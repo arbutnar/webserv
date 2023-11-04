@@ -12,15 +12,18 @@
 
 #pragma once
 
-# include <iostream>
-# include <string>
-# include <vector>
+#include "Master.hpp"
 
 class Server {
+	friend void Master::validateConfig( void );
 	private:
-		std::vector<std::string> locations; // in realta' probabilmente un vettore di mappe
+		std::string					main;
+		std::vector<std::string> 	locations; // in realta' probabilmente un vettore di mappe
 	public:
 		Server( void );
 		
-		void    setLocationBlock( std::string block );
+		void    	setLocationBlock( std::string block );
+		std::string	getMainDirectives( void );
 };
+
+std::ostream &operator<<(std::ostream &out, Server &server );

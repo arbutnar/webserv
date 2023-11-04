@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Master.hpp"
+#include "Server.hpp"
 
 int main(int argc, char *argv[]) {
 
@@ -21,6 +22,7 @@ int main(int argc, char *argv[]) {
 			Master master("./conf/default.conf");
 		else
 			throw std::invalid_argument("Invalid Argument");
+		
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;
 	}

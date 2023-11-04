@@ -19,3 +19,13 @@ Server::Server( void )
 void    Server::setLocationBlock( std::string block ) {
     (void)block;
 }
+
+std::string Server::getMainDirectives( void ) {
+    return (main);
+    
+}
+
+std::ostream &operator<<(std::ostream &out, Server &server ) {
+	out << server.getMainDirectives();
+	return (out);
+}

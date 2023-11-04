@@ -16,11 +16,14 @@
 # include <fstream>
 # include <string>
 # include <sstream>
+# include <vector>
+
+class Server;
 
 class Master {
 	private:
-		std::ifstream	configFile;
-		//cluster = vettore di workers
+		std::ifstream		configFile;
+		std::vector<Server>	cluster;
 	public:
 		class FileError;
 

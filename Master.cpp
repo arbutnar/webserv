@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Master.hpp"
+#include "Server.hpp"
 
 class Master::FileError : public std::exception {
 	public:
@@ -33,36 +34,26 @@ Master::Master( const char* path )
 void	Master::validateConfig( void ) {
 	std::string			content;
 	std::stringstream	buffer;
-	// size_t				locationBlock;
 	size_t				pos;
-		std::string s;
 
 	buffer << configFile.rdbuf();
 	content = buffer.str();
-
 	while ((pos = content.find_first_of('#')) != std::string::npos)
 		content.erase(pos, content.find_first_of('\n', pos) - pos);
-	while ((pos = content.find_first_of("location ")) != std::string::npos) {
-		// locationBlock = content.find(static_cast<std::string>("location")) != std::string::npos;
-		// if (locationBlock)
-		s = content.substr(pos, content.find_first_of('}'));
+	while ((pos = content.find("server")) != std::string::npos) {
+		size_t	posServer = pos;
+		Server currentServer;
+		cluster.push_back(currentServer);
+		while ((pos = content.find("location")) != std::string::npos) {
+			size_t	posLocation = pos;
+			currentServer.locations.push_back(content.substr(posLocation, content.find('}', posLocation) - posLocation + 1));
+			content.erase(posLocation, content.find('}', posLocation) - posLocation + 1);
+		}
+		currentServer.main = content.substr(posServer, content.find('}', posServer) + 1);
+		//std::cout << currentServer.main << std::endl;
+		//for (std::vector<std::string>::iterator it = currentServer.locations.begin(); it != currentServer.locations.end(); it++) {
+		//	std::cout << *it << std::endl;
+		//}
+		content.erase(posServer, content.find('}', posServer) - posServer + 1);
 	}
-	std::cout << content << std::endl;
-	std::cout << s << std::endl;
 }
-
-// void	Master::validateConfig( void ) {
-// 	std::string		content;
-// 	size_t			pos;
-// 	unsigned int	locCount;
-// 	bool			locationBlock;
-
-// 	while (std::getline(configFile, content)) {
-// 		while ((pos = content.find_first_of('#')) != std::string::npos)
-// 			content.erase(pos, content.find_first_of('\n', pos) - pos);
-// 		locationBlock = content.find(static_cast<std::string>("location")) != std::string::npos;
-// 		if (locationBlock)
-// 			locCount++;
-// 	}
-// 	std::cout << locCount << std::endl;
-// }
