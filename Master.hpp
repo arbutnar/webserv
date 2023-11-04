@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/03 17:28:15 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/04 14:33:22 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,6 @@ class Master {
 		Master( void );
 		Master( const char* path );
 
+		bool	checkSyntax( void );
 		void	validateConfig( void );
 };

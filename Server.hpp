@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/03 18:34:00 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/04 17:46:19 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class Server {
 	public:
 		Server( void );
 		
-		void    	setLocationBlock( std::string block );
+		void    	setLocation( std::string locationBlock );
 		std::string	getMainDirectives( void );
 };
 
