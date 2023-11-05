@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/04 14:33:22 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/05 17:50:45 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,17 @@ class Server;
 
 class Master {
 	private:
-		std::ifstream		configFile;
-		std::vector<Server>	cluster;
+		std::ifstream		_configFile;
+		std::vector<Server>	_cluster;
 	public:
 		class FileError;
 
 		Master( void );
 		Master( const char* path );
+		Master( const Master &src );
+		Master& operator=( Master &src );	// const
+		~Master( );
 
-		bool	checkSyntax( void );
-		void	validateConfig( void );
+		bool	configSyntax( void );
+		void	configParse( void );
 };

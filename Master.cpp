@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/04 17:43:14 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/05 18:31:16 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,24 +19,33 @@ class Master::FileError : public std::exception {
 };
 
 Master::Master( void )
-	: configFile (NULL) {
+	: _configFile (NULL) {
 }
 
 Master::Master( const char* path )
-	: configFile (NULL) {
-		configFile.open(path);
-
-		if (!(configFile.is_open()))
+	: _configFile (path) {
+		if (!(_configFile.is_open()))
 			throw Master::FileError();
-		validateConfig();
+		configParse();
 }
 
-bool	Master::checkSyntax( void ) {
+Master::Master( const Master &src ) {
+	(void)src;
+}
+
+Master& Master::operator=( Master &src ) { // const
+	return src;
+}
+
+Master::~Master() {
+}
+
+bool	Master::configSyntax( void ) {
 	unsigned int 	openBrackets = 0;
 	unsigned int	closeBrackets = 0;
 	std::string		line;
 
-	while (std::getline(configFile, line)) {
+	while (std::getline(_configFile, line)) {
 		if (line.find('{') != std::string::npos)
 			openBrackets++;
 		else if (line.find('}') != std::string::npos)
@@ -50,15 +59,15 @@ bool	Master::checkSyntax( void ) {
 	return 1;
 }
 
-void	Master::validateConfig( void ) {
+void	Master::configParse( void ) {
 	std::string			content;
 	std::stringstream	buffer;
 	size_t				pos;
 
-	if (!checkSyntax())
-		throw Master::FileError();
-	buffer << configFile.rdbuf();
+	buffer << _configFile.rdbuf();
 	content = buffer.str();
+	if (!configSyntax())
+		throw Master::FileError();
 	while ((pos = content.find_first_of('#')) != std::string::npos)
 		content.erase(pos, content.find_first_of('\n', pos) - pos);
 	while ((pos = content.find("\n\n")) != std::string::npos)
@@ -66,15 +75,15 @@ void	Master::validateConfig( void ) {
 	while ((pos = content.find("server")) != std::string::npos) {
 		size_t	posServer = pos;
 		Server currentServer;
-		cluster.push_back(currentServer);
 		while ((pos = content.find("location")) != std::string::npos) {
 			size_t		posLocation = pos;
-			std::string	locationBlock;
-			locationBlock = content.substr(posLocation, content.find('}', posLocation) - posLocation + 1);
-			currentServer.locations.push_back(locationBlock);
+			Location	currentLocation(content.substr(posLocation, content.find('}', posLocation) - posLocation + 1));
+			// rienmpire l'attributo _vecLocs._locationName con la path dopo la parola location
+			currentServer._vecLocs.push_back(currentLocation);
 			content.erase(posLocation, content.find('}', posLocation) - posLocation);
 		}
-		currentServer.main = content.substr(posServer, content.find('}', posServer) - posServer + 1);
+		_cluster.push_back(currentServer);
+		currentServer._main = content.substr(posServer, content.find('}', posServer) - posServer + 1);
 		content.erase(posServer, content.find('}', posServer) - posServer);
 	}
 }

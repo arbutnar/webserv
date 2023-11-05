@@ -1,31 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/03 13:05:32 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/05 17:57:18 by arbutnar         ###   ########.fr       */
+/*   Created: 2023/11/05 17:51:54 by arbutnar          #+#    #+#             */
+/*   Updated: 2023/11/05 17:55:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Master.hpp"
-#include "Server.hpp"
+#include "Location.hpp"
 
-int main(int argc, char *argv[]) {
+Location::Location( void ) {
+}
 
-	try {
-		if (argc == 2)
-			Master master(argv[1]);
-		else if (argc > 2)
-			throw std::invalid_argument("Invalid Argument");
-		else if (argc < 2)
-			Master master("./conf/default.conf");
-		
-	} catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
-	}
+Location::Location( std::string block) {
+    std::cout << block << std::endl;
+}
 
-	return 0;
+Location::Location( const Location &src ) {
+    (void)src;
+}
+
+Location& Location::operator=( Location &src ) { //const
+    return src;
+}
+
+Location::~Location() {
 }
