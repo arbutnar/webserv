@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/05 18:31:16 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/06 12:13:23 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,8 @@ bool	Master::configSyntax( void ) {
 	unsigned int	closeBrackets = 0;
 	std::string		line;
 
-	while (std::getline(_configFile, line)) {
+	while (std::getline(_configFile, line))
+	{
 		if (line.find('{') != std::string::npos)
 			openBrackets++;
 		else if (line.find('}') != std::string::npos)
@@ -72,14 +73,14 @@ void	Master::configParse( void ) {
 		content.erase(pos, content.find_first_of('\n', pos) - pos);
 	while ((pos = content.find("\n\n")) != std::string::npos)
 		content.erase(pos, 1);
-	while ((pos = content.find("server")) != std::string::npos) {
+	while ((pos = content.find("server")) != std::string::npos)
+	{
 		size_t	posServer = pos;
 		Server currentServer;
 		while ((pos = content.find("location")) != std::string::npos) {
 			size_t		posLocation = pos;
 			Location	currentLocation(content.substr(posLocation, content.find('}', posLocation) - posLocation + 1));
-			// rienmpire l'attributo _vecLocs._locationName con la path dopo la parola location
-			currentServer._vecLocs.push_back(currentLocation);
+			currentServer._locations.push_back(currentLocation);
 			content.erase(posLocation, content.find('}', posLocation) - posLocation);
 		}
 		_cluster.push_back(currentServer);

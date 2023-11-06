@@ -6,23 +6,20 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/05 18:33:42 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/06 17:15:54 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
-#include "Master.hpp"
+#include "Directive.hpp"
 #include "Location.hpp"
 
-class Server {
+class Server : protected Directive {
 	friend void Master::configParse( void );
+
 	private:
-		unsigned int			listen;
-		std::string				root;
-		const char*				index;
-		const char*				error_page;
-		unsigned int			client_max_body_size;
-		std::vector<Location>	_vecLocs;
+		std::string				_main;
+		std::vector<Location>	_locations;
 	public:
 		Server( void );
 		Server( const Server &src );

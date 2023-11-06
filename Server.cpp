@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/05 17:47:05 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/06 17:18:33 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ Server::Server( void )
     : _main ("None") {
 }
 
-Server::Server( const Server &src ) {
+Server::Server( const Server &src )
+    : Directive() {
     (void)src;
 }
 
