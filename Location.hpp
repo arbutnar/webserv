@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:16:45 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/06 17:11:25 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/07 14:04:13 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ class   Location : protected Directive {
 
 	private:
 		std::string     _locationName;
+		std::string		_scgi_pass;
+		const char*		_limit_except;
 	public:
 		Location( void );
 		Location( std::string block);
