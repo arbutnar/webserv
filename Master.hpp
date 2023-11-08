@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/05 17:50:45 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/08 13:56:03 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,6 @@ class Master {
 		Master& operator=( Master &src );	// const
 		~Master( );
 
-		bool	configSyntax( void );
+		bool	configSyntax( std::string content );
 		void	configParse( void );
 };

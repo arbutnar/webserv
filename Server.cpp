@@ -6,18 +6,20 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/06 17:18:33 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/08 16:36:58 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-Server::Server( void )
-    : _main ("None") {
+Server::Server( void ) {
 }
 
-Server::Server( const Server &src )
-    : Directive() {
+Server::Server( std::string block ) {
+    std::cout << block << std::endl;
+}
+
+Server::Server( const Server &src ) {
     (void)src;
 }
 
@@ -26,18 +28,4 @@ Server& Server::operator=( Server &src ) { //const
 }
 
 Server::~Server() {
-}
-
-void    Server::setLocation( std::string block ) {
-    (void)block;
-}
-
-std::string Server::getMainDirectives( void ) {
-    return (_main);
-    
-}
-
-std::ostream &operator<<(std::ostream &out, Server &server ) {
-	out << server.getMainDirectives();
-	return (out);
 }
