@@ -97,44 +97,47 @@ void	Directives::setClientMaxBodySize( std::string configLine ) {
 	this->_client_max_body_size = std::atoi(configLine);
 }
 
-void	Directives::parseBlock( std::string line ) {
+void	Directives::setAttribute( std::string line ) {
 	std::string	arr[] = { "listen", "root", "index", "autoindex", "error_page", "client_max_body_size",
-									"allowed_methods", "try_files", "cgi_pass", "return" };
-	size_t	startPos = line.find_first_not_of(' ');
-	size_t	endPos = line.find(' ');
+									"limit_except", "try_files", "cgi_pass" };
+	// int 		i;
+	size_t		pos = line.find_first_not_of(" \t");
+	std::string	directive = line.substr(pos, line.find_first_of(" \t", pos) - pos);
+	std::cout << '$' << directive << '$'<< std::endl;
+	// for (i = 0; i < 10; i++)
+	// {
 
-	for (int i = 0; i < arr.length; i++)
-	{
-		if (arr[i] == line.substr(startPos, endPos - startPos));
-		{
-			line.erase(startPos, endPos - startPos);
-			startPos = line.find_first_not_of(' ');
-			endPos = line.find(';');
-			switch (i) {
-				case LISTEN:
-						setListen(line); break;
-				case SERVER_NAME:
-						setServerName(line); break;
-				case ROOT:
-						setRoot(line); break;
-				case INDEX:
-						setIndex(line); break;
-				case AUTOINDEX:
-						setAutoindex(line); break;
-				case ERROR_PAGE:
-						setErrorPage(line); break;
-				case LIMIT_EXCEPT:
-						setLimitExcept(line); break;
-				case TRY_FILES:
-						setTryFiles(line); break;
-				case SCGI_PASS:
-						setScgiPass(line); break;
-				default:
-						break;
-			}
-			break;
-		}
-	}
+	// }
+	// 	if (arr[i] == line.substr(startPos, endPos - startPos))
+	// 	{
+	// 		line.erase(startPos, endPos - startPos);
+	// 		startPos = line.find_first_not_of(' \t');
+	// 		endPos = line.find(';');
+	// 		switch (i) {
+	// 			case LISTEN:
+	// 					setListen(line); break;
+	// 			case SERVER_NAME:
+	// 					setServerName(line); break;
+	// 			case ROOT:
+	// 					setRoot(line); break;
+	// 			case INDEX:
+	// 					setIndex(line); break;
+	// 			case AUTOINDEX:
+	// 					setAutoindex(line); break;
+	// 			case ERROR_PAGE:
+	// 					setErrorPage(line); break;
+	// 			case LIMIT_EXCEPT:
+	// 					setLimitExcept(line); break;
+	// 			case TRY_FILES:
+	// 					setTryFiles(line); break;
+	// 			case SCGI_PASS:
+	// 					setScgiPass(line); break;
+	// 			default:
+	// 					break;
+	// 		}
+	// 		break;
+	// 	}
+	// }
 }
 
 void	Directives::clearDirectives( void ) {
