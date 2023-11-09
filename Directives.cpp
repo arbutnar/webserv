@@ -28,7 +28,8 @@ Directives::Directives( const Directives &src ) {
 Directives& Directives::operator=( const Directives &src ) {
 	if (this != &src)
 	{
-		this->_listen = src._listen;
+		this->_listen_host = src._listen_host;
+		this->_listen_port = src._listen_port;
 		this->_server_name = src._server_name;
 		this->_root = src._root;
 		this->_index = src._index;
@@ -45,8 +46,12 @@ Directives& Directives::operator=( const Directives &src ) {
 Directives::~Directives( void ) {
 }
 
-void	Directives::setListen( std::string configLine) {
-	this->_listen = std::atoi(configLine);
+void	Directives::setListenPort( std::string configLine ) {
+	this->_listen_host = configLine;
+}
+
+void	Directives::setListenHost( std::string configLine ) {
+	this->_listen_port = std::atoi(configLine.c_str());
 }
 
 void	Directives::setServerName( std::string configLine ) {
@@ -94,54 +99,56 @@ void	Directives::setErrorPage( std::string configLine ) {
 }
 
 void	Directives::setClientMaxBodySize( std::string configLine ) {
-	this->_client_max_body_size = std::atoi(configLine);
+	this->_client_max_body_size = std::atoi(configLine.c_str());
 }
 
 void	Directives::setAttribute( std::string line ) {
-	std::string	arr[] = { "listen", "root", "index", "autoindex", "error_page", "client_max_body_size",
-									"limit_except", "try_files", "cgi_pass" };
-	// int 		i;
-	size_t		pos = line.find_first_not_of(" \t");
-	std::string	directive = line.substr(pos, line.find_first_of(" \t", pos) - pos);
-	std::cout << '$' << directive << '$'<< std::endl;
-	// for (i = 0; i < 10; i++)
-	// {
+	std::string	arr[] = { "listen", "root", "index", "autoindex", "error_page",
+							"client_max_body_size", "limit_except", "try_files", "cgi_pass" };
+	std::string	key;
+	std::string	value;
+	size_t		pos;
+	int 		i;
 
-	// }
-	// 	if (arr[i] == line.substr(startPos, endPos - startPos))
-	// 	{
-	// 		line.erase(startPos, endPos - startPos);
-	// 		startPos = line.find_first_not_of(' \t');
-	// 		endPos = line.find(';');
-	// 		switch (i) {
-	// 			case LISTEN:
-	// 					setListen(line); break;
-	// 			case SERVER_NAME:
-	// 					setServerName(line); break;
-	// 			case ROOT:
-	// 					setRoot(line); break;
-	// 			case INDEX:
-	// 					setIndex(line); break;
-	// 			case AUTOINDEX:
-	// 					setAutoindex(line); break;
-	// 			case ERROR_PAGE:
-	// 					setErrorPage(line); break;
-	// 			case LIMIT_EXCEPT:
-	// 					setLimitExcept(line); break;
-	// 			case TRY_FILES:
-	// 					setTryFiles(line); break;
-	// 			case SCGI_PASS:
-	// 					setScgiPass(line); break;
-	// 			default:
-	// 					break;
-	// 		}
-	// 		break;
-	// 	}
-	// }
+	pos = line.find_first_not_of(" \t");
+	key = line.substr(pos, line.find_first_of(" \t", pos) - pos);
+	for (i = 0; i < 10; i++) {
+		if (arr[i] == key)
+			break;
+	}
+	line.erase(0, line.find_first_not_of(" \t", key.length() + pos));
+	value = line.substr(0, line.find(';'));
+	switch (i) {
+		case LISTEN:
+				std::cout << value.substr(0, value.find(':')) << std::endl;
+				std::cout << value.substr(value.find(':'), value.find(';') - value.find(':')) << std::endl;
+				// setListenHost(value.substr(0, value.find(':')));
+				// setListenPort(value.substr(value.find(':'), value.find(';') - value.find(':')));
+				break;
+		// case SERVER_NAME:
+		// 		setServerName(line); break;
+		// case ROOT:
+		// 		setRoot(line); break;
+		// case INDEX:
+		// 		setIndex(line); break;
+		// case AUTOINDEX:
+		// 		setAutoindex(line); break;
+		// case ERROR_PAGE:
+		// 		setErrorPage(line); break;
+		// case LIMIT_EXCEPT:
+		// 		setLimitExcept(line); break;
+		// case TRY_FILES:
+		// 		setTryFiles(line); break;
+		// case SCGI_PASS:
+		// 		setScgiPass(line); break;
+		default:
+				break;
+	}
 }
 
 void	Directives::clearDirectives( void ) {
-	this->_listen = 0;
+	this->_listen_host = "None";
+	this->_listen_port = 0;
 	this->_server_name = "None";
 	this->_root = "None";
 	this->_index = "None";
@@ -154,7 +161,8 @@ void	Directives::clearDirectives( void ) {
 }
 
 void	Directives::showAttributes(void) {
-	std::cout << _listen << std::endl;
+	std::cout << _listen_host << std::endl;
+	std::cout << _listen_port << std::endl;
 	std::cout << _server_name << std::endl;
 	std::cout << _root << std::endl;
 	std::cout << _index << std::endl;

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 18:21:28 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/09 15:51:44 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,8 @@ class Directives {
 	private:
 		class FileError;
 
-		unsigned int    			_listen;
+		std::string    				_listen_host;
+		unsigned int				_listen_port;
 		std::string     			_server_name;
 		std::string					_root;
 		std::string					_index;
@@ -49,7 +50,8 @@ class Directives {
 		Directives& operator=( const Directives &src );
 		~Directives( );
 
-		void	setListen( std::string configLine );
+		void	setListenHost( std::string configLine );
+		void	setListenPort( std::string configLine );
 		void	setServerName( std::string configLine );
 		void	setRoot( std::string configLine );
 		void	setIndex( std::string configLine );
