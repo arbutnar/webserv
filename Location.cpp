@@ -23,15 +23,16 @@ Location::Location( std::string block )
 		size_t pos;
 		while (std::getline(ss, line))
 		{
-			if (line.find_first_of("location")) {
-				pos = line.find_first_of("location") + 9;
-				this->_locationName = block.substr(pos, block.find_first_of('{', pos) - pos - 1);
+			if ((pos = line.find("location")) != std::string::npos) {
+				pos += line.find_first_not_of(" \t", pos + 8);
+				this->_locationName = block.substr(pos, block.find('{', pos) - pos);
+				// togliere spazi da locationName
 			}
-			this->_directives.setAttribute(line);
+			else if (line.find('}') == std::string::npos)
+				this->_directives.setAttribute(line);
 		}
-		std::cout << this->_locationName << std::endl;
-		// Directives	directives(block);
-		this->_directives.showAttributes();
+		std::cout << '$' << this->_locationName << '$' << std::endl;
+		// this->_directives.showAttributes();
 }
 
 Location::Location( const Location &src ) {
