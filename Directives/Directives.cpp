@@ -12,6 +12,11 @@
 
 #include "Directives.hpp"
 
+class Master::ConfigError : public std::exception {
+	public:
+		virtual const char* what() const throw() { return ("Wrong config File"); }
+};
+
 Directives::Directives( void ) {
 }
 
@@ -28,78 +33,21 @@ Directives::Directives( const Directives &src ) {
 Directives& Directives::operator=( const Directives &src ) {
 	if (this != &src)
 	{
-		this->_listen_host = src._listen_host;
-		this->_listen_port = src._listen_port;
+		this->_listen = src._listen;
 		this->_server_name = src._server_name;
 		this->_root = src._root;
-		this->_index = src._index;
+		// this->_index = src._index;
 		this->_autoindex = src._autoindex;
 		this->_scgi_pass = src._scgi_pass;
-		this->_try_files = src._try_files;
-		this->_limit_except = src._limit_except;
-		this->_error_page = src._error_page;
+		// this->_try_files = src._try_files;
+		// this->_limit_except = src._limit_except;
+		// this->_error_page = src._error_page;
 		this->_client_max_body_size = src._client_max_body_size;
 	}
 	return (*this);
 }
 
 Directives::~Directives( void ) {
-}
-
-void	Directives::setListenPort( std::string configLine ) {
-	this->_listen_host = configLine;
-}
-
-void	Directives::setListenHost( std::string configLine ) {
-	this->_listen_port = std::atoi(configLine.c_str());
-}
-
-void	Directives::setServerName( std::string configLine ) {
-	this->_server_name = configLine;
-}
-
-void	Directives::setRoot( std::string configLine ) {
-	this->_root = configLine;
-}
-
-void	Directives::setIndex( std::string configLine ) {
-	this->_index = configLine;
-}
-
-void	Directives::setAutoindex( std::string configLine ) {
-	this->_autoindex = configLine;
-}
-
-void	Directives::setScgiPass( std::string configLine ) {
-	this->_scgi_pass = configLine;
-}
-
-void	Directives::setTryFiles( std::string configLine ) {
-	std::stringstream 	ss(configLine);
-	std::string			line;
-
-	while (std::getline(ss, line, ' '))
-		this->_try_files.push_back(line);
-}
-
-void	Directives::setLimitExcept( std::string configLine ) {
-	std::stringstream 	ss(configLine);
-	std::string			line;
-
-	while (std::getline(ss, line, ' '))
-		this->_limit_except.push_back(line);
-}
-
-void	Directives::setErrorPage( std::string configLine ) {
-	std::stringstream 	ss(configLine);
-	std::string			line;
-
-	while (std::getline(ss, line, ' '))
-		this->_error_page.push_back(line);
-}
-
-void	Directives::setClientMaxBodySize( std::string configLine ) {
-	this->_client_max_body_size = std::atoi(configLine.c_str());
 }
 
 void	Directives::setAttribute( std::string line ) {
@@ -120,11 +68,7 @@ void	Directives::setAttribute( std::string line ) {
 	value = line.substr(0, line.find(';'));
 	switch (i) {
 		case LISTEN:
-				std::cout << value.substr(0, value.find(':')) << std::endl;
-				std::cout << value.substr(value.find(':'), value.find(';') - value.find(':')) << std::endl;
-				// setListenHost(value.substr(0, value.find(':')));
-				// setListenPort(value.substr(value.find(':'), value.find(';') - value.find(':')));
-				break;
+				setListen(line); break;
 		// case SERVER_NAME:
 		// 		setServerName(line); break;
 		// case ROOT:
@@ -147,8 +91,7 @@ void	Directives::setAttribute( std::string line ) {
 }
 
 void	Directives::clearDirectives( void ) {
-	this->_listen_host = "None";
-	this->_listen_port = 0;
+	this->_listen = "None";
 	this->_server_name = "None";
 	this->_root = "None";
 	this->_index = "None";
@@ -161,8 +104,7 @@ void	Directives::clearDirectives( void ) {
 }
 
 void	Directives::showAttributes(void) {
-	std::cout << _listen_host << std::endl;
-	std::cout << _listen_port << std::endl;
+	std::cout << _listen << std::endl;
 	std::cout << _server_name << std::endl;
 	std::cout << _root << std::endl;
 	std::cout << _index << std::endl;

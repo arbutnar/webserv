@@ -1,38 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Master.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 13:56:03 by arbutnar         ###   ########.fr       */
+/*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
+/*   Updated: 2023/11/08 16:41:27 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
+#include "../Location/Location.hpp"
 
-# include <iostream>
-# include <fstream>
-# include <string>
-# include <sstream>
-# include <vector>
-
-class Server;
-
-class Master {
+class Server : protected Directives {
 	private:
-		std::ifstream		_configFile;
-		std::vector<Server>	_cluster;
+		std::vector<Location>	_locations;
+		// std::vector<Socket>		_sockets;
 	public:
-		class FileError;
-
-		Master( void );
-		Master( const char* path );
-		Master( const Master &src );
-		Master& operator=( Master &src );	// const
-		~Master( );
-
-		bool	configSyntax( std::string content );
-		void	configParse( void );
+		Server( void );
+		Server( std::string block );
+		Server( const Server &src );
+		Server& operator=( Server &src ); // connst
+		~Server( );
 };

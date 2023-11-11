@@ -10,18 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Master.hpp"
-#include "Server.hpp"
+#include "./Master/Master.hpp"
 
 int main(int argc, char *argv[]) {
-
 	try {
+		Master master;
 		if (argc == 2)
-			Master master(argv[1]);
+			master.configParse(argv[1])
 		else if (argc > 2)
 			throw std::invalid_argument("Invalid Argument");
 		else if (argc < 2)
-			Master master("./conf/default.conf");
+			master.configParse("./conf/default.conf");
 		
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;

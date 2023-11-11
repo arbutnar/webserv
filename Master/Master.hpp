@@ -1,31 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Location.hpp                                       :+:      :+:    :+:   */
+/*   Master.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/05 17:16:45 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/09 12:02:37 by arbutnar         ###   ########.fr       */
+/*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
+/*   Updated: 2023/11/08 13:56:03 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Directives.hpp"
-#include <algorithm>
+# include "../Server/Server.hpp"
 
-class   Location {
-		friend void Master::configParse( void );
-
+class Master {
 	private:
-		std::string     _locationName;
-		Directives		_directives;
+		std::vector<Server>	_cluster;
 	public:
-		Location( void );
-		Location( std::string block );
-		Location( const Location &src );
-		Location& operator=( Location &src ); // const
-		~Location( );
+		Master( void );
+		Master( const char* path );
+		Master( const Master &src );
+		Master& operator=( Master &src );	// const
+		~Master( );
 
+		bool	configSyntax( std::string content );
+		void	configParse( void );
 };
