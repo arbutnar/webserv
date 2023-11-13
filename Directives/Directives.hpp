@@ -70,17 +70,17 @@ class Directives {
 		void	setErrorPage( m_IntStr error_page );
 		void	setClientMaxBodySize( unsigned int client_max_body_size );
 
-		u_int32_t		getListenHost( void );
-		u_int16_t		getListenPort( void );
-		std::string		getServerName( void );
-		std::string		getRoot( void );
-		v_Str			getIndex( void );
-		bool			getAutoindex( void );
-		std::string		getScgiPass( void );
-		v_Str			getTryFiles( void );
-		v_Str			getLimitExcept( void );
-		m_IntStr		getErrorPage( void );
-		unsigned int	getClientMaxBodySize( void );
+		const u_int32_t&	getListenHost( void ) const ;
+		const u_int16_t&	getListenPort( void ) const ;
+		const std::string&	getServerName( void ) const ;
+		const std::string&	getRoot( void ) const ;
+		const v_Str&		getIndex( void ) const ;
+		const bool&			getAutoindex( void ) const ;
+		const std::string&	getScgiPass( void ) const ;
+		const v_Str&		getTryFiles( void ) const ;
+		const v_Str&		getLimitExcept( void ) const ;
+		const m_IntStr&		getErrorPage( void ) const ;
+		const unsigned int&	getClientMaxBodySize( void ) const ;
 
 		void	setAttribute( std::string line );
 		void	parsAttribute( std::string line );

@@ -12,6 +12,11 @@
 
 #include "Master.hpp"
 
+class Master::SyntaxError : public std::exception {
+	public:
+		virtual const char* what() const throw() { return ("Incomplete or wrong configurations Syntax"); }
+};
+
 Master::Master( void ) {
 }
 
@@ -29,9 +34,8 @@ Master& Master::operator=( const Master &src ) {
 Master::~Master() {
 }
 
-std::string		Master::configCleaner( std::ifstream &configFile) {
+void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
 	std::stringstream	buffer;
-	std::string			content;
 	size_t				pos;
 
 	buffer << configFile.rdbuf();
@@ -40,7 +44,6 @@ std::string		Master::configCleaner( std::ifstream &configFile) {
 		content.erase(pos, content.find_first_of('\n', pos) - pos);
 	while ((pos = content.find("\n\n")) != std::string::npos)
 		content.erase(pos, 1);
-	return content;
 }
 
 void	Master::configDivider( const char* path ) {
@@ -49,9 +52,8 @@ void	Master::configDivider( const char* path ) {
 
 	if (!configFile.is_open())
 		throw std::runtime_error("Cannot open File");
-	content = configCleaner(configFile);
-
-	std::vector<std::string>ServerBlocks;
+	configCleaner(configFile, content);
+	// std::vector<std::string>ServerBlocks;
 	std::stringstream		ss(content);
 	std::string				line;
 	std::string				tmp;
@@ -63,24 +65,22 @@ void	Master::configDivider( const char* path ) {
 		if (line.find('{') != std::string::npos)
 		{
 			if (brackets == 0 && line.find("server") == std::string::npos)
-				throw std::runtime_error("Incomplete Config");
+				throw Master::SyntaxError();
 			brackets++;
 		}
 		else if (line.find('}') != std::string::npos)
 			brackets--;
 		else if (line[line.length() - 1] != ';')
-			throw std::runtime_error("Incomplete Config");
+			throw Master::SyntaxError();
 		tmp += line + '\n';
 		if (tmp.find("server {") == std::string::npos)
-			throw std::runtime_error("Incomplete Config");
+			throw Master::SyntaxError();
 		if (brackets == 0)
 		{
-			ServerBlocks.push_back(tmp);
+			_cluster.push_back(tmp);
 			tmp.clear();
 		}
 	}
 	if (brackets != 0)
-		throw std::runtime_error("Incomplete Config");
-	for (std::vector<std::string>::iterator it = ServerBlocks.begin(); it != ServerBlocks.end(); it++)
-		std::cout << *it << std::endl;
+		throw Master::SyntaxError();
 }

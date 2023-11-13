@@ -17,13 +17,15 @@
 class Master {
 	private:
 		std::vector<Server>	_cluster;
+		void	configCleaner( std::ifstream &configFile, std::string &content );
 	public:
+		class SyntaxError;
+
 		Master( void );
 		Master( const char* path );
 		Master( const Master &src );
 		Master& operator=( const Master &src );
 		~Master( );
 
-		std::string	configCleaner( std::ifstream &configFile );
-		void		configDivider( const char* path );
+		void	configDivider( const char* path );
 };

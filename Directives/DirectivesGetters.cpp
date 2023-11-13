@@ -1,45 +1,45 @@
 #include "Directives.hpp"
 
-u_int32_t    Directives::getListenHost( void ) {
+const u_int32_t&	Directives::getListenHost( void ) const {
     return this->_listen_host;
 }
 
-u_int16_t    Directives::getListenPort( void ) {
+const u_int16_t&	Directives::getListenPort( void ) const {
     return this->_listen_port;
 }
 
-std::string	Directives::getServerName( void ) {
+const std::string&	Directives::getServerName( void ) const {
 	return this->_server_name;
 }
 
-std::string	Directives::getRoot( void ) {
+const std::string&	Directives::getRoot( void ) const {
 	return this->_root;
 }
 
-v_Str   Directives::getIndex( void ) {
+const v_Str&	Directives::getIndex( void ) const {
 	return this->_index;
 }
 
-bool	Directives::getAutoindex( void ) {
+const bool&	Directives::getAutoindex( void ) const {
 	return this->_autoindex;
 }
 
-std::string	Directives::getScgiPass( void ) {
+const std::string&	Directives::getScgiPass( void ) const {
 	return this->_scgi_pass;
 }
 
-v_Str	Directives::getTryFiles( void ) {
+const v_Str&	Directives::getTryFiles( void ) const {
 	return this->_try_files;
 }
 
-v_Str	Directives::getLimitExcept( void ) {
+const v_Str&	Directives::getLimitExcept( void ) const {
     return this->_limit_except;
 }
 
-m_IntStr	Directives::getErrorPage( void ) {
+const m_IntStr&	Directives::getErrorPage( void ) const {
 	return this->_error_page;
 }
 
-unsigned int	Directives::getClientMaxBodySize( void ) {
+const unsigned int&	Directives::getClientMaxBodySize( void ) const {
 	return this->_client_max_body_size;
 }
