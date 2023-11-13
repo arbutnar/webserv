@@ -12,11 +12,6 @@
 
 #include "Master.hpp"
 
-class Master::SyntaxError : public std::exception {
-	public:
-		virtual const char* what() const throw() { return ("Incomplete or wrong configurations Syntax"); }
-};
-
 Master::Master( void ) {
 }
 
@@ -53,34 +48,67 @@ void	Master::configDivider( const char* path ) {
 	if (!configFile.is_open())
 		throw std::runtime_error("Cannot open File");
 	configCleaner(configFile, content);
-	// std::vector<std::string>ServerBlocks;
 	std::stringstream		ss(content);
 	std::string				line;
 	std::string				tmp;
-	unsigned int 			brackets;
+	unsigned int 			brackets = 0;
 	
-	brackets = 0;
 	while (std::getline(ss, line))
 	{
 		if (line.find('{') != std::string::npos)
 		{
 			if (brackets == 0 && line.find("server") == std::string::npos)
-				throw Master::SyntaxError();
+				throw Directives::SyntaxError();
 			brackets++;
 		}
 		else if (line.find('}') != std::string::npos)
 			brackets--;
 		else if (line[line.length() - 1] != ';')
-			throw Master::SyntaxError();
+			throw Directives::SyntaxError();
 		tmp += line + '\n';
 		if (tmp.find("server {") == std::string::npos)
-			throw Master::SyntaxError();
+			throw Directives::SyntaxError();
 		if (brackets == 0)
 		{
-			_cluster.push_back(tmp);
+			serverParser(tmp);
 			tmp.clear();
 		}
 	}
 	if (brackets != 0)
-		throw Master::SyntaxError();
+		throw Directives::SyntaxError();
+}
+
+void	Master::serverParser( std::string &block ) {
+	block.erase(0, block.find_first_of('\n') + 1);
+	block.erase(block.find_last_of('\n', block.find_last_of('\n') - 1) + 1, std::string::npos);
+	std::stringstream	ss(block);
+	std::string			line;
+	Server				server;
+	Location			location;
+	bool				inLocation = false;
+
+	while (std::getline(ss, line))
+	{
+		if (line.find("location ") != std::string::npos)
+		{
+			if (inLocation)
+				throw Directives::SyntaxError();
+			else if (line.find("{") != line.length() - 1)
+				throw Directives::SyntaxError();
+			inLocation = true;
+			location.parseLocationName(line);
+		}
+		else if (line.find("}") != std::string::npos)
+		{
+			if (!inLocation)
+				throw Directives::SyntaxError();
+			inLocation = false;
+			server.addLocation(location);
+			location.clear();
+		}
+		// else if (inLocation)
+		// 	location.directivesParser(line);
+		else
+			server.directiveParser(line);
+	}
 }

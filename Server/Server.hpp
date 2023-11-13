@@ -13,9 +13,11 @@
 #pragma once
 #include "../Location/Location.hpp"
 
-class Server : protected Directives {
+typedef std::vector<Location> v_locs;
+
+class Server : public Directives {
 	private:
-		std::vector<Location>	_locations;
+		v_locs	_locations;
 		// std::vector<Socket>		_sockets;
 	public:
 		Server( void );
@@ -23,4 +25,9 @@ class Server : protected Directives {
 		Server( const Server &src );
 		Server& operator=( const Server &src );
 		~Server( );
+
+		void			setLocations( const v_locs &locations );
+		const v_locs&	getLocations( void );
+
+		void	addLocation( Location &location );
 };

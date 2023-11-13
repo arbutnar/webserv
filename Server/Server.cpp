@@ -34,3 +34,16 @@ Server& Server::operator=( const Server &src ) {
 
 Server::~Server() {
 }
+
+void    Server::setLocations( const v_locs &locations ) {
+    this->_locations = locations;
+}
+
+const v_locs&	Server::getLocations( void ) {
+    return this->_locations;
+}
+
+
+void    Server::addLocation( Location &location ) {
+    this->_locations.push_back(location);
+}

@@ -12,18 +12,8 @@
 
 #include "Directives.hpp"
 
-class Directives::ConfigError : public std::exception {
-	public:
-		virtual const char* what() const throw() { return ("Wrong config File"); }
-};
-
 Directives::Directives( void ) {
-}
-
-Directives::Directives( std::string block ) {
-	(void)block;
-	// std::cout << block << std::endl;
-	// parseBlock(block);
+	clear();
 }
 
 Directives::Directives( const Directives &src ) {
@@ -50,7 +40,21 @@ Directives& Directives::operator=( const Directives &src ) {
 Directives::~Directives( void ) {
 }
 
-void	Directives::setAttribute( std::string line ) {
+void	Directives::clear( void ) {
+	this->_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
+	this->_listen_port = 0;
+	this->_server_name = "";
+	this->_root = "";
+	this->_index.clear();
+	this->_autoindex = false;
+	this->_scgi_pass = "";
+	this->_try_files.clear();
+	this->_limit_except.clear();
+	this->_error_page.clear();
+	this->_client_max_body_size = 1000000;
+}
+
+void	Directives::directiveParser( std::string line ) {
 	std::string	arr[] = { "listen", "root", "index", "autoindex", "error_page",
 							"client_max_body_size", "limit_except", "try_files", "cgi_pass" };
 	std::string	key;
@@ -67,8 +71,8 @@ void	Directives::setAttribute( std::string line ) {
 	line.erase(0, line.find_first_not_of(" \t", key.length() + pos));
 	value = line.substr(0, line.find(';'));
 	switch (i) {
-		// case LISTEN:
-		// 		setListen(line); break;
+		case LISTEN:
+			parseListen(line); break;
 		// case SERVER_NAME:
 		// 		setServerName(line); break;
 		// case ROOT:
@@ -89,17 +93,3 @@ void	Directives::setAttribute( std::string line ) {
 				break;
 	}
 }
-
-// void	Directives::clearDirectives( void ) {
-// 	this->_listen_host = 0;
-// 	this->_listen_host = 0;
-// 	this->_server_name = "None";
-// 	this->_root = "None";
-// 	this->_index = "None";
-// 	this->_autoindex = "None";
-// 	this->_scgi_pass = "None";
-// 	// this->_try_files = NULL;
-// 	// this->_limit_except = NULL;
-// 	// this->_error_page = NULL;
-// 	this->_client_max_body_size = 0;
-// }

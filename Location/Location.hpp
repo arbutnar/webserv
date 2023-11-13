@@ -14,14 +14,18 @@
 
 # include "../Directives/Directives.hpp"
 
-class   Location : protected Directives {
+class   Location : public Directives {
 	private:
 		std::string     _location_name;
 	public:
 		Location( void );
-		Location( std::string block );
 		Location( const Location &src );
 		Location& operator=( const Location &src );
 		~Location( );
+		
+		void				setLocationName( std::string name );
+		const std::string&	getLocationName( void );
 
+		void	parseLocationName( const std::string &line );
+		void	clear( void );
 };

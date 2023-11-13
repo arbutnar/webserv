@@ -19,8 +19,6 @@ class Master {
 		std::vector<Server>	_cluster;
 		void	configCleaner( std::ifstream &configFile, std::string &content );
 	public:
-		class SyntaxError;
-
 		Master( void );
 		Master( const char* path );
 		Master( const Master &src );
@@ -28,4 +26,5 @@ class Master {
 		~Master( );
 
 		void	configDivider( const char* path );
+		void	serverParser( std::string &block );
 };
