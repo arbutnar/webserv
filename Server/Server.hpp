@@ -21,6 +21,6 @@ class Server : protected Directives {
 		Server( void );
 		Server( std::string block );
 		Server( const Server &src );
-		Server& operator=( Server &src ); // connst
+		Server& operator=( const Server &src );
 		~Server( );
 };

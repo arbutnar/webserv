@@ -1,10 +1,10 @@
 #include "Directives.hpp"
 
-void    Directives::setListenHost( uint32_t listen_host ) {
+void    Directives::setListenHost( u_int32_t listen_host ) {
     this->_listen_host = listen_host;
 }
 
-void    Directives::setListenPort( uint16_t listen_port ) {
+void    Directives::setListenPort( u_int16_t listen_port ) {
     this->_listen_port = listen_port;
 }
 

@@ -12,7 +12,7 @@
 
 #include "Directives.hpp"
 
-class Master::ConfigError : public std::exception {
+class Directives::ConfigError : public std::exception {
 	public:
 		virtual const char* what() const throw() { return ("Wrong config File"); }
 };
@@ -31,20 +31,20 @@ Directives::Directives( const Directives &src ) {
 }
 
 Directives& Directives::operator=( const Directives &src ) {
-	if (this != &src)
-	{
-		this->_listen = src._listen;
-		this->_server_name = src._server_name;
-		this->_root = src._root;
-		// this->_index = src._index;
-		this->_autoindex = src._autoindex;
-		this->_scgi_pass = src._scgi_pass;
-		// this->_try_files = src._try_files;
-		// this->_limit_except = src._limit_except;
-		// this->_error_page = src._error_page;
-		this->_client_max_body_size = src._client_max_body_size;
-	}
-	return (*this);
+	if (this == &src)
+		return *this;
+	this->_listen_host = src._listen_host;
+	this->_listen_port = src._listen_port;
+	this->_server_name = src._server_name;
+	this->_root = src._root;
+	// this->_index = src._index;
+	this->_autoindex = src._autoindex;
+	this->_scgi_pass = src._scgi_pass;
+	// this->_try_files = src._try_files;
+	// this->_limit_except = src._limit_except;
+	// this->_error_page = src._error_page;
+	this->_client_max_body_size = src._client_max_body_size;
+	return *this;
 }
 
 Directives::~Directives( void ) {
@@ -67,8 +67,8 @@ void	Directives::setAttribute( std::string line ) {
 	line.erase(0, line.find_first_not_of(" \t", key.length() + pos));
 	value = line.substr(0, line.find(';'));
 	switch (i) {
-		case LISTEN:
-				setListen(line); break;
+		// case LISTEN:
+		// 		setListen(line); break;
 		// case SERVER_NAME:
 		// 		setServerName(line); break;
 		// case ROOT:
@@ -90,28 +90,16 @@ void	Directives::setAttribute( std::string line ) {
 	}
 }
 
-void	Directives::clearDirectives( void ) {
-	this->_listen = "None";
-	this->_server_name = "None";
-	this->_root = "None";
-	this->_index = "None";
-	this->_autoindex = "None";
-	this->_scgi_pass = "None";
-	// this->_try_files = NULL;
-	// this->_limit_except = NULL;
-	// this->_error_page = NULL;
-	this->_client_max_body_size = 0;
-}
-
-void	Directives::showAttributes(void) {
-	std::cout << _listen << std::endl;
-	std::cout << _server_name << std::endl;
-	std::cout << _root << std::endl;
-	std::cout << _index << std::endl;
-	std::cout << _autoindex << std::endl;
-	std::cout << _scgi_pass << std::endl;
-	// std::cout << _try_files << std::endl;
-	// std::cout << _limit_except << std::endl;
-	// std::cout << _error_page << std::endl;
-	std::cout << _client_max_body_size << std::endl;
-}
+// void	Directives::clearDirectives( void ) {
+// 	this->_listen_host = 0;
+// 	this->_listen_host = 0;
+// 	this->_server_name = "None";
+// 	this->_root = "None";
+// 	this->_index = "None";
+// 	this->_autoindex = "None";
+// 	this->_scgi_pass = "None";
+// 	// this->_try_files = NULL;
+// 	// this->_limit_except = NULL;
+// 	// this->_error_page = NULL;
+// 	this->_client_max_body_size = 0;
+// }

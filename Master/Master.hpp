@@ -21,9 +21,9 @@ class Master {
 		Master( void );
 		Master( const char* path );
 		Master( const Master &src );
-		Master& operator=( Master &src );	// const
+		Master& operator=( const Master &src );
 		~Master( );
 
-		bool	configSyntax( std::string content );
-		void	configParse( void );
+		std::string	configCleaner( std::ifstream &configFile );
+		void		configDivider( const char* path );
 };

@@ -16,11 +16,11 @@ int main(int argc, char *argv[]) {
 	try {
 		Master master;
 		if (argc == 2)
-			master.configParse(argv[1])
+			master.configDivider(argv[1]);
 		else if (argc > 2)
 			throw std::invalid_argument("Invalid Argument");
 		else if (argc < 2)
-			master.configParse("./conf/default.conf");
+			master.configDivider("./conf/default.conf");
 		
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;

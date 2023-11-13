@@ -1,13 +1,13 @@
 NAME = webserv
-SRC = *.cpp
-OBJ = $(SRC:.cpp=.o)
+SRC = Master/*.cpp Server/*.cpp Location/*.cpp Directives/*.cpp main.cpp
+OBJ = obj/*.o
 FLG = -Wextra -Wall -Werror -std=c++98
 
 $(NAME): $(SRC)
 	mkdir -p obj
 	c++ $(SRC) $(FLG) -c
-	c++ $(OBJ) -o $(NAME)
 	mv *.o obj
+	c++ $(OBJ) -o $(NAME)
 
 all:	$(NAME)
 

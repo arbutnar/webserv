@@ -16,12 +16,12 @@
 
 class   Location : protected Directives {
 	private:
-		std::string     _locationName;
+		std::string     _location_name;
 	public:
 		Location( void );
 		Location( std::string block );
 		Location( const Location &src );
-		Location& operator=( Location &src ); // const
+		Location& operator=( const Location &src );
 		~Location( );
 
 };

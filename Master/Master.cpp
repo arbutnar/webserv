@@ -11,84 +11,76 @@
 /* ************************************************************************** */
 
 #include "Master.hpp"
-#include "Server.hpp"
 
 Master::Master( void ) {
 }
 
 Master::Master( const Master &src ) {
-	(void)src;
+	*this = src;
 }
 
-Master& Master::operator=( Master &src ) { // const
-	return src;
+Master& Master::operator=( const Master &src ) {
+	if (this == &src)
+		return *this;
+	this->_cluster = src._cluster;
+	return *this;
 }
 
 Master::~Master() {
 }
 
-bool	Master::configSyntax( std::string content ) {
-	std::stringstream	ss(content);
-	std::string		line;
-	unsigned int 	openBrackets = 0;
-	unsigned int	closeBrackets = 0;
-
-	while (std::getline(ss, line))
-	{
-		if (line.find('{') != std::string::npos)
-			openBrackets++;
-		else if (line.find('}') != std::string::npos)
-			closeBrackets++;
-		else if (line.find('{') == std::string::npos || line.find('}') == std::string::npos)
-			if (!line.empty() && line[line.length() - 1] != ';')
-				return 0;
-	}
-	if (openBrackets != closeBrackets)
-		return 0;
-	return 1;
-}
-
-void	Master::configParse( const char* path ) {
-	std::ifstream		configFile(path);
-	std::string			content;
+std::string		Master::configCleaner( std::ifstream &configFile) {
 	std::stringstream	buffer;
+	std::string			content;
 	size_t				pos;
 
-	if (!configFile.is_open())
-		throw std::runtime_error("Cannot open File");
-	buffer << _configFile.rdbuf();
+	buffer << configFile.rdbuf();
 	content = buffer.str();
 	while ((pos = content.find_first_of('#')) != std::string::npos)
 		content.erase(pos, content.find_first_of('\n', pos) - pos);
 	while ((pos = content.find("\n\n")) != std::string::npos)
 		content.erase(pos, 1);
-	if (!configSyntax(content))
-		throw Master::FileError();
-
-	while ((pos = content.find("server")) != std::string::npos)
-	{
-		pos = content.find_first_not_of(" \t\n", pos + 6);
-		if ( content.at(pos) != '{')
-			throw
-	}
-	std::string	server = content.substr(pos, content.find_last_of());
-	
-
+	return content;
 }
 
-// while ((pos = content.find("server")) != std::string::npos)
-// 	{
-// 		size_t	posServer = pos;
-// 		Server	currentServer;
-// 		while ((pos = content.find("location")) != std::string::npos) {
-// 			size_t		posLocation = pos;
-// 			Location	currentLocation(content.substr(posLocation, content.find('}', posLocation) - posLocation + 1));
-// 			currentServer._locations.push_back(currentLocation);
-// 			content.erase(posLocation, content.find('}', posLocation) - posLocation);
-// 		}
-// 		exit(0);
-// 		Directives currentDirectives(content.substr(posServer, content.find('}', posServer) - posServer + 1));
-// 		currentServer._directives = currentDirectives;
-// 		_cluster.push_back(currentServer);
-// 		content.erase(posServer, content.find('}', posServer) - posServer);
-// 	}
+void	Master::configDivider( const char* path ) {
+	std::ifstream		configFile(path);
+	std::string			content;
+
+	if (!configFile.is_open())
+		throw std::runtime_error("Cannot open File");
+	content = configCleaner(configFile);
+
+	std::vector<std::string>ServerBlocks;
+	std::stringstream		ss(content);
+	std::string				line;
+	std::string				tmp;
+	unsigned int 			brackets;
+	
+	brackets = 0;
+	while (std::getline(ss, line))
+	{
+		if (line.find('{') != std::string::npos)
+		{
+			if (brackets == 0 && line.find("server") == std::string::npos)
+				throw std::runtime_error("Incomplete Config");
+			brackets++;
+		}
+		else if (line.find('}') != std::string::npos)
+			brackets--;
+		else if (line[line.length() - 1] != ';')
+			throw std::runtime_error("Incomplete Config");
+		tmp += line + '\n';
+		if (tmp.find("server {") == std::string::npos)
+			throw std::runtime_error("Incomplete Config");
+		if (brackets == 0)
+		{
+			ServerBlocks.push_back(tmp);
+			tmp.clear();
+		}
+	}
+	if (brackets != 0)
+		throw std::runtime_error("Incomplete Config");
+	for (std::vector<std::string>::iterator it = ServerBlocks.begin(); it != ServerBlocks.end(); it++)
+		std::cout << *it << std::endl;
+}

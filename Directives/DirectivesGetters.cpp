@@ -1,11 +1,11 @@
 #include "Directives.hpp"
 
-uint32_t    Directives::getListenHost( void ) {
-    return this->_listenHost;
+u_int32_t    Directives::getListenHost( void ) {
+    return this->_listen_host;
 }
 
-uint16_t    Directives::getListenPort( void ) {
-    return this->_listenPort;
+u_int16_t    Directives::getListenPort( void ) {
+    return this->_listen_port;
 }
 
 std::string	Directives::getServerName( void ) {

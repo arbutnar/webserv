@@ -19,12 +19,17 @@ Server::Server( std::string block ) {
     std::cout << block << std::endl;
 }
 
-Server::Server( const Server &src ) {
-    (void)src;
+Server::Server( const Server &src )
+    : Directives(src) {
+        this->_locations = src._locations;
 }
 
-Server& Server::operator=( Server &src ) { //const
-    return src;
+Server& Server::operator=( const Server &src ) {
+    if (this == &src)
+        return *this;
+    this->_locations = src._locations;
+    Directives::operator=(src);
+    return *this;
 }
 
 Server::~Server() {

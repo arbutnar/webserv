@@ -38,8 +38,8 @@ enum	commonDirectives {
 
 class Directives {
 	protected:
-		uint32_t	    _listen_host;	//htonl
-		uint16_t 		_listen_port;	//htons
+		u_int32_t	    _listen_host;	//htonl
+		u_int16_t 		_listen_port;	//htons
 		std::string     _server_name;
 		std::string		_root;
 		v_Str			_index;
@@ -50,14 +50,16 @@ class Directives {
 		m_IntStr		_error_page;
 		unsigned int	_client_max_body_size;
 	public:
+		class ConfigError;
+
 		Directives( void );
 		Directives( std::string block );
 		Directives( const Directives &src );
 		Directives& operator=( const Directives &src );
 		~Directives( );
 
-		void	setListenHost( uint32_t listen_host );
-		void	setListenPort( uint16_t listen_port );
+		void	setListenHost( u_int32_t listen_host );
+		void	setListenPort( u_int16_t listen_port );
 		void	setServerName( std::string server_name );
 		void	setRoot( std::string root );
 		void	setIndex( v_Str index );
@@ -68,8 +70,8 @@ class Directives {
 		void	setErrorPage( m_IntStr error_page );
 		void	setClientMaxBodySize( unsigned int client_max_body_size );
 
-		uint32_t		getListenHost( void );
-		uint16_t		getListenPort( void );
+		u_int32_t		getListenHost( void );
+		u_int16_t		getListenPort( void );
 		std::string		getServerName( void );
 		std::string		getRoot( void );
 		v_Str			getIndex( void );
