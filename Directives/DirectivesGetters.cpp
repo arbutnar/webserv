@@ -32,7 +32,7 @@ const v_Str&	Directives::getTryFiles( void ) const {
 	return this->_try_files;
 }
 
-const v_Str&	Directives::getLimitExcept( void ) const {
+const m_StrBool&	Directives::getLimitExcept( void ) const {
     return this->_limit_except;
 }
 

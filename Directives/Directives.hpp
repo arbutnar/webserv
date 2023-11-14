@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 18:21:28 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 13:45:37 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 
 typedef std::vector<std::string> v_Str;
 typedef std::map<int,std::string> m_IntStr;
+typedef std::map<std::string, bool> m_StrBool;
 
 enum	commonDirectives {
 	LISTEN,
@@ -46,7 +47,7 @@ class Directives {
 		bool			_autoindex;
 		std::string		_scgi_pass;
 		v_Str			_try_files;
-		v_Str			_limit_except;
+		m_StrBool		_limit_except;
 		m_IntStr		_error_page;
 		unsigned int	_client_max_body_size;
 	public:
@@ -60,11 +61,10 @@ class Directives {
 		~Directives( );
 
 		void	parseListen( const std::string &attribute );
-		void	parseServerName( const std::string &attribute );
-		void	parseRoot( const std::string &attribute );
+		void	parseListenHost( const std::string &attribute );
+		void	parseListenPort( const std::string &attribute );
 		void	parseIndex( const std::string &attribute );
 		void	parseAutoindex( const std::string &attribute );
-		void	parseScgiPass( const std::string &attribute );
 		void	parseTryFiles( const std::string &attribute );
 		void	parseLimitExcept( const std::string &attribute );
 		void	parseErrorPage( const std::string &attribute );
@@ -78,7 +78,7 @@ class Directives {
 		void	setAutoindex( const bool &autoindex );
 		void	setScgiPass( const std::string &scgi_pass );
 		void	setTryFiles( const v_Str &try_files );
-		void	setLimitExcept( const v_Str &limit_except );
+		void	setLimitExcept( const m_StrBool &limit_except );
 		void	setErrorPage( const m_IntStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
 
@@ -90,7 +90,7 @@ class Directives {
 		const bool&			getAutoindex( void ) const ;
 		const std::string&	getScgiPass( void ) const ;
 		const v_Str&		getTryFiles( void ) const ;
-		const v_Str&		getLimitExcept( void ) const ;
+		const m_StrBool&	getLimitExcept( void ) const ;
 		const m_IntStr&		getErrorPage( void ) const ;
 		const unsigned int&	getClientMaxBodySize( void ) const ;
 

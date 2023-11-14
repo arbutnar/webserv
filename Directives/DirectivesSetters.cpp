@@ -32,7 +32,7 @@ void	Directives::setTryFiles( const v_Str &try_files ) {
 	this->_try_files = try_files;
 }
 
-void	Directives::setLimitExcept( const v_Str &limit_except ) {
+void	Directives::setLimitExcept( const m_StrBool &limit_except ) {
     this->_limit_except = limit_except;
 }
 
