@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:16:45 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 18:16:50 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 19:34:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,9 @@ class   Location : public Directives {
 		~Location( );
 		
 		void				setLocationName( std::string name );
-		const std::string&	getLocationName( void );
+		const std::string&	getLocationName( void ) const;
 
 		void	parseLocationName( const std::string &line );
 		void	clear( void );
+		void	displayLocation( void ) const;
 };

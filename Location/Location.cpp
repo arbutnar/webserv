@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:51:54 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 18:17:02 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 19:17:55 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void	Location::setLocationName( std::string name ) {
 	this->_location_name = name;
 }
 
-const std::string&	Location::getLocationName( void ) {
+const std::string&	Location::getLocationName( void ) const {
 	return this->_location_name;
 }
 
@@ -48,4 +48,10 @@ void	Location::parseLocationName( const std::string &line ) {
 void	Location::clear( void ) {
 	this->_location_name = "";
 	Directives::clear();
+}
+
+void	Location::displayLocation( void ) const {
+	std::cout << "location " << this->_location_name << " {" << std::endl;
+	this->displayDirectives();
+	std::cout << "}" << std::endl;
 }

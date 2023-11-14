@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 13:45:37 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 18:57:13 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <vector>
 # include <map>
 # include <stdlib.h>
+# include <algorithm>
 
 typedef std::vector<std::string> v_Str;
 typedef std::map<int,std::string> m_IntStr;
@@ -96,4 +97,5 @@ class Directives {
 
 		void	clear( void );
 		void	directiveParser( std::string line );
+		void	displayDirectives( void ) const;
 };

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 16:58:42 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 19:34:22 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,14 @@ Master& Master::operator=( const Master &src ) {
 }
 
 Master::~Master() {
+}
+
+void	Master::setCluster( const v_Ser &cluster) {
+	this->_cluster = cluster;
+}
+
+const v_Ser&	Master::getCluster( void ) const {
+	return this->_cluster;
 }
 
 void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
@@ -76,6 +84,7 @@ void	Master::configDivider( const char* path ) {
 	}
 	if (brackets != 0)
 		throw Directives::SyntaxError();
+	
 }
 
 void	Master::serverParser( std::string &block ) {
@@ -106,9 +115,16 @@ void	Master::serverParser( std::string &block ) {
 			server.addLocation(location);
 			location.clear();
 		}
-		// else if (inLocation)
-		// 	location.directivesParser(line);
+		else if (inLocation)
+			location.directiveParser(line);
 		else
 			server.directiveParser(line);
 	}
+	this->_cluster.push_back(server);
+}
+
+void	Master::displayMaster( void ) const {
+	std::cout << "[MASTER]" << std::endl;
+	for (v_Ser::const_iterator it = this->_cluster.begin(); it != this->_cluster.end(); it++)
+		it->displayServer();
 }

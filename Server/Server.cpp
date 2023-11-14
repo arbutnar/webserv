@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/08 16:36:58 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/14 19:18:01 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,18 @@ void    Server::setLocations( const v_locs &locations ) {
     this->_locations = locations;
 }
 
-const v_locs&	Server::getLocations( void ) {
+const v_locs&	Server::getLocations( void ) const {
     return this->_locations;
 }
 
-
 void    Server::addLocation( Location &location ) {
     this->_locations.push_back(location);
+}
+
+void	Server::displayServer( void ) const {
+	std::cout << "Server {" << std::endl;
+	this->displayDirectives();
+	for (v_locs::const_iterator it = this->_locations.begin(); it != this->_locations.end(); it++)
+		it->displayLocation();
+	std::cout << "}" << std::endl;
 }

@@ -96,8 +96,10 @@ void	Directives::directiveParser( std::string line ) {
 			parseTryFiles(value); break;
 		case SCGI_PASS:
 			this->_scgi_pass = value; break;
+		case CLIENT_MAX_BODY_SIZE:
+			parseClientMaxBodySize(value); break;
 		default:
-			throw Directives::SyntaxError;
+			throw Directives::SyntaxError();
 	}
 }
 
@@ -125,13 +127,11 @@ void	Directives::parseListenPort( const std::string &attribute ) {
 
 void	Directives::parseIndex( const std::string &attribute ) {
 	size_t	pos = 0;
-
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
 		this->_index.push_back(tmp);
 		pos += tmp.length();
-		std::cout << tmp <<  std::endl;
 	}
 }
 
@@ -144,25 +144,26 @@ void	Directives::parseAutoindex( const std::string &attribute ) {
 
 void	Directives::parseTryFiles( const std::string &attribute ) {
 	size_t	pos = 0;
-
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
 		this->_try_files.push_back(tmp);
 		pos += tmp.length();
-		std::cout << tmp <<  std::endl;
 	}
 }
 
 void	Directives::parseLimitExcept( const std::string &attribute ) {
 	size_t	pos = 0;
-
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		tmp = toupper(tmp)
+		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
+		if (tmp != "GET" && tmp != "HEAD" && tmp != "POST" && tmp != "PUT" && tmp != "DELETE")
+			throw Directives::SyntaxError();
+		for (std::map<std::string, bool>::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
+			if (it->first == tmp)
+				it->second = true;
 		pos += tmp.length();
-		std::cout << tmp <<  std::endl;
 	}
 }
 
@@ -177,5 +178,46 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 }
 
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
-	setClientMaxBodySize(std::atoi(attribute.c_str()));
+	size_t			pos = attribute.find_first_not_of("0123456789");
+	char			c;
+
+	this->_client_max_body_size = std::atoi(attribute.substr(0, pos).c_str());
+	if (pos == std::string::npos)
+		return ;
+	else if (pos != attribute.length() - 1)
+		throw Directives::SyntaxError();
+	c = attribute[pos];
+	c = std::toupper(c);
+	if (c == 'K')
+		this->_client_max_body_size *= 1000;
+	else if (c == 'M')
+		this->_client_max_body_size *= 1000000;
+	else
+		throw Directives::SyntaxError();
+}
+
+void	Directives::displayDirectives( void ) const {
+	std::cout << "Host: " << this->_listen_host << std::endl;
+	std::cout << "Port: " << this->_listen_port << std::endl;
+	std::cout << "Server Name: " << this->_server_name << std::endl;
+	std::cout << "Root: " << this->_root << std::endl;
+	std::cout << "Index: ";
+	for (v_Str::const_iterator it = this->_index.begin(); it != this->_index.end(); it++)
+		std::cout << *it << ' ';
+	std::cout << std::endl;
+	std::cout << "Autoindex: " << this->_autoindex << std::endl;
+	std::cout << "Scgi Pass: " << this->_scgi_pass << std::endl;
+	std::cout << "Try Files: ";
+	for (v_Str::const_iterator it = this->_try_files.begin(); it != this->_try_files.end(); it++)
+		std::cout << *it << ' ';
+	std::cout << std::endl;
+	std::cout << "Allowed Methods: ";
+	for (m_StrBool::const_iterator it = this->_limit_except.begin(); it != this->_limit_except.end(); it++)
+		if (it->second == true)
+			std::cout << it->first << ' ';
+	std::cout << std::endl;
+	std::cout << "Error Page: " << std::endl;
+	for (m_IntStr::const_iterator it = this->_error_page.begin(); it != this->_error_page.end(); it++)
+		std::cout << it->first << ' ' << it->second << std::endl;
+	std::cout << "Client Max Body Size: " << this->_client_max_body_size << std::endl;
 }
