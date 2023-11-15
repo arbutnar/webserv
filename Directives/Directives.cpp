@@ -13,11 +13,29 @@
 #include "Directives.hpp"
 
 Directives::Directives( void ) {
-	clear();
+	this->_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
+	this->_listen_port = 8080;
+	this->_server_name = "";
+	this->_root = "";
+	this->_index.clear();
+	this->_autoindex = false;
+	this->_scgi_pass = "";
+	this->_try_files.clear();
+	this->_error_page.clear();
+	this->_client_max_body_size = 1000000;
+	this->_limit_except.clear();
+	this->_limit_except.insert(std::make_pair("GET", false));
+	this->_limit_except.insert(std::make_pair("HEAD", false));
+	this->_limit_except.insert(std::make_pair("POST", false));
+	this->_limit_except.insert(std::make_pair("PUT", false));
+	this->_limit_except.insert(std::make_pair("DELETE", false));
 }
 
 Directives::Directives( const Directives &src ) {
 	*this = src;
+}
+
+Directives::~Directives( ) {
 }
 
 Directives& Directives::operator=( const Directives &src ) {
@@ -35,28 +53,6 @@ Directives& Directives::operator=( const Directives &src ) {
 	this->_error_page = src._error_page;
 	this->_client_max_body_size = src._client_max_body_size;
 	return *this;
-}
-
-Directives::~Directives( void ) {
-}
-
-void	Directives::clear( void ) {
-	this->_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
-	this->_listen_port = 8080;
-	this->_server_name = "";
-	this->_root = "";
-	this->_index.clear();
-	this->_autoindex = false;
-	this->_scgi_pass = "";
-	this->_try_files.clear();
-	this->_error_page.clear();
-	this->_client_max_body_size = 1000000;
-	this->_limit_except.clear();
-	this->_limit_except.insert(std::make_pair("GET", false));
-	this->_limit_except.insert(std::make_pair("HEAD", false));
-	this->_limit_except.insert(std::make_pair("POST", false));
-	this->_limit_except.insert(std::make_pair("PUT", false));
-	this->_limit_except.insert(std::make_pair("DELETE", false));
 }
 
 void	Directives::directiveParser( std::string line ) {
@@ -220,4 +216,8 @@ void	Directives::displayDirectives( void ) const {
 	for (m_IntStr::const_iterator it = this->_error_page.begin(); it != this->_error_page.end(); it++)
 		std::cout << it->first << ' ' << it->second << std::endl;
 	std::cout << "Client Max Body Size: " << this->_client_max_body_size << std::endl;
+}
+
+void	Directives::addLocation( const Location &location ) {
+	(void) location;
 }

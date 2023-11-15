@@ -6,11 +6,12 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 18:57:13 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/15 15:07:56 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef DIRECTIVES_HPP
+# define DIRECTIVES_HPP
 
 # include <iostream>
 # include <fstream>
@@ -20,6 +21,8 @@
 # include <map>
 # include <stdlib.h>
 # include <algorithm>
+
+class	Location;
 
 typedef std::vector<std::string> v_Str;
 typedef std::map<int,std::string> m_IntStr;
@@ -59,7 +62,7 @@ class Directives {
 		Directives( void );
 		Directives( const Directives &src );
 		Directives& operator=( const Directives &src );
-		~Directives( );
+		virtual ~Directives( );
 
 		void	parseListen( const std::string &attribute );
 		void	parseListenHost( const std::string &attribute );
@@ -95,7 +98,9 @@ class Directives {
 		const m_IntStr&		getErrorPage( void ) const ;
 		const unsigned int&	getClientMaxBodySize( void ) const ;
 
-		void	clear( void );
-		void	directiveParser( std::string line );
-		void	displayDirectives( void ) const;
+		void			directiveParser( std::string line );
+		void			displayDirectives( void ) const;
+		virtual void	addLocation( const Location &location );
 };
+
+#endif

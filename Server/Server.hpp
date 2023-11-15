@@ -6,11 +6,12 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 18:56:50 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/15 13:52:09 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef SERVER_HPP
+# define SERVER_HPP
 #include "../Location/Location.hpp"
 
 typedef std::vector<Location> v_locs;
@@ -29,6 +30,8 @@ class Server : public Directives {
 		void			setLocations( const v_locs &locations );
 		const v_locs&	getLocations( void ) const;
 
-		void	addLocation( Location &location );
+		void	addLocation( const Location &location );
 		void	displayServer( void ) const;
 };
+
+#endif

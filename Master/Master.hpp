@@ -6,11 +6,12 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 19:12:36 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/15 12:26:56 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef MASTER_HPP
+# define MASTER_HPP
 
 # include "../Server/Server.hpp"
 
@@ -34,3 +35,5 @@ class Master {
 		void	serverParser( std::string &block );
 		void	displayMaster( void ) const;
 };
+
+#endif

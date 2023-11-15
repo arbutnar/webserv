@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 19:18:01 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/15 12:17:01 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ const v_locs&	Server::getLocations( void ) const {
     return this->_locations;
 }
 
-void    Server::addLocation( Location &location ) {
+void    Server::addLocation( const Location &location ) {
     this->_locations.push_back(location);
 }
 

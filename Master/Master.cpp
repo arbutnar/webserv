@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/14 19:34:22 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/15 15:06:48 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void	Master::configDivider( const char* path ) {
 	std::string				line;
 	std::string				tmp;
 	unsigned int 			brackets = 0;
-	
+
 	while (std::getline(ss, line))
 	{
 		if (line.find('{') != std::string::npos)
@@ -84,7 +84,6 @@ void	Master::configDivider( const char* path ) {
 	}
 	if (brackets != 0)
 		throw Directives::SyntaxError();
-	
 }
 
 void	Master::serverParser( std::string &block ) {
@@ -92,8 +91,8 @@ void	Master::serverParser( std::string &block ) {
 	block.erase(block.find_last_of('\n', block.find_last_of('\n') - 1) + 1, std::string::npos);
 	std::stringstream	ss(block);
 	std::string			line;
-	Server				server;
-	Location			location;
+	Directives*			serverPtr = new Server();
+	Directives*			locationPtr;
 	bool				inLocation = false;
 
 	while (std::getline(ss, line))
@@ -105,22 +104,24 @@ void	Master::serverParser( std::string &block ) {
 			else if (line.find("{") != line.length() - 1)
 				throw Directives::SyntaxError();
 			inLocation = true;
-			location.parseLocationName(line);
+			locationPtr = new Location(line);
+			*locationPtr = *serverPtr;
 		}
 		else if (line.find("}") != std::string::npos)
 		{
 			if (!inLocation)
 				throw Directives::SyntaxError();
 			inLocation = false;
-			server.addLocation(location);
-			location.clear();
+			serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
+			delete locationPtr;
 		}
 		else if (inLocation)
-			location.directiveParser(line);
+			locationPtr->directiveParser(line);
 		else
-			server.directiveParser(line);
+			serverPtr->directiveParser(line);
 	}
-	this->_cluster.push_back(server);
+	this->_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
+	delete serverPtr;
 }
 
 void	Master::displayMaster( void ) const {
