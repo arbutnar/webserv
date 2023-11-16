@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/15 15:06:48 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/16 16:27:29 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,4 +128,31 @@ void	Master::displayMaster( void ) const {
 	std::cout << "[MASTER]" << std::endl;
 	for (v_Ser::const_iterator it = this->_cluster.begin(); it != this->_cluster.end(); it++)
 		it->displayServer();
+}
+
+void	Master::start( void ) {
+	for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		it->socketInit();
+	fd_set	activeSockets;
+	for (;;)
+	{
+		for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		{
+			activeSockets = it->getSockets();
+			if (select(it->nfds() + 1, &activeSockets, NULL, NULL, 0) == -1)
+				throw std::runtime_error("Select function failed");
+			for (int i = 0; i != activeSockets.fd_count; i++)
+			{
+				if (activeSockets.fd_array[i] == it->getListener())
+				{
+					struct sockaddr_in sockaddr;
+					socklen_t	len = sizeof(sockaddr);
+					int client = accept(it->getListener(), (struct sockaddr *)&sockaddr, &len);
+					if (client == -1)
+						throw std::runtime_error("Cannot create Client socket");
+					it->addSocket(client);
+				}
+			}
+		}
+	}		
 }

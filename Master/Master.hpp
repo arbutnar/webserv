@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/15 12:26:56 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/16 14:00:04 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ class Master {
 		void	configDivider( const char* path );
 		void	serverParser( std::string &block );
 		void	displayMaster( void ) const;
+		void	start( void );
 };
 
 #endif
