@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/16 16:27:29 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/17 13:07:21 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,23 +134,24 @@ void	Master::start( void ) {
 	for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		it->socketInit();
 	fd_set	activeSockets;
-	for (;;)
+	while (true)
 	{
-		for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		for (v_Ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
 		{
-			activeSockets = it->getSockets();
-			if (select(it->nfds() + 1, &activeSockets, NULL, NULL, 0) == -1)
+			FD_ZERO(&activeSockets);
+			s_sock temp = s_it->getSockets();
+			for (s_sock::const_iterator it = temp.begin(); it != temp.end(); it++)
+				FD_SET(*it, &activeSockets);
+			if (select(*temp.rbegin() + 1, &activeSockets, NULL, NULL, 0) == -1)
 				throw std::runtime_error("Select function failed");
-			for (int i = 0; i != activeSockets.fd_count; i++)
+			for (s_sock::const_iterator it = temp.begin(); it != temp.end(); it++)
 			{
-				if (activeSockets.fd_array[i] == it->getListener())
+				if (FD_ISSET(*it, &activeSockets))
 				{
-					struct sockaddr_in sockaddr;
-					socklen_t	len = sizeof(sockaddr);
-					int client = accept(it->getListener(), (struct sockaddr *)&sockaddr, &len);
-					if (client == -1)
-						throw std::runtime_error("Cannot create Client socket");
-					it->addSocket(client);
+					if (it == temp.begin())
+						s_it->newConnection();
+					else
+						s_it->readRequest(it, &activeSockets);
 				}
 			}
 		}

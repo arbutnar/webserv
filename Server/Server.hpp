@@ -6,26 +6,28 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/16 16:08:41 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/17 12:26:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include "../Location/Location.hpp"
+# include <sys/select.h>
+# include <sys/socket.h>
+# include <netinet/in.h>
+# include <stdio.h>
+# include <set>
+# include <unistd.h>
+# include "../Location/Location.hpp"
 
 typedef std::vector<Location> v_locs;
+typedef std::set<int> s_sock;
 
 class Server : public Directives {
 	private:
 		v_locs	_locations;
-		fd_set	_sockets;
-		int 	_listener;
+		s_sock	_sockets;
 	public:
 		Server( void );
 		Server( std::string block );
@@ -34,16 +36,14 @@ class Server : public Directives {
 		~Server( );
 
 		void			setLocations( const v_locs &locations );
-		void			setSockets( const fd_set &sockets );
-		void			setListener( const int &listener );
+		void			setSockets( const s_sock &sockets );
 		const v_locs&	getLocations( void ) const;
-		const fd_set&	getSockets( void ) const;
-		const int &	getListener( void ) const;
+		s_sock			getSockets( void ) const;
 
 		void	addLocation( const Location &location );
 		void	socketInit( void );
-		int		nfds( void );
-		void	addSocket( const int &socket );
+		void	newConnection( void );
+		void	readRequest( s_sock::iterator &socket, fd_set* const activeSockets );
 		void	displayServer( void ) const;
 };
 
