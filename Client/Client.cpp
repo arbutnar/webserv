@@ -32,6 +32,12 @@ Client	&Client::operator=( Client const &src ) {
 	return *this;
 }
 
+bool	Client::operator==( Client const &src ) const {
+	if (_socket != src._socket || _buffer != src._buffer)
+		return false;
+	return true;
+}
+
 Client::~Client( void ) {
 }
 

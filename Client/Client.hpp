@@ -22,7 +22,8 @@ class Client {
 		Client( void );
 		Client( int const &socket );
 		Client( Client const &src );
-		Client& operator=( Client const &src );
+		Client	&operator=( Client const &src );
+		bool	operator==( Client const &src ) const ;
 		~Client();
 
 		int const			&getSocket( void ) const;

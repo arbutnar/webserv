@@ -103,23 +103,22 @@ void	Server::newConnection( void ) {
 
 void	Server::readRequest( v_cli::iterator &it ) {
 	char	c;
-	int	nBytes = recv(it->getSocket(), &c, 1, 0);
+	int		nBytes = recv(it->getSocket(), &c, 1, 0);
 	if (nBytes == -1)
 		throw std::runtime_error("Cannot read from socket");
 	else if (nBytes == 0) // forse <= a 0 perche' l'errore non serve
-		deleteConnection(it);
+	{
+		close(it->getSocket());
+		_clients.erase(std::find(_clients.begin(), _clients.end(), *it));
+		std::cout << it->getSocket() << " is disconnected" << std::endl;
+	}
 	else
-		it->buildBuffer(c);
+		std::find(_clients.begin(), _clients.end(), *it)->buildBuffer(c);
 }
 
-void	Server::deleteConnection( v_cli::iterator &it ) {
-	it->clearBuffer();
-	close(it->getSocket());
-	std::cout << it->getSocket() << " disconnected" << std::endl;
-	for (v_cli::iterator jt = _clients.begin(); jt != _clients.end(); jt++)
-		if ()
-			_clients.erase(jt);
-
+void	Server::writeResponse( v_cli::iterator &it ) {
+	std::cout << it->getBuffer();
+	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
 }
 
 void	Server::displayServer( void ) const {

@@ -160,12 +160,8 @@ void	Master::start( void ) {
 			{
 				if (FD_ISSET(it->getSocket(), &read))
 					s_it->readRequest(it);
-				else if (FD_ISSET(it->getSocket(), &write))
-				{
-					// mandare la risposta
-					if (!it->getBuffer().empty())
-						std::cout << it->getBuffer() << std::endl;
-				}
+				else if (FD_ISSET(it->getSocket(), &write) && !it->getBuffer().empty())
+					s_it->writeResponse(it);
 			}
 		}
 	}

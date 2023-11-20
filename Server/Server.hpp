@@ -48,8 +48,8 @@ class Server : public Directives {
 		void	ListenerInit( void );
 		int		nfds( void ) const;
 		void	newConnection( void );
-		void	deleteConnection( v_cli::iterator &it );
 		void	readRequest( v_cli::iterator &it );
+		void	writeResponse( v_cli::iterator &it );
 		void	displayServer( void ) const;
 };
 
