@@ -13,22 +13,22 @@
 #include "Directives.hpp"
 
 Directives::Directives( void ) {
-	this->_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
-	this->_listen_port = 8080;
-	this->_server_name = "";
-	this->_root = "";
-	this->_index.clear();
-	this->_autoindex = false;
-	this->_scgi_pass = "";
-	this->_try_files.clear();
-	this->_error_page.clear();
-	this->_client_max_body_size = 1000000;
-	this->_limit_except.clear();
-	this->_limit_except.insert(std::make_pair("GET", false));
-	this->_limit_except.insert(std::make_pair("HEAD", false));
-	this->_limit_except.insert(std::make_pair("POST", false));
-	this->_limit_except.insert(std::make_pair("PUT", false));
-	this->_limit_except.insert(std::make_pair("DELETE", false));
+	_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
+	_listen_port = 8080;
+	_server_name = "";
+	_root = "";
+	_index.clear();
+	_autoindex = false;
+	_scgi_pass = "";
+	_try_files.clear();
+	_error_page.clear();
+	_client_max_body_size = 1000000;
+	_limit_except.clear();
+	_limit_except.insert(std::make_pair("GET", false));
+	_limit_except.insert(std::make_pair("HEAD", false));
+	_limit_except.insert(std::make_pair("POST", false));
+	_limit_except.insert(std::make_pair("PUT", false));
+	_limit_except.insert(std::make_pair("DELETE", false));
 }
 
 Directives::Directives( const Directives &src ) {
@@ -41,17 +41,17 @@ Directives::~Directives( ) {
 Directives& Directives::operator=( const Directives &src ) {
 	if (this == &src)
 		return *this;
-	this->_listen_host = src._listen_host;
-	this->_listen_port = src._listen_port;
-	this->_server_name = src._server_name;
-	this->_root = src._root;
-	this->_index = src._index;
-	this->_autoindex = src._autoindex;
-	this->_scgi_pass = src._scgi_pass;
-	this->_try_files = src._try_files;
-	this->_limit_except = src._limit_except;
-	this->_error_page = src._error_page;
-	this->_client_max_body_size = src._client_max_body_size;
+	_listen_host = src._listen_host;
+	_listen_port = src._listen_port;
+	_server_name = src._server_name;
+	_root = src._root;
+	_index = src._index;
+	_autoindex = src._autoindex;
+	_scgi_pass = src._scgi_pass;
+	_try_files = src._try_files;
+	_limit_except = src._limit_except;
+	_error_page = src._error_page;
+	_client_max_body_size = src._client_max_body_size;
 	return *this;
 }
 
@@ -77,9 +77,9 @@ void	Directives::directiveParser( std::string line ) {
 		case LISTEN:
 			parseListen(value); break;
 		case SERVER_NAME:
-			this->_server_name = value; break;
+			_server_name = value; break;
 		case ROOT:
-			this->_root = value; break;
+			_root = value; break;
 		case INDEX:
 			parseIndex(value); break;
 		case AUTOINDEX:
@@ -91,7 +91,7 @@ void	Directives::directiveParser( std::string line ) {
 		case TRY_FILES:
 			parseTryFiles(value); break;
 		case SCGI_PASS:
-			this->_scgi_pass = value; break;
+			_scgi_pass = value; break;
 		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
 		default:
@@ -118,7 +118,7 @@ void 	Directives::parseListenHost( const std::string &attribute ) {
 void	Directives::parseListenPort( const std::string &attribute ) {
 	if (attribute.find_first_not_of("0123456789") != std::string::npos)
 		throw Directives::SyntaxError();
-	this->_listen_port = std::atoi(attribute.c_str());
+	_listen_port = std::atoi(attribute.c_str());
 }
 
 void	Directives::parseIndex( const std::string &attribute ) {
@@ -126,14 +126,14 @@ void	Directives::parseIndex( const std::string &attribute ) {
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		this->_index.push_back(tmp);
+		_index.push_back(tmp);
 		pos += tmp.length();
 	}
 }
 
 void	Directives::parseAutoindex( const std::string &attribute ) {
 	if (attribute == "on")
-		this->_autoindex = true;
+		_autoindex = true;
 	else if (attribute != "off")
 		throw Directives::SyntaxError();
 }
@@ -143,7 +143,7 @@ void	Directives::parseTryFiles( const std::string &attribute ) {
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		this->_try_files.push_back(tmp);
+		_try_files.push_back(tmp);
 		pos += tmp.length();
 	}
 }
@@ -170,14 +170,14 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	
 	if (key.empty() || value.empty() || key.find_first_not_of("0123456789") != std::string::npos)
 		throw Directives::SyntaxError();
-	this->_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
+	_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
 }
 
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 	size_t			pos = attribute.find_first_not_of("0123456789");
 	char			c;
 
-	this->_client_max_body_size = std::atoi(attribute.substr(0, pos).c_str());
+	_client_max_body_size = std::atoi(attribute.substr(0, pos).c_str());
 	if (pos == std::string::npos)
 		return ;
 	else if (pos != attribute.length() - 1)
@@ -185,37 +185,37 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 	c = attribute[pos];
 	c = std::toupper(c);
 	if (c == 'K')
-		this->_client_max_body_size *= 1000;
+		_client_max_body_size *= 1000;
 	else if (c == 'M')
-		this->_client_max_body_size *= 1000000;
+		_client_max_body_size *= 1000000;
 	else
 		throw Directives::SyntaxError();
 }
 
 void	Directives::displayDirectives( void ) const {
-	std::cout << "Host: " << this->_listen_host << std::endl;
-	std::cout << "Port: " << this->_listen_port << std::endl;
-	std::cout << "Server Name: " << this->_server_name << std::endl;
-	std::cout << "Root: " << this->_root << std::endl;
+	std::cout << "Host: " << _listen_host << std::endl;
+	std::cout << "Port: " << _listen_port << std::endl;
+	std::cout << "Server Name: " << _server_name << std::endl;
+	std::cout << "Root: " << _root << std::endl;
 	std::cout << "Index: ";
-	for (v_Str::const_iterator it = this->_index.begin(); it != this->_index.end(); it++)
+	for (v_Str::const_iterator it = _index.begin(); it != _index.end(); it++)
 		std::cout << *it << ' ';
 	std::cout << std::endl;
-	std::cout << "Autoindex: " << this->_autoindex << std::endl;
-	std::cout << "Scgi Pass: " << this->_scgi_pass << std::endl;
+	std::cout << "Autoindex: " << _autoindex << std::endl;
+	std::cout << "Scgi Pass: " << _scgi_pass << std::endl;
 	std::cout << "Try Files: ";
-	for (v_Str::const_iterator it = this->_try_files.begin(); it != this->_try_files.end(); it++)
+	for (v_Str::const_iterator it = _try_files.begin(); it != _try_files.end(); it++)
 		std::cout << *it << ' ';
 	std::cout << std::endl;
 	std::cout << "Allowed Methods: ";
-	for (m_StrBool::const_iterator it = this->_limit_except.begin(); it != this->_limit_except.end(); it++)
+	for (m_StrBool::const_iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 		if (it->second == true)
 			std::cout << it->first << ' ';
 	std::cout << std::endl;
 	std::cout << "Error Page: " << std::endl;
-	for (m_IntStr::const_iterator it = this->_error_page.begin(); it != this->_error_page.end(); it++)
+	for (m_IntStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
 		std::cout << it->first << ' ' << it->second << std::endl;
-	std::cout << "Client Max Body Size: " << this->_client_max_body_size << std::endl;
+	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
 }
 
 void	Directives::addLocation( const Location &location ) {

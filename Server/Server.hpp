@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/17 12:26:08 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/20 17:06:15 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,16 @@
 # include <set>
 # include <unistd.h>
 # include "../Location/Location.hpp"
+# include "../Client/Client.hpp"
 
 typedef std::vector<Location> v_locs;
-typedef std::set<int> s_sock;
+typedef std::vector<Client> v_cli;
 
 class Server : public Directives {
 	private:
 		v_locs	_locations;
-		s_sock	_sockets;
+		int		_listener;
+		v_cli	_clients;
 	public:
 		Server( void );
 		Server( std::string block );
@@ -36,14 +38,18 @@ class Server : public Directives {
 		~Server( );
 
 		void			setLocations( const v_locs &locations );
-		void			setSockets( const s_sock &sockets );
-		const v_locs&	getLocations( void ) const;
-		s_sock			getSockets( void ) const;
+		void			setListener( const int &listener );
+		void			setClients( const v_cli &clients );
+		const v_locs	&getLocations( void ) const;
+		const int		&getListener( void ) const;
+		const v_cli		&getClients( void ) const;
 
 		void	addLocation( const Location &location );
-		void	socketInit( void );
+		void	ListenerInit( void );
+		int		nfds( void ) const;
 		void	newConnection( void );
-		void	readRequest( s_sock::iterator &socket, fd_set* const activeSockets );
+		void	deleteConnection( v_cli::iterator &it );
+		void	readRequest( v_cli::iterator &it );
 		void	displayServer( void ) const;
 };
 

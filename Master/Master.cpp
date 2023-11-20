@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/17 13:07:21 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/20 17:10:02 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Master::Master( const Master &src ) {
 Master& Master::operator=( const Master &src ) {
 	if (this == &src)
 		return *this;
-	this->_cluster = src._cluster;
+	_cluster = src._cluster;
 	return *this;
 }
 
@@ -30,11 +30,11 @@ Master::~Master() {
 }
 
 void	Master::setCluster( const v_Ser &cluster) {
-	this->_cluster = cluster;
+	_cluster = cluster;
 }
 
 const v_Ser&	Master::getCluster( void ) const {
-	return this->_cluster;
+	return _cluster;
 }
 
 void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
@@ -120,40 +120,53 @@ void	Master::serverParser( std::string &block ) {
 		else
 			serverPtr->directiveParser(line);
 	}
-	this->_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
+	_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
 	delete serverPtr;
 }
 
 void	Master::displayMaster( void ) const {
 	std::cout << "[MASTER]" << std::endl;
-	for (v_Ser::const_iterator it = this->_cluster.begin(); it != this->_cluster.end(); it++)
+	for (v_Ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		it->displayServer();
 }
 
 void	Master::start( void ) {
 	for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
-		it->socketInit();
-	fd_set	activeSockets;
+		it->ListenerInit();
+	fd_set	read;
+	fd_set	write;
+	int		max;
 	while (true)
 	{
 		for (v_Ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
 		{
-			FD_ZERO(&activeSockets);
-			s_sock temp = s_it->getSockets();
-			for (s_sock::const_iterator it = temp.begin(); it != temp.end(); it++)
-				FD_SET(*it, &activeSockets);
-			if (select(*temp.rbegin() + 1, &activeSockets, NULL, NULL, 0) == -1)
-				throw std::runtime_error("Select function failed");
-			for (s_sock::const_iterator it = temp.begin(); it != temp.end(); it++)
+			FD_ZERO(&read);
+			FD_ZERO(&write);
+			FD_SET(s_it->getListener(), &read);
+			v_cli temp = s_it->getClients();
+			for (v_cli::const_iterator it = temp.begin(); it != temp.end(); it++)
 			{
-				if (FD_ISSET(*it, &activeSockets))
+				FD_SET(it->getSocket(), &read);
+				FD_SET(it->getSocket(), &write);
+			}
+			max = s_it->nfds();
+			if (max == 0)
+				max = s_it->getListener();
+			if (select(max + 1, &read, &write, NULL, NULL) == -1)
+				throw std::runtime_error("Select function failed");
+			if (FD_ISSET(s_it->getListener(), &read))
+				s_it->newConnection();
+			for (v_cli::iterator it = temp.begin(); it != temp.end(); it++)
+			{
+				if (FD_ISSET(it->getSocket(), &read))
+					s_it->readRequest(it);
+				else if (FD_ISSET(it->getSocket(), &write))
 				{
-					if (it == temp.begin())
-						s_it->newConnection();
-					else
-						s_it->readRequest(it, &activeSockets);
+					// mandare la risposta
+					if (!it->getBuffer().empty())
+						std::cout << it->getBuffer() << std::endl;
 				}
 			}
 		}
-	}		
+	}
 }

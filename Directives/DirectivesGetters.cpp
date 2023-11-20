@@ -1,45 +1,45 @@
 #include "Directives.hpp"
 
 const u_int32_t&	Directives::getListenHost( void ) const {
-    return this->_listen_host;
+    return _listen_host;
 }
 
 const u_int16_t&	Directives::getListenPort( void ) const {
-    return this->_listen_port;
+    return _listen_port;
 }
 
 const std::string&	Directives::getServerName( void ) const {
-	return this->_server_name;
+	return _server_name;
 }
 
 const std::string&	Directives::getRoot( void ) const {
-	return this->_root;
+	return _root;
 }
 
 const v_Str&	Directives::getIndex( void ) const {
-	return this->_index;
+	return _index;
 }
 
 const bool&	Directives::getAutoindex( void ) const {
-	return this->_autoindex;
+	return _autoindex;
 }
 
 const std::string&	Directives::getScgiPass( void ) const {
-	return this->_scgi_pass;
+	return _scgi_pass;
 }
 
 const v_Str&	Directives::getTryFiles( void ) const {
-	return this->_try_files;
+	return _try_files;
 }
 
 const m_StrBool&	Directives::getLimitExcept( void ) const {
-    return this->_limit_except;
+    return _limit_except;
 }
 
 const m_IntStr&	Directives::getErrorPage( void ) const {
-	return this->_error_page;
+	return _error_page;
 }
 
 const unsigned int&	Directives::getClientMaxBodySize( void ) const {
-	return this->_client_max_body_size;
+	return _client_max_body_size;
 }
