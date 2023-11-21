@@ -118,7 +118,12 @@ void	Server::readRequest( v_cli::iterator &it ) {
 
 void	Server::writeResponse( v_cli::iterator &it ) {
 	Request request;
-	request.parser(it->getBuffer());
+	try {
+		request.parser(it->getBuffer());
+		request.setIsValid(true);
+	} catch(std::exception &e) {
+		std::cout << "Bad Client request" << std::endl;
+	}
 	// std::cout << it->getBuffer();
 	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
 }

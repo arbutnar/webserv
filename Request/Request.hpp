@@ -17,6 +17,7 @@
 # include <string>
 # include <sstream>
 # include <map>
+# include <algorithm>
 
 typedef std::map<std::string, std::string> m_hdrs;
 
@@ -25,6 +26,7 @@ class Request {
 		bool		_isValid;
 		std::string	_method;
 		std::string	_url;
+		std::string _protocol;
 		m_hdrs		_headers;
 	public:
 		Request( void );
@@ -35,10 +37,12 @@ class Request {
 		const bool			&getIsValid( void ) const;
 		const std::string 	&getMethod( void ) const;
 		const std::string 	&getUrl( void ) const;
+		const std::string 	&getProtocol( void ) const;
 		const m_hdrs		&getHeaders( void ) const;
 		void				setIsValid( const bool &isValid );
 		void				setMethod( const std::string &method );
 		void				setUrl( const std::string &url );
+		void				setProtocol( const std::string &protocol );
 		void				setHeaders( const m_hdrs &headers );
 
 		void				parser( const std::string &buffer );
