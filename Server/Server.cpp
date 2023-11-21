@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/20 17:27:40 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/21 15:12:16 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,9 @@ void	Server::readRequest( v_cli::iterator &it ) {
 }
 
 void	Server::writeResponse( v_cli::iterator &it ) {
-	std::cout << it->getBuffer();
+	Request request;
+	request.parser(it->getBuffer());
+	// std::cout << it->getBuffer();
 	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
 }
 

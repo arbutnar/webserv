@@ -6,11 +6,12 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 16:38:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/20 16:56:40 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/21 13:59:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#ifndef CLIENT_HPP
+# define CLIENT_HPP
 
 # include <iostream>
 
@@ -34,3 +35,5 @@ class Client {
 		void				buildBuffer( const char &c );
 		void				clearBuffer( void );
 };
+
+#endif
