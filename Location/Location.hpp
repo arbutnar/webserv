@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:16:45 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/15 15:09:35 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/22 16:55:42 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,16 +17,19 @@
 
 class   Location : public Directives {
 	private:
-		std::string     _location_name;
+		int			_modifier;
+		std::string	_location_name;
 	public:
 		Location( void );
-		Location( const std::string &locationName );
+		Location( const std::string &line );
 		Location( const Location &src );
 		Location& operator=( const Location &src );
 		~Location( );
 		
-		void				setLocationName( std::string name );
-		const std::string&	getLocationName( void ) const;
+		const int			&getModifier( void ) const;
+		const std::string	&getLocationName( void ) const;
+		void				setModifier( const int &modifier );
+		void				setLocationName( const std::string &name );
 
 		void	displayLocation( void ) const;
 };

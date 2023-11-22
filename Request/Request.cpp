@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/21 18:17:35 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/22 18:01:00 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ const std::string 	&Request::getProtocol( void ) const {
 	return _protocol;
 }
 
-const m_hdrs	&Request::getHeaders( void ) const {
+const m_strStr	&Request::getHeaders( void ) const {
 	return _headers;
 }
 
@@ -69,7 +69,7 @@ void	Request::setProtocol( const std::string &protocol ) {
 	_protocol = protocol;
 }
 
-void	Request::setHeaders( const m_hdrs &headers ) {
+void	Request::setHeaders( const m_strStr &headers ) {
 	_headers = headers;
 }
 
@@ -93,9 +93,36 @@ void	Request::parser( const std::string &buffer ) {
 	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
+}
+
+void	Request::associateUrl( const v_locs &locations ) {
+	Location	tmp;
+	v_locs		noMod;
+	v_locs		equalMod;
+	v_locs		caseSensMod;
+
+	for (v_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
+	{	
+		if (it->getModifier() == 0)
+			noMod.push_back(*it);
+		else if (it->getModifier() == 1)
+			equalMod.push_back(*it);
+		else
+			caseSensMod.push_back(*it);
+	}
+	for (v_locs::const_iterator it = noMod.begin(); it != noMod.end(); it++)
+		if (_url.find(it->getLocationName()) != std::string::npos)
+			tmp = *it;
+	for (v_locs::const_iterator it = equalMod.begin(); it != equalMod.end(); it++)
+		if (_url == it->getLocationName())
+			tmp = *it;
+	tmp.displayLocation();
+}
+
+void	Request::displayRequest( void ) const {
 	std::cout << '$' << _method << '$' << std::endl;
 	std::cout << '$' << _url << '$' << std::endl;
 	std::cout << '$' << _protocol << '$' << std::endl;
-	for (m_hdrs::iterator it = _headers.begin(); it != _headers.end(); it++)
+	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << '$' << it->first << '$' << it->second << '$' << std::endl;
 }

@@ -198,22 +198,22 @@ void	Directives::displayDirectives( void ) const {
 	std::cout << "Server Name: " << _server_name << std::endl;
 	std::cout << "Root: " << _root << std::endl;
 	std::cout << "Index: ";
-	for (v_Str::const_iterator it = _index.begin(); it != _index.end(); it++)
+	for (v_str::const_iterator it = _index.begin(); it != _index.end(); it++)
 		std::cout << *it << ' ';
 	std::cout << std::endl;
 	std::cout << "Autoindex: " << _autoindex << std::endl;
 	std::cout << "Scgi Pass: " << _scgi_pass << std::endl;
 	std::cout << "Try Files: ";
-	for (v_Str::const_iterator it = _try_files.begin(); it != _try_files.end(); it++)
+	for (v_str::const_iterator it = _try_files.begin(); it != _try_files.end(); it++)
 		std::cout << *it << ' ';
 	std::cout << std::endl;
 	std::cout << "Allowed Methods: ";
-	for (m_StrBool::const_iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
+	for (m_strBool::const_iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 		if (it->second == true)
 			std::cout << it->first << ' ';
 	std::cout << std::endl;
 	std::cout << "Error Page: " << std::endl;
-	for (m_IntStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
+	for (m_intStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
 		std::cout << it->first << ' ' << it->second << std::endl;
 	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
 }

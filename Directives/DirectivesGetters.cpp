@@ -16,7 +16,7 @@ const std::string&	Directives::getRoot( void ) const {
 	return _root;
 }
 
-const v_Str&	Directives::getIndex( void ) const {
+const v_str&	Directives::getIndex( void ) const {
 	return _index;
 }
 
@@ -28,15 +28,15 @@ const std::string&	Directives::getScgiPass( void ) const {
 	return _scgi_pass;
 }
 
-const v_Str&	Directives::getTryFiles( void ) const {
+const v_str&	Directives::getTryFiles( void ) const {
 	return _try_files;
 }
 
-const m_StrBool&	Directives::getLimitExcept( void ) const {
+const m_strBool&	Directives::getLimitExcept( void ) const {
     return _limit_except;
 }
 
-const m_IntStr&	Directives::getErrorPage( void ) const {
+const m_intStr&	Directives::getErrorPage( void ) const {
 	return _error_page;
 }
 

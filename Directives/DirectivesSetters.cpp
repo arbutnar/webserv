@@ -16,7 +16,7 @@ void	Directives::setRoot( const std::string &root ) {
 	_root = root;
 }
 
-void	Directives::setIndex( const v_Str &index ) {
+void	Directives::setIndex( const v_str &index ) {
 	_index = index;
 }
 
@@ -28,15 +28,15 @@ void	Directives::setScgiPass( const std::string &scgi_pass ) {
 	_scgi_pass = scgi_pass;
 }
 
-void	Directives::setTryFiles( const v_Str &try_files ) {
+void	Directives::setTryFiles( const v_str &try_files ) {
 	_try_files = try_files;
 }
 
-void	Directives::setLimitExcept( const m_StrBool &limit_except ) {
+void	Directives::setLimitExcept( const m_strBool &limit_except ) {
     _limit_except = limit_except;
 }
 
-void	Directives::setErrorPage( const m_IntStr &error_page ) {
+void	Directives::setErrorPage( const m_intStr &error_page ) {
 	_error_page = error_page;
 }
 

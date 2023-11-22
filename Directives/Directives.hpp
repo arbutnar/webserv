@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/15 15:07:56 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/22 17:01:35 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,11 @@
 
 class	Location;
 
-typedef std::vector<std::string> v_Str;
-typedef std::map<int,std::string> m_IntStr;
-typedef std::map<std::string, bool> m_StrBool;
+typedef std::vector<std::string> v_str;
+typedef std::map<int,std::string> m_intStr;
+typedef std::map<std::string, bool> m_strBool;
+typedef std::map<std::string, std::string> m_strStr;
+typedef std::vector<Location> v_locs;
 
 enum	commonDirectives {
 	LISTEN,
@@ -47,12 +49,12 @@ class Directives {
 		u_int16_t 		_listen_port;	//htons
 		std::string     _server_name;
 		std::string		_root;
-		v_Str			_index;
+		v_str			_index;
 		bool			_autoindex;
 		std::string		_scgi_pass;
-		v_Str			_try_files;
-		m_StrBool		_limit_except;
-		m_IntStr		_error_page;
+		v_str			_try_files;
+		m_strBool		_limit_except;
+		m_intStr		_error_page;
 		unsigned int	_client_max_body_size;
 	public:
 		struct SyntaxError : public std::exception {
@@ -78,24 +80,24 @@ class Directives {
 		void	setListenPort( const u_int16_t &listen_port );
 		void	setServerName( const std::string &server_name );
 		void	setRoot( const std::string &root );
-		void	setIndex( const v_Str &index );
+		void	setIndex( const v_str &index );
 		void	setAutoindex( const bool &autoindex );
 		void	setScgiPass( const std::string &scgi_pass );
-		void	setTryFiles( const v_Str &try_files );
-		void	setLimitExcept( const m_StrBool &limit_except );
-		void	setErrorPage( const m_IntStr &error_page );
+		void	setTryFiles( const v_str &try_files );
+		void	setLimitExcept( const m_strBool &limit_except );
+		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
 
 		const u_int32_t&	getListenHost( void ) const ;
 		const u_int16_t&	getListenPort( void ) const ;
 		const std::string&	getServerName( void ) const ;
 		const std::string&	getRoot( void ) const ;
-		const v_Str&		getIndex( void ) const ;
+		const v_str&		getIndex( void ) const ;
 		const bool&			getAutoindex( void ) const ;
 		const std::string&	getScgiPass( void ) const ;
-		const v_Str&		getTryFiles( void ) const ;
-		const m_StrBool&	getLimitExcept( void ) const ;
-		const m_IntStr&		getErrorPage( void ) const ;
+		const v_str&		getTryFiles( void ) const ;
+		const m_strBool&	getLimitExcept( void ) const ;
+		const m_intStr&		getErrorPage( void ) const ;
 		const unsigned int&	getClientMaxBodySize( void ) const ;
 
 		void			directiveParser( std::string line );
