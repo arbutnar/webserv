@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 			throw std::invalid_argument("Invalid Argument");
 		else if (argc < 2)
 			master.configDivider("./conf/default.conf");
+		master.arrangeCluster();
 		master.start();
 	} catch (std::exception &e) {
 		std::cout << e.what() << std::endl;

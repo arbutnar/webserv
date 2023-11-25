@@ -36,6 +36,12 @@ Server& Server::operator=( const Server &src ) {
     return *this;
 }
 
+bool	Server::operator<( const Server &src ) {
+	if (_server_name.compare(src._server_name) < 0)
+		return true;
+	return false;
+}
+
 Server::~Server() {
 }
 
@@ -124,7 +130,7 @@ void	Server::readRequest( v_cli::iterator &it ) {
 		std::find(_clients.begin(), _clients.end(), *it)->buildBuffer(c);
 }
 
-void	Server::writeResponse( v_cli::iterator &it ) {
+void	Server::readRequest( v_cli::iterator &it ) {
 	Request 	request;
 	Location	match;
 	try {

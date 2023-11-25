@@ -192,6 +192,12 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 		throw Directives::SyntaxError();
 }
 
+void	Directives::parseReturn( const std::string &attribute ) {
+	// std::string 
+	// int
+	
+}
+
 void	Directives::displayDirectives( void ) const {
 	std::cout << "Host: " << _listen_host << std::endl;
 	std::cout << "Port: " << _listen_port << std::endl;

@@ -35,6 +35,7 @@ class Server : public Directives {
 		Server( std::string block );
 		Server( const Server &src );
 		Server& operator=( const Server &src );
+		bool	operator<( const Server &src );
 		~Server( );
 
 		void			setLocations( const s_locs &locations );
@@ -50,7 +51,7 @@ class Server : public Directives {
 		int						nfds( void ) const;
 		void					newConnection( void );
 		void					readRequest( v_cli::iterator &it );
-		void					writeResponse( v_cli::iterator &it );
+		void					readRequest( v_cli::iterator &it );
 		void					displayServer( void ) const;
 };
 

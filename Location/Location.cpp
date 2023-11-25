@@ -64,7 +64,7 @@ Location	&Location::operator=( const Location &src ) {
 }
 
 bool	Location::operator<( const Location &src ) const {
-	if (strcmp(_location_name.c_str(), src._location_name.c_str()) < 0)
+	if (_location_name.compare(src._location_name) < 0)
 		return true;
 	return false;
 }

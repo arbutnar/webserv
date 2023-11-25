@@ -34,6 +34,7 @@ class Master {
 		void	configDivider( const char* path );
 		void	serverParser( std::string &block );
 		void	displayMaster( void ) const;
+		void	arrangeCluster( void );
 		void	start( void );
 };
 

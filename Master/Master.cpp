@@ -133,9 +133,21 @@ void	Master::displayMaster( void ) const {
 		it->displayServer();
 }
 
-void	Master::start( void ) {
+void	Master::arrangeCluster( void ) {
+	std::sort(_cluster.begin(), _cluster.end());
 	for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
-		it->ListenerInit();
+	{
+		try {
+			it->ListenerInit();
+		} catch (std::exception &e) {
+			std::cout << it->getServerName() << ": " << e.what() << std::endl;
+			_cluster.erase(it);
+			it -= 1;
+		}
+	}
+}
+
+void	Master::start( void ) {
 	fd_set	read;
 	fd_set	write;
 	int		max;
@@ -164,7 +176,7 @@ void	Master::start( void ) {
 				if (FD_ISSET(it->getSocket(), &read))
 					s_it->readRequest(it);
 				else if (FD_ISSET(it->getSocket(), &write) && !it->getBuffer().empty())
-					s_it->writeResponse(it);
+					s_it->readRequest(it);
 			}
 		}
 	}

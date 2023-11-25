@@ -41,6 +41,7 @@ class Request {
 
 		void				parser( const std::string &buffer );
 		const Location		uriMatcher( const s_locs &locations );
+		void				uriRedirection( void );
 		void				displayRequest( void ) const;
 };
 

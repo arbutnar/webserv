@@ -16,7 +16,6 @@
 # include <iostream>
 # include <fstream>
 # include <string>
-# include <cstring>
 # include <sstream>
 # include <vector>
 # include <map>
@@ -42,7 +41,8 @@ enum	commonDirectives {
 	TRY_FILES,
 	LIMIT_EXCEPT,
 	ERROR_PAGE,
-	CLIENT_MAX_BODY_SIZE
+	CLIENT_MAX_BODY_SIZE,
+	RETURN
 };
 
 class Directives {
@@ -58,6 +58,7 @@ class Directives {
 		m_strBool		_limit_except;
 		m_intStr		_error_page;
 		unsigned int	_client_max_body_size;
+		v_str			_return;
 	public:
 		struct SyntaxError : public std::exception {
 			virtual const char* what() const throw() { return ("Incomplete or wrong configurations Syntax"); }
@@ -70,6 +71,7 @@ class Directives {
 
 		void	parseListen( const std::string &attribute );
 		void	parseListenHost( const std::string &attribute );
+		//parseServerName
 		void	parseListenPort( const std::string &attribute );
 		void	parseIndex( const std::string &attribute );
 		void	parseAutoindex( const std::string &attribute );
@@ -77,6 +79,7 @@ class Directives {
 		void	parseLimitExcept( const std::string &attribute );
 		void	parseErrorPage( const std::string &attribute );
 		void	parseClientMaxBodySize( const std::string &attribute );
+		void	parseReturn( const std::string &attribute );
 
 		void	setListenHost( const u_int32_t &listen_host );
 		void	setListenPort( const u_int16_t &listen_port );
@@ -89,18 +92,20 @@ class Directives {
 		void	setLimitExcept( const m_strBool &limit_except );
 		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
+		void	setReturn( const v_str &return );
 
-		const u_int32_t&	getListenHost( void ) const ;
-		const u_int16_t&	getListenPort( void ) const ;
-		const std::string&	getServerName( void ) const ;
-		const std::string&	getRoot( void ) const ;
-		const v_str&		getIndex( void ) const ;
-		const bool&			getAutoindex( void ) const ;
-		const std::string&	getScgiPass( void ) const ;
-		const v_str&		getTryFiles( void ) const ;
-		const m_strBool&	getLimitExcept( void ) const ;
-		const m_intStr&		getErrorPage( void ) const ;
-		const unsigned int&	getClientMaxBodySize( void ) const ;
+		const u_int32_t		&getListenHost( void ) const;
+		const u_int16_t		&getListenPort( void ) const;
+		const std::string	&getServerName( void ) const;
+		const std::string	&getRoot( void ) const;
+		const v_str			&getIndex( void ) const;
+		const bool			&getAutoindex( void ) const;
+		const std::string	&getScgiPass( void ) const;
+		const v_str			&getTryFiles( void ) const;
+		const m_strBool		&getLimitExcept( void ) const;
+		const m_intStr		&getErrorPage( void ) const;
+		const unsigned int	&getClientMaxBodySize( void ) const;
+		const v_str			&getReturn( void ) const;
 
 		void			directiveParser( std::string line );
 		void			displayDirectives( void ) const;

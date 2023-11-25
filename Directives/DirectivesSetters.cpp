@@ -43,3 +43,7 @@ void	Directives::setErrorPage( const m_intStr &error_page ) {
 void	Directives::setClientMaxBodySize( const unsigned int &client_max_body_size ) {
 	_client_max_body_size = client_max_body_size;
 }
+
+void	Directives::setReturn( const v_str &return ) {
+	_return = return;
+}
