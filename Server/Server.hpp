@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/22 11:24:31 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/25 16:07:19 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ typedef std::vector<Client> v_cli;
 
 class Server : public Directives {
 	private:
-		v_locs	_locations;
+		s_locs	_locations;
 		int		_listener;
 		v_cli	_clients;
 	public:
@@ -37,20 +37,21 @@ class Server : public Directives {
 		Server& operator=( const Server &src );
 		~Server( );
 
-		void			setLocations( const v_locs &locations );
+		void			setLocations( const s_locs &locations );
 		void			setListener( const int &listener );
 		void			setClients( const v_cli &clients );
-		const v_locs	&getLocations( void ) const;
+		const s_locs	&getLocations( void ) const;
 		const int		&getListener( void ) const;
 		const v_cli		&getClients( void ) const;
 
-		void	addLocation( const Location &location );
-		void	ListenerInit( void );
-		int		nfds( void ) const;
-		void	newConnection( void );
-		void	readRequest( v_cli::iterator &it );
-		void	writeResponse( v_cli::iterator &it );
-		void	displayServer( void ) const;
+		void					addLocation( const Location &location );
+		s_locs::const_iterator	findRoot( void ) const;
+		void					ListenerInit( void );
+		int						nfds( void ) const;
+		void					newConnection( void );
+		void					readRequest( v_cli::iterator &it );
+		void					writeResponse( v_cli::iterator &it );
+		void					displayServer( void ) const;
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/22 15:09:03 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/25 17:05:59 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,11 @@ Master& Master::operator=( const Master &src ) {
 Master::~Master() {
 }
 
-void	Master::setCluster( const v_Ser &cluster) {
+void	Master::setCluster( const v_ser &cluster) {
 	_cluster = cluster;
 }
 
-const v_Ser&	Master::getCluster( void ) const {
+const v_ser&	Master::getCluster( void ) const {
 	return _cluster;
 }
 
@@ -84,6 +84,9 @@ void	Master::configDivider( const char* path ) {
 	}
 	if (brackets != 0)
 		throw Directives::SyntaxError();
+	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		if (it->findRoot() == it->getLocations().end())
+			throw Directives::SyntaxError();
 }
 
 void	Master::serverParser( std::string &block ) {
@@ -126,19 +129,19 @@ void	Master::serverParser( std::string &block ) {
 
 void	Master::displayMaster( void ) const {
 	std::cout << "[MASTER]" << std::endl;
-	for (v_Ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
+	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		it->displayServer();
 }
 
 void	Master::start( void ) {
-	for (v_Ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+	for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		it->ListenerInit();
 	fd_set	read;
 	fd_set	write;
 	int		max;
 	while (true)
 	{
-		for (v_Ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
+		for (v_ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
 		{
 			FD_ZERO(&read);
 			FD_ZERO(&write);

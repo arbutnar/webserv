@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/17 12:03:39 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/25 13:34:09 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 
 # include "../Server/Server.hpp"
 
-typedef std::vector<Server> v_Ser;
+typedef std::vector<Server> v_ser;
 
 class Master {
 	private:
-		v_Ser	_cluster;
+		v_ser	_cluster;
 		void	configCleaner( std::ifstream &configFile, std::string &content );
 	public:
 		Master( void );
@@ -28,8 +28,8 @@ class Master {
 		Master& operator=( const Master &src );
 		~Master( );
 
-		void			setCluster( const v_Ser &cluster);
-		const v_Ser&	getCluster( void ) const;
+		void			setCluster( const v_ser &cluster);
+		const v_ser&	getCluster( void ) const;
 
 		void	configDivider( const char* path );
 		void	serverParser( std::string &block );

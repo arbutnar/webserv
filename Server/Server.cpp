@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/22 17:15:36 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/25 17:58:24 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ Server& Server::operator=( const Server &src ) {
 Server::~Server() {
 }
 
-void    Server::setLocations( const v_locs &locations ) {
+void    Server::setLocations( const s_locs &locations ) {
     _locations = locations;
 }
 
@@ -51,7 +51,7 @@ void	Server::setClients( const v_cli &clients ) {
 	_clients = clients;
 }
 
-const v_locs	&Server::getLocations( void ) const {
+const s_locs	&Server::getLocations( void ) const {
     return _locations;
 }
 
@@ -64,7 +64,15 @@ const v_cli	&Server::getClients( void ) const {
 }
 
 void    Server::addLocation( const Location &location ) {
-    _locations.push_back(location);
+	if (_locations.insert(location).second == false)
+		throw Directives::SyntaxError();
+}
+
+s_locs::const_iterator	Server::findRoot( void ) const {
+	for (s_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
+		if (it->getLocationName() == "/")
+			return it;
+	return _locations.end();
 }
 
 void	Server::ListenerInit( void ) {
@@ -117,21 +125,25 @@ void	Server::readRequest( v_cli::iterator &it ) {
 }
 
 void	Server::writeResponse( v_cli::iterator &it ) {
-	Request request;
+	Request 	request;
+	Location	match;
 	try {
 		request.parser(it->getBuffer());
 		request.setIsValid(true);
+		match = request.uriMatcher(_locations);
+		if (match.getLocationName().empty())
+			match = *findRoot();
+		request.displayRequest();
 	} catch(std::exception &e) {
 		std::cout << "Bad Client request" << std::endl;
 	}
-	request.associateUrl(_locations);
 	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
 }
 
 void	Server::displayServer( void ) const {
 	std::cout << "Server {" << std::endl;
 	displayDirectives();
-	for (v_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
+	for (s_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
 		it->displayLocation();
 	std::cout << "}" << std::endl;
 }

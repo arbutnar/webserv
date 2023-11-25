@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/22 17:01:35 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/25 16:42:56 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,13 @@
 # include <iostream>
 # include <fstream>
 # include <string>
+# include <cstring>
 # include <sstream>
 # include <vector>
 # include <map>
 # include <stdlib.h>
 # include <algorithm>
+# include <set>
 
 class	Location;
 
@@ -28,7 +30,7 @@ typedef std::vector<std::string> v_str;
 typedef std::map<int,std::string> m_intStr;
 typedef std::map<std::string, bool> m_strBool;
 typedef std::map<std::string, std::string> m_strStr;
-typedef std::vector<Location> v_locs;
+typedef std::set<Location> s_locs;
 
 enum	commonDirectives {
 	LISTEN,
