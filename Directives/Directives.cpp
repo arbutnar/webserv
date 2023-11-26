@@ -16,13 +16,14 @@ Directives::Directives( void ) {
 	_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
 	_listen_port = 8080;
 	_server_name = "";
-	_root = "";
+	_root = ".";
 	_index.clear();
 	_autoindex = false;
 	_scgi_pass = "";
 	_try_files.clear();
 	_error_page.clear();
 	_client_max_body_size = 1000000;
+	_return.clear();
 	_limit_except.clear();
 	_limit_except.insert(std::make_pair("GET", false));
 	_limit_except.insert(std::make_pair("HEAD", false));
@@ -52,12 +53,13 @@ Directives& Directives::operator=( const Directives &src ) {
 	_limit_except = src._limit_except;
 	_error_page = src._error_page;
 	_client_max_body_size = src._client_max_body_size;
+	_return = src._return;
 	return *this;
 }
 
 void	Directives::directiveParser( std::string line ) {
 	std::string	arr[] = { "listen", "server_name", "root", "index", "autoindex", "scgi_pass", "try_files", 
-							"limit_except", "error_page", "client_max_body_size"};
+							"limit_except", "error_page", "client_max_body_size", "return" };
 	std::string	key;
 	std::string	value;
 	size_t		pos;
@@ -79,7 +81,7 @@ void	Directives::directiveParser( std::string line ) {
 		case SERVER_NAME:
 			_server_name = value; break;
 		case ROOT:
-			_root = value; break;
+			parseRoot(value); break;
 		case INDEX:
 			parseIndex(value); break;
 		case AUTOINDEX:
@@ -94,6 +96,8 @@ void	Directives::directiveParser( std::string line ) {
 			_scgi_pass = value; break;
 		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
+		case RETURN:
+			parseReturn(value); break;
 		default:
 			throw Directives::SyntaxError();
 	}
@@ -108,6 +112,22 @@ void	Directives::parseListen( const std::string &attribute ) {
 	}
 	else
 		parseListenPort(attribute);
+}
+
+void	Directives::parseRoot( const std::string &attribute ) {
+	_root = attribute;
+	if (_root != "/") {
+		if (_root.at(0) == '/')
+			_root.erase(0, 1);
+		if (_root.at(_root.size() - 1) == '/')
+			_root.erase(_root.size() -1, 1);
+	}
+	if (_root.empty())
+		throw Directives::SyntaxError();
+
+	struct stat	st;
+	if (stat(_root.c_str(), &st) == -1 || s.st_mode != S_IFDIR)
+		throw Directives::SyntaxError();
 }
 
 void 	Directives::parseListenHost( const std::string &attribute ) {
@@ -173,6 +193,14 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
 }
 
+void	Directives::parseScgiPass( const std::string &attribute ) {
+	_scgi_pass = attribute;
+	struct stat st;
+
+	if (stat(_scgi_pass, &st) == -1 || s.st_mode != S_IFREG )
+		throw Directives::SyntaxError();
+}
+
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 	size_t			pos = attribute.find_first_not_of("0123456789");
 	char			c;
@@ -193,9 +221,30 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 }
 
 void	Directives::parseReturn( const std::string &attribute ) {
-	// std::string 
-	// int
-	
+	int count = 0;
+
+	for (size_t i = 0; i < attribute.size(); i++)
+		if (attribute.at(i) == ' ' || attribute.at(i) == '\t')
+			count++;
+	if (count == 1)
+	{
+		size_t pos = attribute.find_first_of(' ');
+		std::string	code = attribute.substr(0, pos);
+		if (std::atoi(code.c_str()))
+			_return.push_back(attribute.substr(0, pos));
+		else
+			throw Directives::SyntaxError();
+		pos = attribute.find_first_not_of(' ', pos);
+		std::string uri = attribute.substr(pos, std::string::npos);
+		if (!std::atoi(uri.c_str()))
+			_return.push_back(uri);
+		else
+			throw Directives::SyntaxError();
+	}
+	else if (count < 1)
+		_return.push_back(attribute);
+	else
+		throw Directives::SyntaxError();
 }
 
 void	Directives::displayDirectives( void ) const {
@@ -222,8 +271,12 @@ void	Directives::displayDirectives( void ) const {
 	for (m_intStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
 		std::cout << it->first << ' ' << it->second << std::endl;
 	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
+	std::cout << "Return: ";
+	for (v_str::const_iterator it = _return.begin(); it != _return.end(); it++)
+		std::cout << *it << ' ';
+	std::cout << std::endl;
 }
 
-void	Directives::addLocation( const Location &location ) {
+void	Directives::addLocation( const Location &location ) {		//implemented only to avoid hpp files recurion.
 	(void) location;
 }

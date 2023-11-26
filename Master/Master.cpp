@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 17:05:59 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 14:39:38 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,7 @@ void	Master::start( void ) {
 				if (FD_ISSET(it->getSocket(), &read))
 					s_it->readRequest(it);
 				else if (FD_ISSET(it->getSocket(), &write) && !it->getBuffer().empty())
-					s_it->readRequest(it);
+					s_it->writeResponse(it);
 			}
 		}
 	}

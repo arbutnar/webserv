@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 16:42:56 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 18:50:13 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <stdlib.h>
 # include <algorithm>
 # include <set>
+# include <sys/stat.h>
 
 class	Location;
 
@@ -71,13 +72,14 @@ class Directives {
 
 		void	parseListen( const std::string &attribute );
 		void	parseListenHost( const std::string &attribute );
-		//parseServerName
 		void	parseListenPort( const std::string &attribute );
+		void	parseRoot( const std::string &attribute );
 		void	parseIndex( const std::string &attribute );
 		void	parseAutoindex( const std::string &attribute );
 		void	parseTryFiles( const std::string &attribute );
 		void	parseLimitExcept( const std::string &attribute );
 		void	parseErrorPage( const std::string &attribute );
+		void	parseScgiPass( const std::string &attribute );
 		void	parseClientMaxBodySize( const std::string &attribute );
 		void	parseReturn( const std::string &attribute );
 
@@ -92,7 +94,7 @@ class Directives {
 		void	setLimitExcept( const m_strBool &limit_except );
 		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
-		void	setReturn( const v_str &return );
+		void	setReturn( const v_str &ret );
 
 		const u_int32_t		&getListenHost( void ) const;
 		const u_int16_t		&getListenPort( void ) const;

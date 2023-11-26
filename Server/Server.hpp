@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 16:07:19 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 14:39:30 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class Server : public Directives {
 		int						nfds( void ) const;
 		void					newConnection( void );
 		void					readRequest( v_cli::iterator &it );
-		void					readRequest( v_cli::iterator &it );
+		void					writeResponse( v_cli::iterator &it );
 		void					displayServer( void ) const;
 };
 

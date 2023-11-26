@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 13:58:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 16:07:19 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 16:59:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class Request {
 
 		void				parser( const std::string &buffer );
 		const Location		uriMatcher( const s_locs &locations );
-		void				uriRedirection( void );
+		const std::string	translateUri( const Location &match );
 		void				displayRequest( void ) const;
 };
 

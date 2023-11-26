@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 17:58:24 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 17:19:43 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,16 +130,20 @@ void	Server::readRequest( v_cli::iterator &it ) {
 		std::find(_clients.begin(), _clients.end(), *it)->buildBuffer(c);
 }
 
-void	Server::readRequest( v_cli::iterator &it ) {
+void	Server::writeResponse( v_cli::iterator &it ) {
 	Request 	request;
 	Location	match;
+	std::string	translation;
 	try {
 		request.parser(it->getBuffer());
 		request.setIsValid(true);
 		match = request.uriMatcher(_locations);
 		if (match.getLocationName().empty())
 			match = *findRoot();
-		request.displayRequest();
+		translation = request.translateUri(match);
+		std::cout << translation << std::endl;
+
+		// request.displayRequest();
 	} catch(std::exception &e) {
 		std::cout << "Bad Client request" << std::endl;
 	}

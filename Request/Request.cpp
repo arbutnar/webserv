@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 17:57:43 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/26 17:51:24 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,16 @@ const Location	Request::uriMatcher( const s_locs &locations ) {
 			tmp = *it;
 	}
 	return tmp;
+}
+
+const std::string	Request::translateUri( const Location &match ) {
+	std::string	translation = match.getRoot();
+	std::cout << match.getRoot() << std::endl;
+	if (_uri != match.getLocationName() && match.getLocationName() != "/" && match.getModifier() == 0)
+		translation += _uri.substr(match.getLocationName().size() + 1);
+	else if (match.getModifier() == 2)
+		translation += _uri;
+	return translation;
 }
 
 void	Request::displayRequest( void ) const {
