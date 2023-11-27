@@ -25,11 +25,11 @@ Directives::Directives( void ) {
 	_client_max_body_size = 1000000;
 	_return.clear();
 	_limit_except.clear();
-	_limit_except.insert(std::make_pair("GET", false));
-	_limit_except.insert(std::make_pair("HEAD", false));
-	_limit_except.insert(std::make_pair("POST", false));
-	_limit_except.insert(std::make_pair("PUT", false));
-	_limit_except.insert(std::make_pair("DELETE", false));
+	_limit_except.insert(std::make_pair("GET", true));
+	_limit_except.insert(std::make_pair("HEAD", true));
+	_limit_except.insert(std::make_pair("POST", true));
+	_limit_except.insert(std::make_pair("PUT", true));
+	_limit_except.insert(std::make_pair("DELETE", true));
 }
 
 Directives::Directives( const Directives &src ) {
@@ -58,7 +58,7 @@ Directives& Directives::operator=( const Directives &src ) {
 }
 
 void	Directives::directiveParser( std::string line ) {
-	std::string	arr[] = { "listen", "server_name", "root", "index", "autoindex", "scgi_pass", "try_files", 
+	std::string	arr[] = { "listen", "server_name", "root", "alias", "index", "autoindex", "scgi_pass", "try_files", 
 							"limit_except", "error_page", "client_max_body_size", "return" };
 	std::string	key;
 	std::string	value;
@@ -82,6 +82,8 @@ void	Directives::directiveParser( std::string line ) {
 			_server_name = value; break;
 		case ROOT:
 			parseRoot(value); break;
+		case ALIAS:
+			parseAlias(value); break;
 		case INDEX:
 			parseIndex(value); break;
 		case AUTOINDEX:
@@ -130,6 +132,22 @@ void	Directives::parseRoot( const std::string &attribute ) {
 		throw Directives::SyntaxError();
 }
 
+void	Directives::parseAlias( const std::string &attribute ) {
+	_alias = attribute;
+	if (_alias != "/") {
+		if (_alias.at(0) == '/')
+			_alias.erase(0, 1);
+		if (_alias.at(_alias.size() - 1) == '/')
+			_alias.erase(_alias.size() -1, 1);
+	}
+	if (_alias.empty())
+		throw Directives::SyntaxError();
+
+	struct stat	st;
+	if (stat(_alias.c_str(), &st) == -1 || s.st_mode != S_IFDIR)
+		throw Directives::SyntaxError();
+}
+
 void 	Directives::parseListenHost( const std::string &attribute ) {
 	if (attribute != "127.0.0.1" && attribute != "localhost")
 		throw Directives::SyntaxError();
@@ -169,6 +187,8 @@ void	Directives::parseTryFiles( const std::string &attribute ) {
 }
 
 void	Directives::parseLimitExcept( const std::string &attribute ) {
+	for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
+		it->second = false;
 	size_t	pos = 0;
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
@@ -176,7 +196,7 @@ void	Directives::parseLimitExcept( const std::string &attribute ) {
 		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
 		if (tmp != "GET" && tmp != "HEAD" && tmp != "POST" && tmp != "PUT" && tmp != "DELETE")
 			throw Directives::SyntaxError();
-		for (std::map<std::string, bool>::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
+		for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 			if (it->first == tmp)
 				it->second = true;
 		pos += tmp.length();

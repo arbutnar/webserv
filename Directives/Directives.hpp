@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/26 18:50:13 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/27 18:49:04 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ enum	commonDirectives {
 	LISTEN,
 	SERVER_NAME,
 	ROOT,
+	ALIAS,
 	INDEX,
 	AUTOINDEX,
 	SCGI_PASS,
@@ -52,6 +53,7 @@ class Directives {
 		u_int16_t 		_listen_port;	//htons
 		std::string     _server_name;
 		std::string		_root;
+		std::string		_alias;
 		v_str			_index;
 		bool			_autoindex;
 		std::string		_scgi_pass;
@@ -87,6 +89,7 @@ class Directives {
 		void	setListenPort( const u_int16_t &listen_port );
 		void	setServerName( const std::string &server_name );
 		void	setRoot( const std::string &root );
+		void	setAlias( const std::string &root );
 		void	setIndex( const v_str &index );
 		void	setAutoindex( const bool &autoindex );
 		void	setScgiPass( const std::string &scgi_pass );
