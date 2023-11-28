@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/27 18:52:51 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/28 16:19:45 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,12 +91,8 @@ void	Request::parser( const std::string &buffer ) {
 	std::transform(_protocol.begin(), _protocol.end(), _protocol.begin(), ::toupper);
 	if (_method.empty() || _uri.empty() || _protocol.empty())
 		throw std::exception();
-	if (_uri != "/") {
-		if (_uri.at(0) == '/')
-			_uri.erase(0, 1);
-		else if (_uri.at(_uri.size() - 1) == '/')
-			_uri.erase(_uri.size() -1, 1);
-	}
+	if (_uri != "/" && _uri.at(0) == '/')
+		_uri.erase(0, 1);
 	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
@@ -142,7 +138,11 @@ const Location	Request::uriMatcher( const s_locs &locations ) {
 }
 
 const std::string	Request::translateUri( const Location &match ) {
-	std::string	translation = match.getRoot();
+	std::string	translation;
+
+	if (!match.getAlias().empty())
+		translation += match.getAlias();
+	
 	
 	return translation;
 }

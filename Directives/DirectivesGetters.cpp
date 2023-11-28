@@ -16,6 +16,10 @@ const std::string	&Directives::getRoot( void ) const {
 	return _root;
 }
 
+const std::string	&Directives::getAlias( void ) const {
+	return _alias;
+}
+
 const v_str	&Directives::getIndex( void ) const {
 	return _index;
 }

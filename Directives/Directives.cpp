@@ -17,6 +17,7 @@ Directives::Directives( void ) {
 	_listen_port = 8080;
 	_server_name = "";
 	_root = ".";
+	_alias = "";
 	_index.clear();
 	_autoindex = false;
 	_scgi_pass = "";
@@ -46,6 +47,7 @@ Directives& Directives::operator=( const Directives &src ) {
 	_listen_port = src._listen_port;
 	_server_name = src._server_name;
 	_root = src._root;
+	_alias = src._alias;
 	_index = src._index;
 	_autoindex = src._autoindex;
 	_scgi_pass = src._scgi_pass;
@@ -67,7 +69,7 @@ void	Directives::directiveParser( std::string line ) {
 
 	pos = line.find_first_not_of(" \t");
 	key = line.substr(pos, line.find_first_of(" \t", pos) - pos);
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 12; i++) {
 		if (arr[i] == key)
 			break;
 	}
@@ -95,13 +97,13 @@ void	Directives::directiveParser( std::string line ) {
 		case TRY_FILES:
 			parseTryFiles(value); break;
 		case SCGI_PASS:
-			_scgi_pass = value; break;
+			parseScgiPass(value); break;
 		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
 		case RETURN:
 			parseReturn(value); break;
 		default:
-			throw Directives::SyntaxError();
+			throw std::runtime_error("Syntax Error: not supported Directive");
 	}
 }
 
@@ -125,11 +127,11 @@ void	Directives::parseRoot( const std::string &attribute ) {
 			_root.erase(_root.size() -1, 1);
 	}
 	if (_root.empty())
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: root Directive");
 
 	struct stat	st;
-	if (stat(_root.c_str(), &st) == -1 || s.st_mode != S_IFDIR)
-		throw Directives::SyntaxError();
+	if (stat(_root.c_str(), &st) == -1 || !(st.st_mode & S_IFDIR))
+		throw std::runtime_error("Syntax Error: root Directive");
 }
 
 void	Directives::parseAlias( const std::string &attribute ) {
@@ -141,21 +143,20 @@ void	Directives::parseAlias( const std::string &attribute ) {
 			_alias.erase(_alias.size() -1, 1);
 	}
 	if (_alias.empty())
-		throw Directives::SyntaxError();
-
+		throw std::runtime_error("Syntax Error: alias Directive");
 	struct stat	st;
-	if (stat(_alias.c_str(), &st) == -1 || s.st_mode != S_IFDIR)
-		throw Directives::SyntaxError();
+	if (stat(_alias.c_str(), &st) == -1 || !(st.st_mode & S_IFDIR))
+		throw std::runtime_error("Syntax Error: alias Directive");
 }
 
 void 	Directives::parseListenHost( const std::string &attribute ) {
 	if (attribute != "127.0.0.1" && attribute != "localhost")
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: host Directive");
 }
 
 void	Directives::parseListenPort( const std::string &attribute ) {
 	if (attribute.find_first_not_of("0123456789") != std::string::npos)
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: port Directive");
 	_listen_port = std::atoi(attribute.c_str());
 }
 
@@ -173,7 +174,7 @@ void	Directives::parseAutoindex( const std::string &attribute ) {
 	if (attribute == "on")
 		_autoindex = true;
 	else if (attribute != "off")
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: autoindex Directive");
 }
 
 void	Directives::parseTryFiles( const std::string &attribute ) {
@@ -195,7 +196,7 @@ void	Directives::parseLimitExcept( const std::string &attribute ) {
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
 		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
 		if (tmp != "GET" && tmp != "HEAD" && tmp != "POST" && tmp != "PUT" && tmp != "DELETE")
-			throw Directives::SyntaxError();
+			throw std::runtime_error("Syntax Error: limit_except Directive");
 		for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 			if (it->first == tmp)
 				it->second = true;
@@ -209,16 +210,15 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	std::string	value = attribute.substr(attribute.find_first_not_of(" \t", pos), std::string::npos);
 	
 	if (key.empty() || value.empty() || key.find_first_not_of("0123456789") != std::string::npos)
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: error_page Directive");
 	_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
 }
 
 void	Directives::parseScgiPass( const std::string &attribute ) {
-	_scgi_pass = attribute;
-	struct stat st;
-
-	if (stat(_scgi_pass, &st) == -1 || s.st_mode != S_IFREG )
-		throw Directives::SyntaxError();
+	char buffer[PATH_MAX + 1];
+	_scgi_pass = realpath(".", buffer) + attribute;
+	if (access(_scgi_pass.c_str(), X_OK) == -1)
+		throw std::runtime_error("Syntax Error: scgi_pass Directive");
 }
 
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
@@ -229,7 +229,7 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 	if (pos == std::string::npos)
 		return ;
 	else if (pos != attribute.length() - 1)
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: max_body_size Directive");
 	c = attribute[pos];
 	c = std::toupper(c);
 	if (c == 'K')
@@ -237,7 +237,7 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 	else if (c == 'M')
 		_client_max_body_size *= 1000000;
 	else
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: max_body_size Directive");
 }
 
 void	Directives::parseReturn( const std::string &attribute ) {
@@ -253,18 +253,18 @@ void	Directives::parseReturn( const std::string &attribute ) {
 		if (std::atoi(code.c_str()))
 			_return.push_back(attribute.substr(0, pos));
 		else
-			throw Directives::SyntaxError();
+			throw std::runtime_error("Syntax Error: return Directive");
 		pos = attribute.find_first_not_of(' ', pos);
 		std::string uri = attribute.substr(pos, std::string::npos);
 		if (!std::atoi(uri.c_str()))
 			_return.push_back(uri);
 		else
-			throw Directives::SyntaxError();
+			throw std::runtime_error("Syntax Error: return Directive");
 	}
 	else if (count < 1)
 		_return.push_back(attribute);
 	else
-		throw Directives::SyntaxError();
+		throw std::runtime_error("Syntax Error: return Directive");
 }
 
 void	Directives::displayDirectives( void ) const {
@@ -272,6 +272,7 @@ void	Directives::displayDirectives( void ) const {
 	std::cout << "Port: " << _listen_port << std::endl;
 	std::cout << "Server Name: " << _server_name << std::endl;
 	std::cout << "Root: " << _root << std::endl;
+	std::cout << "Alias: " << _alias << std::endl;
 	std::cout << "Index: ";
 	for (v_str::const_iterator it = _index.begin(); it != _index.end(); it++)
 		std::cout << *it << ' ';

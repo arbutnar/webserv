@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/27 18:49:04 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/28 12:53:39 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,11 @@
 # include <vector>
 # include <map>
 # include <stdlib.h>
+# include <linux/limits.h>
 # include <algorithm>
 # include <set>
 # include <sys/stat.h>
+# include <unistd.h>
 
 class	Location;
 
@@ -76,6 +78,7 @@ class Directives {
 		void	parseListenHost( const std::string &attribute );
 		void	parseListenPort( const std::string &attribute );
 		void	parseRoot( const std::string &attribute );
+		void	parseAlias( const std::string &attribute );
 		void	parseIndex( const std::string &attribute );
 		void	parseAutoindex( const std::string &attribute );
 		void	parseTryFiles( const std::string &attribute );
@@ -103,6 +106,7 @@ class Directives {
 		const u_int16_t		&getListenPort( void ) const;
 		const std::string	&getServerName( void ) const;
 		const std::string	&getRoot( void ) const;
+		const std::string	&getAlias( void ) const;
 		const v_str			&getIndex( void ) const;
 		const bool			&getAutoindex( void ) const;
 		const std::string	&getScgiPass( void ) const;

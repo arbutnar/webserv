@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:51:54 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 17:34:38 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/28 14:59:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@ Location::Location( void )
 Location::Location( const std::string &line )
 	: _modifier (0), _location_name ("") {
 		std::string	arr[] = { "=", "~", "~*", "^~" };
-		
-		size_t pos = line.find("location") + 8;
+		size_t		pos = 0;
+
+		if (line.find("location") != std::string::npos)
+			pos = line.find("location") + 8;
 		pos = line.find_first_not_of(" \t", pos);
 		std::string tmp = line.substr(pos, line.find_last_not_of(" {\t\n") - pos + 1);
 		if (tmp.find(" ") != std::string::npos)

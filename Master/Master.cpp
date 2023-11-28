@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/26 14:39:38 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/28 15:59:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,24 @@ const v_ser&	Master::getCluster( void ) const {
 
 void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
 	std::stringstream	buffer;
-	size_t				pos;
+	std::string			tmp;
+	size_t				pos = 0;
 
 	buffer << configFile.rdbuf();
 	content = buffer.str();
-	while ((pos = content.find_first_of('#')) != std::string::npos)
-		content.erase(pos, content.find_first_of('\n', pos) - pos);
-	while ((pos = content.find("\n\n")) != std::string::npos)
-		content.erase(pos, 1);
+	while ((pos = content.find('#')) != std::string::npos)
+	{
+		tmp = content.substr(pos, content.find_first_of("\n", pos) - pos);
+		content.erase(pos, content.find_first_not_of(" \t\n", pos + tmp.size()) - pos);
+	}
+	pos = 0;
+	while ((pos = content.find("\n", pos)) != std::string::npos)
+	{
+		tmp = content.substr(pos, content.find_first_of("\n", pos + 1) - pos);
+		if (tmp.find_first_not_of(" \t\n") == std::string::npos)
+			content.erase(pos, tmp.size());
+		pos += 1;
+	}
 }
 
 void	Master::configDivider( const char* path ) {
@@ -84,9 +94,15 @@ void	Master::configDivider( const char* path ) {
 	}
 	if (brackets != 0)
 		throw Directives::SyntaxError();
-	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
-		if (it->findRoot() == it->getLocations().end())
-			throw Directives::SyntaxError();
+	for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+	{
+		if (it->findRoot() != it->getLocations().end())
+			continue ;
+		Directives *root = new Location("/");
+		Directives *server = &(*it);
+		*root = *server;
+		it->addLocation(*(dynamic_cast<Location *>(root)));
+	}
 }
 
 void	Master::serverParser( std::string &block ) {

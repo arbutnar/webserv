@@ -16,6 +16,10 @@ void	Directives::setRoot( const std::string &root ) {
 	_root = root;
 }
 
+void	Directives::setAlias( const std::string &alias ) {
+	_alias = alias;
+}
+
 void	Directives::setIndex( const v_str &index ) {
 	_index = index;
 }
