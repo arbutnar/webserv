@@ -16,9 +16,10 @@ Directives::Directives( void ) {
 	_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
 	_listen_port = 8080;
 	_server_name = "";
-	_root = ".";
+	_root = "";
 	_alias = "";
 	_index.clear();
+	_index.push_back("index.html");
 	_autoindex = false;
 	_scgi_pass = "";
 	_try_files.clear();
@@ -119,12 +120,14 @@ void	Directives::parseListen( const std::string &attribute ) {
 }
 
 void	Directives::parseRoot( const std::string &attribute ) {
+	if (!_alias.empty())
+		throw std::runtime_error("Syntax Error: root Directive");
 	_root = attribute;
 	if (_root != "/") {
 		if (_root.at(0) == '/')
 			_root.erase(0, 1);
-		if (_root.at(_root.size() - 1) == '/')
-			_root.erase(_root.size() -1, 1);
+		if (*_root.rbegin() != '/')
+			_root += "/";
 	}
 	if (_root.empty())
 		throw std::runtime_error("Syntax Error: root Directive");
@@ -135,13 +138,11 @@ void	Directives::parseRoot( const std::string &attribute ) {
 }
 
 void	Directives::parseAlias( const std::string &attribute ) {
+	if (!_root.empty())
+		throw std::runtime_error("Syntax Error: alias Directive");
 	_alias = attribute;
-	if (_alias != "/") {
-		if (_alias.at(0) == '/')
-			_alias.erase(0, 1);
-		if (_alias.at(_alias.size() - 1) == '/')
-			_alias.erase(_alias.size() -1, 1);
-	}
+	if (_alias != "/" && _alias.at(0) == '/')
+		_alias.erase(0, 1);
 	if (_alias.empty())
 		throw std::runtime_error("Syntax Error: alias Directive");
 	struct stat	st;

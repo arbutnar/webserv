@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/28 16:17:21 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/29 14:02:19 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,7 @@ void	Server::writeResponse( v_cli::iterator &it ) {
 		if (match.getLocationName().empty())
 			match = *findRoot();
 		translation = request.translateUri(match);
+		std::cout << '$' << translation << '$' << std::endl;
 		match.displayLocation();
 		// request.displayRequest();
 	} catch(std::exception &e) {

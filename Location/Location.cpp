@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:51:54 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/28 14:59:34 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/29 18:18:26 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,8 @@ Location::Location( const std::string &line )
 		}
 		if (tmp.empty() || tmp.find_first_of(" \t") != std::string::npos)
 			throw Directives::SyntaxError();
-		if (tmp != "/") {
-			if (tmp.at(0) == '/')
-				tmp.erase(0, 1);
-			if (tmp.at(tmp.size() - 1) == '/')
-				tmp.erase(tmp.size() -1, 1);
-		}
-		else
-			if (_modifier != 0)
-				throw Directives::SyntaxError();
+		if (tmp != "/" && tmp.at(0) == '/')
+			tmp.erase(0, 1);
 		_location_name = tmp;
 }
 

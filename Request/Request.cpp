@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/28 16:19:45 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/29 20:23:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,51 +99,56 @@ void	Request::parser( const std::string &buffer ) {
 }
 
 const Location	Request::uriMatcher( const s_locs &locations ) {
-	s_locs		prefixed;
-	s_locs		equalMod;
-	s_locs		regex;
-	Location	tmp;
-
+	Location 	match;
+	bool		isMatch;
+	
 	for (s_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
 	{
-		if (it->getModifier() == 0)
-			prefixed.insert(*it);
-		else if (it->getModifier() == 1)
-			equalMod.insert(*it);
-		else
-			regex.insert(*it);
+		isMatch = false;
+		if ((*it->getLocationName().rbegin() != '/' || it->getModifier() == 1) && _uri == it->getLocationName())
+			isMatch = true;
+		else if (*it->getLocationName().rbegin() == '/' && _uri.find(it->getLocationName()) == 0)
+			isMatch = true;
+		if (isMatch && match.getLocationName().size() < it->getLocationName().size())
+			match = *it;
 	}
-	for (s_locs::const_iterator it = equalMod.begin(); it != equalMod.end(); it++)
-		if (_uri == it->getLocationName())
-			return *it;
-	size_t i;
-	size_t locSize;
-	for (s_locs::const_iterator it = prefixed.begin(); it != prefixed.end(); it++)
-	{
-		locSize = it->getLocationName().size();
-		for (i = 0; i < _uri.size() && i < locSize; i++)
-			if (_uri.at(i) != it->getLocationName().at(i))
-				break ;
-		if ((i == _uri.size() || _uri.at(i) == '/') &&  i == locSize)
-			if (locSize > tmp.getLocationName().size())
-				tmp = *it;
-	}
-	for (s_locs::const_iterator it = regex.begin(); it != regex.end(); it++)
-	{
-		locSize = it->getLocationName().size();
-		if (locSize <=  _uri.size() && _uri.substr(_uri.size() - locSize) == it->getLocationName())
-			tmp = *it;
-	}
-	return tmp;
+	return match;
 }
 
 const std::string	Request::translateUri( const Location &match ) {
-	std::string	translation;
+	std::string				translation;
+	struct stat 			st;
+	v_str::const_iterator	it;
 
-	if (!match.getAlias().empty())
-		translation += match.getAlias();
-	
-	
+	if (match.getAlias().empty())
+		translation = match.getRoot() + _uri;
+	else if (match.getRoot().empty())
+	{
+		if (_uri.find(match.getLocationName()) != std::string::npos)
+			translation = match.getAlias() + _uri.substr(match.getLocationName().size(), std::string::npos);
+		else
+			translation = match.getAlias();
+	}
+	std::cout << translation << std::endl;
+	if (stat(translation.c_str(), &st) == -1)
+		throw std::runtime_error("404 Not Found");
+	if (st.st_mode & S_IFDIR || *translation.rbegin() == '/')
+	{
+		char buffer[PATH_MAX + 1];
+		translation = "/" + translation;
+		translation = realpath(".", buffer) + translation;
+		if (*translation.rbegin() != '/')
+			translation += "/";
+		for (it = match.getIndex().begin(); it != match.getIndex().end(); it++)
+		{
+			std::cout << translation + *it << std::endl;
+			if (access((translation + *it).c_str(), R_OK) == 0) // se metodo e' POST allora la flag e' di scrittura, se e' GET e' di lettura
+				break ;	
+		}
+		if (it == match.getIndex().end())
+			throw std::runtime_error("404 Not Found");
+		translation += *it;
+	}
 	return translation;
 }
 

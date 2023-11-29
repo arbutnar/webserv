@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/28 15:59:34 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/29 13:44:45 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,12 +125,19 @@ void	Master::serverParser( std::string &block ) {
 			inLocation = true;
 			locationPtr = new Location(line);
 			*locationPtr = *serverPtr;
+			locationPtr->setRoot("");
+			locationPtr->setAlias("");
 		}
 		else if (line.find("}") != std::string::npos)
 		{
 			if (!inLocation)
 				throw Directives::SyntaxError();
 			inLocation = false;
+			if (locationPtr->getRoot().empty() && locationPtr->getAlias().empty())
+			{
+				locationPtr->setRoot(serverPtr->getRoot());
+				locationPtr->setAlias(serverPtr->getAlias());
+			}
 			serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
 			delete locationPtr;
 		}
