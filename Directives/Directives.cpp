@@ -12,6 +12,9 @@
 
 #include "Directives.hpp"
 
+static char buffer[PATH_MAX + 1];
+std::string	absolutePath = static_cast<std::string>(realpath(".", buffer)) + "/";
+
 Directives::Directives( void ) {
 	_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
 	_listen_port = 8080;
@@ -99,7 +102,7 @@ void	Directives::directiveParser( std::string line ) {
 			parseTryFiles(value); break;
 		case SCGI_PASS:
 			parseScgiPass(value); break;
-		case CLIENT_MAX_BODY_SIZE:
+		case CLI_MAX_SIZE:
 			parseClientMaxBodySize(value); break;
 		case RETURN:
 			parseReturn(value); break;
@@ -195,7 +198,7 @@ void	Directives::parseLimitExcept( const std::string &attribute ) {
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
+		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);			// is case sensitive?
 		if (tmp != "GET" && tmp != "HEAD" && tmp != "POST" && tmp != "PUT" && tmp != "DELETE")
 			throw std::runtime_error("Syntax Error: limit_except Directive");
 		for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
@@ -203,6 +206,8 @@ void	Directives::parseLimitExcept( const std::string &attribute ) {
 				it->second = true;
 		pos += tmp.length();
 	}
+	if (_limit_except["GET"] == true)
+		_limit_except["HEAD"] = true;
 }
 
 void	Directives::parseErrorPage( const std::string &attribute ) {
@@ -216,8 +221,10 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 }
 
 void	Directives::parseScgiPass( const std::string &attribute ) {
-	char buffer[PATH_MAX + 1];
-	_scgi_pass = realpath(".", buffer) + attribute;
+	_scgi_pass = attribute;
+	if (*_scgi_pass.begin() == '/')
+		_scgi_pass.erase(0, 1);
+	_scgi_pass = absolutePath + _scgi_pass;
 	if (access(_scgi_pass.c_str(), X_OK) == -1)
 		throw std::runtime_error("Syntax Error: scgi_pass Directive");
 }

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/26 14:39:30 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/30 17:52:07 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include "../Location/Location.hpp"
 # include "../Client/Client.hpp"
 # include "../Request/Request.hpp"
+# include "../ErrorResponse/ErrorResponse.hpp"
 
 typedef std::vector<Client> v_cli;
 

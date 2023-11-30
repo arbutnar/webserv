@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/28 12:53:39 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/30 17:52:56 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ typedef std::map<std::string, bool> m_strBool;
 typedef std::map<std::string, std::string> m_strStr;
 typedef std::set<Location> s_locs;
 
+extern std::string	absolutePath;
+
 enum	commonDirectives {
 	LISTEN,
 	SERVER_NAME,
@@ -45,7 +47,7 @@ enum	commonDirectives {
 	TRY_FILES,
 	LIMIT_EXCEPT,
 	ERROR_PAGE,
-	CLIENT_MAX_BODY_SIZE,
+	CLI_MAX_SIZE,
 	RETURN
 };
 

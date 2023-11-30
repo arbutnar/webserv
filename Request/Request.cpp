@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/29 20:23:08 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/30 16:56:42 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,19 +83,20 @@ void	Request::parser( const std::string &buffer ) {
 	_method = buffer.substr(0, pos);
 	for (unsigned int i = 0; i < _method.size(); i++)
 		if (!std::isupper(_method[i]))
-			throw std::exception();
+			throw std::runtime_error("405");
 	pos = buffer.find_first_not_of(" \t", pos);
 	_uri = buffer.substr(pos, buffer.find_first_of(" \t", pos) - pos);
 	pos = buffer.find_first_not_of(" \t", pos + _uri.size());
 	_protocol = buffer.substr(pos, buffer.find_first_of("\r\n", pos) - pos);
-	std::transform(_protocol.begin(), _protocol.end(), _protocol.begin(), ::toupper);
-	if (_method.empty() || _uri.empty() || _protocol.empty())
-		throw std::exception();
-	if (_uri != "/" && _uri.at(0) == '/')
-		_uri.erase(0, 1);
 	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
+	if (_uri != "/" && _uri.at(0) == '/')
+		_uri.erase(0, 1);
+	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
+		throw std::runtime_error("505");
+	if (_method.empty() || _uri.empty() || _protocol.empty())
+		throw std::runtime_error("400");
 }
 
 const Location	Request::uriMatcher( const s_locs &locations ) {
@@ -117,8 +118,8 @@ const Location	Request::uriMatcher( const s_locs &locations ) {
 
 const std::string	Request::translateUri( const Location &match ) {
 	std::string				translation;
-	struct stat 			st;
 	v_str::const_iterator	it;
+	struct stat 			st;
 
 	if (match.getAlias().empty())
 		translation = match.getRoot() + _uri;
@@ -131,22 +132,20 @@ const std::string	Request::translateUri( const Location &match ) {
 	}
 	std::cout << translation << std::endl;
 	if (stat(translation.c_str(), &st) == -1)
-		throw std::runtime_error("404 Not Found");
-	if (st.st_mode & S_IFDIR || *translation.rbegin() == '/')
+		throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
+	if (st.st_mode & S_IFDIR)
 	{
-		char buffer[PATH_MAX + 1];
-		translation = "/" + translation;
-		translation = realpath(".", buffer) + translation;
+		translation = absolutePath + translation;
 		if (*translation.rbegin() != '/')
 			translation += "/";
 		for (it = match.getIndex().begin(); it != match.getIndex().end(); it++)
 		{
-			std::cout << translation + *it << std::endl;
-			if (access((translation + *it).c_str(), R_OK) == 0) // se metodo e' POST allora la flag e' di scrittura, se e' GET e' di lettura
-				break ;	
+			if (match.getLimitExcept().at("GET") == true || match.getLimitExcept().at("GET") == true)
+				if (access((translation + *it).c_str(), R_OK) == 0)
+					break ;	
 		}
 		if (it == match.getIndex().end())
-			throw std::runtime_error("404 Not Found");
+			throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
 		translation += *it;
 	}
 	return translation;

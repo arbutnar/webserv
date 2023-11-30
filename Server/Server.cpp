@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/29 14:02:19 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/11/30 17:53:11 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,9 +143,8 @@ void	Server::writeResponse( v_cli::iterator &it ) {
 		translation = request.translateUri(match);
 		std::cout << '$' << translation << '$' << std::endl;
 		match.displayLocation();
-		// request.displayRequest();
 	} catch(std::exception &e) {
-		std::cout << "Bad Client request" << std::endl;
+		ErrorResponse(e.what());
 	}
 	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
 }
