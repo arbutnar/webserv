@@ -6,14 +6,18 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:00:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/30 16:52:12 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/01 15:32:32 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSE_H
 # define RESPONSE_H
 
-# include "../Location/Location.hpp"
+# include <iostream>
+# include <sys/socket.h>
+# include <fstream>
+# include <ctime>
+# include "../Request/Request.hpp"
 
 enum Success {
 	OK = 200,
@@ -24,30 +28,34 @@ enum Success {
 	FORBIDDEN = 403,
 	NOT_FOUND = 404,
 	METHOD_NOT_ALLOWED = 405,
-	LENGHT_REQUIRED = 411,
+	LENGTH_REQUIRED = 411,
+	INTERNAL_SERVER = 500,
+	NOT_IMPLEMENTED = 501,
 	HTTP_NOT_SUPPORTED = 505
 };
 
 class Response {
 	protected:
-		int			_status;
+		std::string	_status;
 		m_strStr	_headers;
 		std::string	_body;
 	public:
 		Response( void );
+		Response( const Request &request );
 		Response( const std::string &code );
 		Response( const Response &src );
 		Response &operator=( const Response &src );
 		virtual ~Response( );
 
-		const int			&getStatus( void ) const;
+		const std::string	&getStatus( void ) const;
 		const m_strStr		&getHeaders( void ) const;
 		const std::string	&getBody( void ) const;
-		void				setStatus( const int &status );
+		void				setStatus( const std::string &status );
 		void				setHeaders( const m_strStr &headers );
 		void				setBody( const std::string &body);
-		
-		virtual	void	sendResponse( void ) const = 0;
+
+		void			send( const int &socket ) const;
+		virtual void	generateContent( const bool &isConnected ) = 0;
 };
 
 #endif

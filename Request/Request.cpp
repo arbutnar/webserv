@@ -6,14 +6,15 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/30 16:56:42 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/01 17:57:15 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
 Request::Request( void )
-	: _isValid (false), _method (""), _uri ("") {
+	: _method (""), _uri ("") {
+		_headers.insert(std::make_pair("Connection", "keep-alive"));
 }
 
 Request::Request( const Request &src ) {
@@ -23,7 +24,6 @@ Request::Request( const Request &src ) {
 Request& Request::operator=( const Request &src ) {
 	if (this == &src)
 		return *this;
-	_isValid = src._isValid;
 	_method = src._method;
 	_uri = src._uri;
 	_headers = src._headers;
@@ -31,10 +31,6 @@ Request& Request::operator=( const Request &src ) {
 }
 
 Request::~Request( ) {
-}
-
-const bool &Request::getIsValid( void ) const {
-	return _isValid;
 }
 
 const std::string &Request::getMethod( void ) const {
@@ -51,10 +47,6 @@ const std::string 	&Request::getProtocol( void ) const {
 
 const m_strStr	&Request::getHeaders( void ) const {
 	return _headers;
-}
-
-void	Request::setIsValid( const bool &isValid ) {
-	_isValid = isValid;
 }
 
 void	Request::setMethod( const std::string &method ) {
@@ -78,25 +70,38 @@ void	Request::parser( const std::string &buffer ) {
 	std::string			key;
 	std::string			value;
 	size_t				pos;
+	std::string			methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
 
 	pos = buffer.find_first_of(" \t");
 	_method = buffer.substr(0, pos);
-	for (unsigned int i = 0; i < _method.size(); i++)
-		if (!std::isupper(_method[i]))
-			throw std::runtime_error("405");
+	int i;
+	for (i = 0; i < 5; i++)
+		if (methods[i] == _method)
+			break ;
+	if (i == 5)
+		throw std::runtime_error("400");
 	pos = buffer.find_first_not_of(" \t", pos);
 	_uri = buffer.substr(pos, buffer.find_first_of(" \t", pos) - pos);
+	if (_uri.empty())
+		throw std::runtime_error("400");
 	pos = buffer.find_first_not_of(" \t", pos + _uri.size());
 	_protocol = buffer.substr(pos, buffer.find_first_of("\r\n", pos) - pos);
-	std::getline(ss, key);
-	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
-		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
-	if (_uri != "/" && _uri.at(0) == '/')
-		_uri.erase(0, 1);
+	if (_protocol.empty())
+		throw std::runtime_error("400");
 	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
 		throw std::runtime_error("505");
-	if (_method.empty() || _uri.empty() || _protocol.empty())
+	bool	isHost = false;
+	std::getline(ss, key);
+	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
+	{
+		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)))
+		if (key == "Host")
+			isHost = true;
+	}
+	if (!isHost)
 		throw std::runtime_error("400");
+	if (_uri != "/" && _uri.at(0) == '/')
+		_uri.erase(0, 1);
 }
 
 const Location	Request::uriMatcher( const s_locs &locations ) {
@@ -140,7 +145,7 @@ const std::string	Request::translateUri( const Location &match ) {
 			translation += "/";
 		for (it = match.getIndex().begin(); it != match.getIndex().end(); it++)
 		{
-			if (match.getLimitExcept().at("GET") == true || match.getLimitExcept().at("GET") == true)
+			if (match.getLimitExcept().at("GET") == true)
 				if (access((translation + *it).c_str(), R_OK) == 0)
 					break ;	
 		}

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 13:58:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/26 16:59:08 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/01 15:45:08 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 
 class Request {
 	private:
-		bool		_isValid;
 		std::string	_method;
 		std::string	_uri;
 		std::string _protocol;
@@ -28,12 +27,10 @@ class Request {
 		Request& operator=( const Request &src );
 		~Request( );
 
-		const bool			&getIsValid( void ) const;
 		const std::string 	&getMethod( void ) const;
 		const std::string 	&getUrl( void ) const;
 		const std::string 	&getProtocol( void ) const;
 		const m_strStr		&getHeaders( void ) const;
-		void				setIsValid( const bool &isValid );
 		void				setMethod( const std::string &method );
 		void				setUrl( const std::string &uri );
 		void				setProtocol( const std::string &protocol );

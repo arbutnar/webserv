@@ -6,18 +6,22 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:25:35 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/30 17:54:05 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/01 17:28:07 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 
-Response::Response( void )
-	: _status (0), _body ("") {
+Response::Response( void ) {
 }
 
-Response::Response( const std::string &code )
-	: _status (std::atoi(code.c_str())), _body("") {
+Response::Response( const Request &request )
+	: _status (0), _body ("") {
+		(void)request;
+}
+
+Response::Response(const std::string &code )
+	: _status (code + " "), _body("") {
 		std::cout << _status << std::endl;
 }
 
@@ -38,7 +42,7 @@ Response::~Response( void ) {
 	_headers.clear();
 }
 
-const int	&Response::getStatus( void ) const {
+const std::string	&Response::getStatus( void ) const {
 	return _status;
 }
 
@@ -50,7 +54,7 @@ const std::string	&Response::getBody( void ) const {
 	return _body;
 }
 
-void	Response::setStatus( const int &status ) {
+void	Response::setStatus( const std::string &status ) {
 	_status = status;
 }
 
@@ -60,4 +64,14 @@ void	Response::setHeaders( const m_strStr &headers ) {
 
 void	Response::setBody( const std::string &body ) {
 	_body = body;
+}
+
+void	Response::send( const int &socket ) const {
+	std::string	response("HTTP/1.1 ");
+
+	response += _status + "\r\n";
+	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
+		response += it->first + ": " + it->second + "\r\n";
+	response += "\r\n" + _body;
+	::send(socket, response.c_str(), response.length(), 0);
 }

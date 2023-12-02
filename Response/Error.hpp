@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ErrorResponse.hpp                                  :+:      :+:    :+:   */
+/*   Error.hpp 			                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,21 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef ERRORRESPONSE_H
-# define ERRORRESPONSE_H
+#ifndef ERROR_H
+# define ERROR_H
 
-#include "../Response/Response.hpp"
+#include "Response.hpp"
 
-class ErrorResponse : protected Response {
+class Error : public Response {
 	public:
-		ErrorResponse( void );
-		ErrorResponse( const std::string &code );
-		ErrorResponse( const ErrorResponse &src );
-		ErrorResponse &operator=( const ErrorResponse &src );
-		~ErrorResponse( );
+		Error( void );
+		Error( const std::string &code );
+		Error( const Error &src );
+		Error &operator=( const Error &src );
+		~Error( );
 
-		// void	generateBody( void ) const;
-		void	sendResponse( void ) const;
+		void	generateContent( const bool &isConnected );
 };
 
 #endif
