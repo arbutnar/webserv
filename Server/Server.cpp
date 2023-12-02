@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 15:21:28 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/02 15:29:35 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,40 +131,40 @@ void	Server::readRequest( v_cli::iterator &it ) {
 }
 
 void	Server::writeResponse( v_cli::iterator &it ) {
-	Response	*response = NULL;
 	Request 	request;
 	Location	match;
 	std::string	translation;
-	bool		isClose = false;
+	// bool		isClose = false;
+	Response	*response = NULL;
+
 	try {
 		std::cout << it->getBuffer() << std::endl;
 		request.parser(it->getBuffer());
-		if (request.getHeaders().at("Connection") == "close")
-			isClose = true;
+		// if (request.getHeaders().at("Connection") == "close")
+		// 	isClose = true;
 		match = request.uriMatcher(_locations);
 		if (match.getLocationName().empty())
 			match = *findRoot();
 		if (match.getLimitExcept().at(request.getMethod()) == false)
 			throw std::runtime_error("405");
 		translation = request.translateUri(match);
-		std::cout << '$' << translation << '$' << std::endl;
 		response = new Valid();
 	} catch(std::exception &e) {
 		std::cout << e.what() << std::endl;
-		// if (response != NULL)
-		// 	delete response;
-		// response = new Error(e.what());
+		if (response != NULL)
+			delete response;
+		response = new Error(e.what());
 	}
-	// response->generateContent(request.getHeaders());
-	// response->send(it->getSocket());
-	// delete response;
+	response->generateContent(request.getHeaders());
+	response->send(it->getSocket());
+	delete response;
 	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
-	if (isClose)
-	{
-		close(it->getSocket());
-		_clients.erase(std::find(_clients.begin(), _clients.end(), *it));
-		std::cout << it->getSocket() << " is disconnected" << std::endl;
-	}
+	// if (isClose)
+	// {
+	// 	close(it->getSocket());
+	// 	_clients.erase(std::find(_clients.begin(), _clients.end(), *it));
+	// 	std::cout << it->getSocket() << " is disconnected" << std::endl;
+	// }
 }
 
 void	Server::displayServer( void ) const {
