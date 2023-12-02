@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/01 17:57:15 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:18:48 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,32 +37,40 @@ const std::string &Request::getMethod( void ) const {
 	return _method;
 }
 
-const std::string &Request::getUrl( void ) const {
+const std::string &Request::getUri( void ) const {
 	return _uri;
 }
 
-const std::string 	&Request::getProtocol( void ) const {
-	return _protocol;
+const std::string &Request::getTranslate( void ) const {
+	return _translate;
 }
 
 const m_strStr	&Request::getHeaders( void ) const {
 	return _headers;
 }
 
+const Location	&Request::getMatch( void ) const {
+	return _match;
+}
+
 void	Request::setMethod( const std::string &method ) {
 	_method = method;
 }
 
-void	Request::setUrl( const std::string &uri ) {
+void	Request::setUri( const std::string &uri ) {
 	_uri = uri;
 }
 
-void	Request::setProtocol( const std::string &protocol ) {
-	_protocol = protocol;
+void	Request::setTranslate( const std::string &translate ) {
+	_translate = translate;
 }
 
 void	Request::setHeaders( const m_strStr &headers ) {
 	_headers = headers;
+}
+
+void	Request::setMatch( const Location &match ) {
+	_match = match;
 }
 
 void	Request::parser( const std::string &buffer ) {
@@ -85,16 +93,16 @@ void	Request::parser( const std::string &buffer ) {
 	if (_uri.empty())
 		throw std::runtime_error("400");
 	pos = buffer.find_first_not_of(" \t", pos + _uri.size());
-	_protocol = buffer.substr(pos, buffer.find_first_of("\r\n", pos) - pos);
-	if (_protocol.empty())
+	std::string	protocol(buffer.substr(pos, buffer.find_first_of("\r\n", pos) - pos));
+	if (protocol.empty())
 		throw std::runtime_error("400");
-	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
+	if (protocol != "HTTP/1.1" && protocol != "http/1.1")
 		throw std::runtime_error("505");
 	bool	isHost = false;
 	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 	{
-		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)))
+		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
 		if (key == "Host")
 			isHost = true;
 	}
@@ -104,10 +112,9 @@ void	Request::parser( const std::string &buffer ) {
 		_uri.erase(0, 1);
 }
 
-const Location	Request::uriMatcher( const s_locs &locations ) {
-	Location 	match;
-	bool		isMatch;
-	
+void	Request::uriMatcher( const s_locs &locations ) {
+	bool		isMatch = false;
+
 	for (s_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
 	{
 		isMatch = false;
@@ -115,51 +122,56 @@ const Location	Request::uriMatcher( const s_locs &locations ) {
 			isMatch = true;
 		else if (*it->getLocationName().rbegin() == '/' && _uri.find(it->getLocationName()) == 0)
 			isMatch = true;
-		if (isMatch && match.getLocationName().size() < it->getLocationName().size())
-			match = *it;
+		if (isMatch && _match.getLocationName().size() < it->getLocationName().size())
+			_match = *it;
 	}
-	return match;
+	if (_match.getLocationName().empty())
+		for (s_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
+			if (it->getLocationName() == "/")
+				_match = *it;
+	if (_match.getLimitExcept().at(_method) == false)
+		throw std::runtime_error("405");
 }
 
-const std::string	Request::translateUri( const Location &match ) {
-	std::string				translation;
+void	Request::translateUri( void ) {
 	v_str::const_iterator	it;
 	struct stat 			st;
 
-	if (match.getAlias().empty())
-		translation = match.getRoot() + _uri;
-	else if (match.getRoot().empty())
+	if (_uri == "/")
+		_uri.clear();
+	if (_match.getAlias().empty())
+		_translate = _match.getRoot() + _uri;
+	else if (_match.getRoot().empty())
 	{
-		if (_uri.find(match.getLocationName()) != std::string::npos)
-			translation = match.getAlias() + _uri.substr(match.getLocationName().size(), std::string::npos);
+		if (_uri.find(_match.getLocationName()) != std::string::npos)
+			_translate = _match.getAlias() + _uri.substr(_match.getLocationName().size(), std::string::npos);
 		else
-			translation = match.getAlias();
+			_translate = _match.getAlias();
 	}
-	std::cout << translation << std::endl;
-	if (stat(translation.c_str(), &st) == -1)
+	if (stat(_translate.c_str(), &st) == -1)
 		throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
 	if (st.st_mode & S_IFDIR)
 	{
-		translation = absolutePath + translation;
-		if (*translation.rbegin() != '/')
-			translation += "/";
-		for (it = match.getIndex().begin(); it != match.getIndex().end(); it++)
+		_translate = absolutePath + _translate;
+		if (*_translate.rbegin() != '/')
+			_translate += "/";
+		for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
 		{
-			if (match.getLimitExcept().at("GET") == true)
-				if (access((translation + *it).c_str(), R_OK) == 0)
+			if (_match.getLimitExcept().at("GET") == true)
+				if (access((_translate + *it).c_str(), R_OK) == 0)
 					break ;	
 		}
-		if (it == match.getIndex().end())
+		if (it == _match.getIndex().end())
 			throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
-		translation += *it;
+		_translate += *it;
 	}
-	return translation;
 }
 
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;
 	std::cout << "uri: " << _uri << std::endl;
-	std::cout << "protocol: " << _protocol << std::endl;
+	std::cout << "match Loocation name: " << _match.getLocationName() << std::endl;
+	std::cout << "uri translated: " << _translate << std::endl;
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 }

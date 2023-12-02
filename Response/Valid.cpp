@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/01 15:33:08 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:48:56 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ Valid	&Valid::operator=( const Valid &src ) {
 Valid::~Valid( ) {
 }
 
-void	Valid::generateContent( const bool &isConnected ) {
-	(void)isConnected;
+void	Valid::generateBody( void ) {
+	//roba
+	_body = "Valid request\n";
 }

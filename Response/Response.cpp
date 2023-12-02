@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:25:35 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/01 17:28:07 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:44:49 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,25 @@ void	Response::setHeaders( const m_strStr &headers ) {
 
 void	Response::setBody( const std::string &body ) {
 	_body = body;
+}
+
+void	Response::addHeader( const p_strStr &header ) {
+	_headers.insert(header);
+}
+
+void	Response::generateHeaders( void ) {
+	std::time_t	now = time(0);
+	struct tm	tstruct;
+	char		buf[30];
+
+	_headers.insert(std::make_pair("Server", "42webserv"));
+	tstruct = *localtime(&now);
+	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
+	_headers.insert(std::make_pair("Date", buf));
+	_headers.insert(std::make_pair("Content-Type", "text/html"));
+	std::stringstream ss;
+	ss << _body.length();
+	_headers.insert(std::make_pair("Content-Length", ss.str()));
 }
 
 void	Response::send( const int &socket ) const {

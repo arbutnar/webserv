@@ -23,7 +23,7 @@ class Error : public Response {
 		Error &operator=( const Error &src );
 		~Error( );
 
-		void	generateContent( const bool &isConnected );
+		void	generateBody( void );
 };
 
 #endif

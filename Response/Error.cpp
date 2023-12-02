@@ -56,26 +56,9 @@ Error	&Error::operator=( const Error &src ) {
 Error::~Error( ) {
 }
 
-void	Error::generateContent( const bool &isConnected ) {
-	std::time_t	now = time(0);
-	struct tm	tstruct;
-	char		buf[30];
-
+void	Error::generateBody( void ) {
 	_body = "<!DOCTYPE HTML>\n";
 	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t<h1>";
 	_body += _status.substr(4, std::string::npos);
 	_body += "</h1>\n</body>\n</html>\n";
-
-	_headers.insert(std::make_pair("Server", "42webserv"));
-	tstruct = *localtime(&now);
-	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
-	_headers.insert(std::make_pair("Date", buf));
-	_headers.insert(std::make_pair("Content-Type", "text/html"));
-	std::stringstream ss;
-	ss << _body.length();
-	_headers.insert(std::make_pair("Content-Length", ss.str()));
-	if (isConnected)
-		_headers.insert(std::make_pair("Connetion", "keep-alive"));
-	else
-		_headers.insert(std::make_pair("Connetion", "close"));
 }

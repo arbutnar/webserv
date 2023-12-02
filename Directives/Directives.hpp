@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/30 17:52:56 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/02 17:56:16 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ typedef std::vector<std::string> v_str;
 typedef std::map<int,std::string> m_intStr;
 typedef std::map<std::string, bool> m_strBool;
 typedef std::map<std::string, std::string> m_strStr;
+typedef	std::pair<std::string, std::string> p_strStr;
 typedef std::set<Location> s_locs;
 
 extern std::string	absolutePath;
