@@ -40,6 +40,4 @@ void	Valid::generateBody( void ) {
 
 	ss << is.rdbuf();
 	_body = ss.str();
-	std::cout << _request.getTranslate() << std::endl;
-	std::cout << _body << std::endl;
 }

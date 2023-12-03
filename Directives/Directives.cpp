@@ -28,6 +28,7 @@ Directives::Directives( void ) {
 	_try_files.clear();
 	_error_page.clear();
 	_client_max_body_size = 1000000;
+	_client_header_buffer_size = 4000;
 	_return.clear();
 	_limit_except.clear();
 	_limit_except.insert(std::make_pair("GET", true));
@@ -59,13 +60,14 @@ Directives& Directives::operator=( const Directives &src ) {
 	_limit_except = src._limit_except;
 	_error_page = src._error_page;
 	_client_max_body_size = src._client_max_body_size;
+	_client_header_buffer_size = src._client_header_buffer_size;
 	_return = src._return;
 	return *this;
 }
 
 void	Directives::directiveParser( std::string line ) {
 	std::string	arr[] = { "listen", "server_name", "root", "alias", "index", "autoindex", "scgi_pass", "try_files", 
-							"limit_except", "error_page", "client_max_body_size", "return" };
+							"limit_except", "error_page", "client_max_body_size", "client_header_buffer_size", "return" };
 	std::string	key;
 	std::string	value;
 	size_t		pos;
@@ -73,7 +75,7 @@ void	Directives::directiveParser( std::string line ) {
 
 	pos = line.find_first_not_of(" \t");
 	key = line.substr(pos, line.find_first_of(" \t", pos) - pos);
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < 13; i++) {
 		if (arr[i] == key)
 			break;
 	}
@@ -102,8 +104,10 @@ void	Directives::directiveParser( std::string line ) {
 			parseTryFiles(value); break;
 		case SCGI_PASS:
 			parseScgiPass(value); break;
-		case CLI_MAX_SIZE:
+		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
+		case CLIENT_HEADER_BUFFER_SIZE:
+			parseClientHeaderBufferSize(value); break;
 		case RETURN:
 			parseReturn(value); break;
 		default:
@@ -246,6 +250,25 @@ void	Directives::parseClientMaxBodySize( const std::string &attribute ) {
 		_client_max_body_size *= 1000000;
 	else
 		throw std::runtime_error("Syntax Error: max_body_size Directive");
+}
+
+void	Directives::parseClientHeaderBufferSize( const std::string &attribute ) {
+	size_t			pos = attribute.find_first_not_of("0123456789");
+	char			c;
+
+	_client_header_buffer_size = std::atoi(attribute.substr(0, pos).c_str());
+	if (pos == std::string::npos)
+		return ;
+	else if (pos != attribute.length() - 1)
+		throw std::runtime_error("Syntax Error: header_buffer_size Directive");
+	c = attribute[pos];
+	c = std::toupper(c);
+	if (c == 'K')
+		_client_header_buffer_size *= 1000;
+	else if (c == 'M')
+		_client_header_buffer_size *= 1000000;
+	else
+		throw std::runtime_error("Syntax Error: header_buffer_size Directive");
 }
 
 void	Directives::parseReturn( const std::string &attribute ) {

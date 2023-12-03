@@ -120,7 +120,7 @@ void	Master::serverParser( std::string &block ) {
 		{
 			if (inLocation)
 				throw Directives::SyntaxError();
-			else if (line.find("{") != line.length() - 1)
+			if (line.find("{") != line.length() - 1)
 				throw Directives::SyntaxError();
 			inLocation = true;
 			locationPtr = new Location(line);
@@ -142,7 +142,11 @@ void	Master::serverParser( std::string &block ) {
 			delete locationPtr;
 		}
 		else if (inLocation)
+		{
+			if (line.find("client_header_buffer_size") != std::string::npos)
+				throw Directives::SyntaxError();
 			locationPtr->directiveParser(line);
+		}
 		else
 			serverPtr->directiveParser(line);
 	}
@@ -198,7 +202,7 @@ void	Master::start( void ) {
 			{
 				if (FD_ISSET(it->getSocket(), &read))
 					s_it->readRequest(it);
-				else if (FD_ISSET(it->getSocket(), &write) && !it->getBuffer().empty())
+				if (it->getBuffer().find("\r\n\r\n") != std::string::npos)
 					s_it->writeResponse(it);
 			}
 		}

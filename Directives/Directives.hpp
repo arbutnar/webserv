@@ -48,7 +48,8 @@ enum	commonDirectives {
 	TRY_FILES,
 	LIMIT_EXCEPT,
 	ERROR_PAGE,
-	CLI_MAX_SIZE,
+	CLIENT_MAX_BODY_SIZE,
+	CLIENT_HEADER_BUFFER_SIZE,
 	RETURN
 };
 
@@ -66,6 +67,7 @@ class Directives {
 		m_strBool		_limit_except;
 		m_intStr		_error_page;
 		unsigned int	_client_max_body_size;
+		unsigned int	_client_header_buffer_size;
 		v_str			_return;
 	public:
 		struct SyntaxError : public std::exception {
@@ -89,6 +91,7 @@ class Directives {
 		void	parseErrorPage( const std::string &attribute );
 		void	parseScgiPass( const std::string &attribute );
 		void	parseClientMaxBodySize( const std::string &attribute );
+		void	parseClientHeaderBufferSize( const std::string &attribute );
 		void	parseReturn( const std::string &attribute );
 
 		void	setListenHost( const u_int32_t &listen_host );
@@ -103,6 +106,7 @@ class Directives {
 		void	setLimitExcept( const m_strBool &limit_except );
 		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
+		void	setClientHeaderBufferSize( const unsigned int &client_header_buffer_size );
 		void	setReturn( const v_str &ret );
 
 		const u_int32_t		&getListenHost( void ) const;
@@ -117,6 +121,7 @@ class Directives {
 		const m_strBool		&getLimitExcept( void ) const;
 		const m_intStr		&getErrorPage( void ) const;
 		const unsigned int	&getClientMaxBodySize( void ) const;
+		const unsigned int	&getClientHeaderBufferSize( void ) const;
 		const v_str			&getReturn( void ) const;
 
 		void			directiveParser( std::string line );

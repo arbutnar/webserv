@@ -136,7 +136,7 @@ void	Server::writeResponse( v_cli::iterator &it ) {
 
 	try {
 		std::cout << it->getBuffer() << std::endl;
-		request.parser(it->getBuffer());
+		request.parser(it->getBuffer(), _client_header_buffer_size);
 		request.uriMatcher(_locations);
 		request.translateUri();
 		response = new Valid(request);

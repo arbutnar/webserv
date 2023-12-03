@@ -75,13 +75,18 @@ void	Request::setMatch( const Location &match ) {
 	_match = match;
 }
 
-void	Request::parser( const std::string &buffer ) {
+void	Request::parser( const std::string &buffer, const unsigned int &client_header_buffer_size ) {
 	std::stringstream	ss(buffer);
 	std::string			key;
 	std::string			value;
 	size_t				pos;
 	std::string			methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
 
+	std::getline(ss, key);
+	if (key.length() > client_header_buffer_size)
+		throw std::runtime_error("414");
+	if (ss.str().length() - key.length() > client_header_buffer_size)
+		throw std::runtime_error("400");
 	pos = buffer.find_first_of(" ");
 	_method = buffer.substr(0, pos);
 	int i;
@@ -100,10 +105,20 @@ void	Request::parser( const std::string &buffer ) {
 		throw std::runtime_error("400");
 	if (protocol != "HTTP/1.1" && protocol != "http/1.1")
 		throw std::runtime_error("505");
-	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
-		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
+	{
+		if (key.find_first_of(" \t") != std::string::npos || key.empty() || value.empty())
+			throw std::runtime_error("400");
+		if (value.at(value.size() - 1) == '\r')
+			value.erase(value.size() - 1, 1);
+		if (key == "Content-Length" && value.find_first_not_of("0123456789") != std::string::npos)
+			throw std::runtime_error("400");
+		std::cout << '$' << key << '$' << value << '$' << std::endl;
+		_headers.insert(std::make_pair(key, value));
+	}
 	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
+		throw std::runtime_error("400");
+	if (_headers.find("Content-Length") != _headers.end() && _headers.find("Transfer-Encoding") != _headers.end())
 		throw std::runtime_error("400");
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri.erase(0, 1);

@@ -48,6 +48,10 @@ const unsigned int	&Directives::getClientMaxBodySize( void ) const {
 	return _client_max_body_size;
 }
 
+const unsigned int	&Directives::getClientHeaderBufferSize( void ) const {
+	return _client_header_buffer_size;
+}
+
 const v_str	&Directives::getReturn( void ) const {
 	return _return;
 }

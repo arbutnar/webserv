@@ -87,5 +87,4 @@ void	Response::send( const int &socket ) const {
 		response += it->first + ": " + it->second + "\r\n";
 	response += "\r\n" + _body;
 	::send(socket, response.c_str(), response.length(), 0);
-	std::cout << response << std::endl;
 }
