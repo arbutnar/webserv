@@ -31,6 +31,8 @@ Error::Error( const std::string &code )
 				_status += "Method Not Allowed"; break ;
 			case LENGTH_REQUIRED:
 				_status += "Length Required"; break ;
+			case URI_TOO_LONG:
+				_status += "URI Too Long"; break;
 			case NOT_IMPLEMENTED:
 				_status += "Not Implemented"; break;
 			case HTTP_NOT_SUPPORTED:

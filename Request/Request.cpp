@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:18:48 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/03 16:00:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ Request& Request::operator=( const Request &src ) {
 		return *this;
 	_method = src._method;
 	_uri = src._uri;
+	_translate = src._translate;
+	_match = src._match;
 	_headers = src._headers;
 	return *this;
 }
@@ -80,7 +82,7 @@ void	Request::parser( const std::string &buffer ) {
 	size_t				pos;
 	std::string			methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
 
-	pos = buffer.find_first_of(" \t");
+	pos = buffer.find_first_of(" ");
 	_method = buffer.substr(0, pos);
 	int i;
 	for (i = 0; i < 5; i++)
@@ -88,25 +90,20 @@ void	Request::parser( const std::string &buffer ) {
 			break ;
 	if (i == 5)
 		throw std::runtime_error("400");
-	pos = buffer.find_first_not_of(" \t", pos);
-	_uri = buffer.substr(pos, buffer.find_first_of(" \t", pos) - pos);
+	pos += 1;
+	_uri = buffer.substr(pos, buffer.find_first_of(" ", pos) - pos);
 	if (_uri.empty())
 		throw std::runtime_error("400");
-	pos = buffer.find_first_not_of(" \t", pos + _uri.size());
-	std::string	protocol(buffer.substr(pos, buffer.find_first_of("\r\n", pos) - pos));
+	pos += _uri.size() + 1;
+	std::string	protocol(buffer.substr(pos, buffer.find("\r\n", pos) - pos));
 	if (protocol.empty())
 		throw std::runtime_error("400");
 	if (protocol != "HTTP/1.1" && protocol != "http/1.1")
 		throw std::runtime_error("505");
-	bool	isHost = false;
 	std::getline(ss, key);
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
-	{
 		_headers.insert(std::make_pair(key, value.substr(0, value.size() - 1)));
-		if (key == "Host")
-			isHost = true;
-	}
-	if (!isHost)
+	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
 		throw std::runtime_error("400");
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri.erase(0, 1);

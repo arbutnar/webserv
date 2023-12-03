@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:25:35 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:44:49 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/03 14:16:02 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,8 @@
 Response::Response( void ) {
 }
 
-Response::Response( const Request &request )
-	: _status (0), _body ("") {
-		(void)request;
-}
-
 Response::Response(const std::string &code )
 	: _status (code + " "), _body("") {
-		std::cout << _status << std::endl;
 }
 
 Response::Response( const Response &src ) {
@@ -93,4 +87,5 @@ void	Response::send( const int &socket ) const {
 		response += it->first + ": " + it->second + "\r\n";
 	response += "\r\n" + _body;
 	::send(socket, response.c_str(), response.length(), 0);
+	std::cout << response << std::endl;
 }

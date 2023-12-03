@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:52:16 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/03 15:55:11 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,14 +135,12 @@ void	Server::writeResponse( v_cli::iterator &it ) {
 	Response	*response = NULL;
 
 	try {
+		std::cout << it->getBuffer() << std::endl;
 		request.parser(it->getBuffer());
 		request.uriMatcher(_locations);
 		request.translateUri();
-		request.displayRequest();
-		response = new Valid();
+		response = new Valid(request);
 	} catch(std::exception &e) {
-		if (response != NULL)
-			delete response;
 		response = new Error(e.what());
 	}
 	response->generateBody();

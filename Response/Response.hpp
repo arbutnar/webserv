@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:00:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:44:41 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/03 15:19:54 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ enum Success {
 	NOT_FOUND = 404,
 	METHOD_NOT_ALLOWED = 405,
 	LENGTH_REQUIRED = 411,
+	URI_TOO_LONG = 414,
 	INTERNAL_SERVER = 500,
 	NOT_IMPLEMENTED = 501,
 	HTTP_NOT_SUPPORTED = 505
@@ -41,7 +42,6 @@ class Response {
 		std::string	_body;
 	public:
 		Response( void );
-		Response( const Request &request );
 		Response( const std::string &code );
 		Response( const Response &src );
 		Response &operator=( const Response &src );
@@ -58,7 +58,6 @@ class Response {
 		void			generateHeaders( void );
 		virtual void	generateBody( void ) = 0;
 		void			send( const int &socket ) const;
-		// virtual void	generateContent( const bool &isConnected ) = 0;
 };
 
 #endif

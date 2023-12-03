@@ -6,18 +6,18 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:48:56 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/03 14:18:15 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Valid.hpp"
 
 Valid::Valid( void )
-	: Response() {
+	: Response("200 Ok") {
 }
 
-Valid::Valid( const std::string &code )
-	: Response(code) {
+Valid::Valid( const Request &request )
+	: Response("200 Ok"), _request(request) {
 }
 
 Valid::Valid( const Valid &src )
@@ -35,6 +35,11 @@ Valid::~Valid( ) {
 }
 
 void	Valid::generateBody( void ) {
-	//roba
-	_body = "Valid request\n";
+	std::ifstream		is(_request.getTranslate().c_str());
+	std::stringstream	ss;
+
+	ss << is.rdbuf();
+	_body = ss.str();
+	std::cout << _request.getTranslate() << std::endl;
+	std::cout << _body << std::endl;
 }
