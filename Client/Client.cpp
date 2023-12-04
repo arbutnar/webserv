@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 16:38:10 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/20 16:58:29 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/04 18:02:07 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Client	&Client::operator=( Client const &src ) {
 }
 
 bool	Client::operator==( Client const &src ) const {
-	if (_socket != src._socket || _buffer != src._buffer)
+	if (_socket != src._socket)
 		return false;
 	return true;
 }
@@ -57,10 +57,16 @@ void	Client::setBuffer( std::string const &buffer ) {
 	_buffer = buffer;
 }
 
-void	Client::buildBuffer( const char &c ) {
+int	Client::readRequest( void ) {
+	char	c;
+	int		nBytes = recv(_socket, &c, 1, 0);
+	if (nBytes <= 0)
+		return 1;
 	_buffer += c;
+	return 0;
 }
 
 void	Client::clearBuffer( void ) {
 	_buffer.clear();
 }
+

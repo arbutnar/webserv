@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 16:38:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/21 13:59:08 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/04 18:03:42 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CLIENT_HPP
 
 # include <iostream>
+# include <sys/socket.h>
 
 class Client {
 	private:
@@ -32,8 +33,8 @@ class Client {
 		void				setSocket( int const &socket );
 		void				setBuffer( std::string const &buffer );
 
-		void				buildBuffer( const char &c );
-		void				clearBuffer( void );
+		int		readRequest( void );
+		void	clearBuffer( void );
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/03 16:00:34 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/04 14:47:32 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ void	Request::parser( const std::string &buffer, const unsigned int &client_head
 			throw std::runtime_error("400");
 		if (value.at(value.size() - 1) == '\r')
 			value.erase(value.size() - 1, 1);
-		if (key == "Content-Length" && value.find_first_not_of("0123456789") != std::string::npos)
+		if (key == "Content-Length" && (value.find_first_not_of("0123456789") != std::string::npos || _headers.find("Content-Length") != _headers.end()))
 			throw std::runtime_error("400");
 		std::cout << '$' << key << '$' << value << '$' << std::endl;
 		_headers.insert(std::make_pair(key, value));
@@ -119,7 +119,7 @@ void	Request::parser( const std::string &buffer, const unsigned int &client_head
 	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
 		throw std::runtime_error("400");
 	if (_headers.find("Content-Length") != _headers.end() && _headers.find("Transfer-Encoding") != _headers.end())
-		throw std::runtime_error("400");
+		_headers.erase(_headers.find("Content-Length"));
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri.erase(0, 1);
 }

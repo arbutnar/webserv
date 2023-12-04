@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/03 15:55:11 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/04 18:02:33 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ const int &Server::getListener( void ) const {
 	return _listener;
 }
 
-const v_cli	&Server::getClients( void ) const {
+v_cli	&Server::getClients( void ) {
 	return _clients;
 }
 
@@ -87,14 +87,14 @@ void	Server::ListenerInit( void ) {
 		throw std::runtime_error("Cannot create socket");
 	const int enable = 1;
 	if (setsockopt(_listener, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-    	throw std::runtime_error("setsockopt(SO_REUSEADDR) failed");
+		throw std::runtime_error("setsockopt(SO_REUSEADDR) failed");
 	struct sockaddr_in	sockaddr;
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_port = htons(_listen_port);
 	sockaddr.sin_addr.s_addr = htonl(_listen_host);
 	if (bind(_listener, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) == -1)
 		throw std::runtime_error("Cannot bind socket");
-	if (listen(_listener, 128) == -1)
+	if (listen(_listener, 10) == -1)
 		throw std::runtime_error("Socket cannot Listen");
 }
 
@@ -115,28 +115,13 @@ void	Server::newConnection( void ) {
 	std::cout << "ciao " << client << std::endl;
 }
 
-void	Server::readRequest( v_cli::iterator &it ) {
-	char	c;
-	int		nBytes = recv(it->getSocket(), &c, 1, 0);
-	if (nBytes == -1)
-		throw std::runtime_error("Cannot read from socket");
-	else if (nBytes == 0) // forse <= a 0 perche' l'errore non serve
-	{
-		close(it->getSocket());
-		_clients.erase(std::find(_clients.begin(), _clients.end(), *it));
-		std::cout << it->getSocket() << " is disconnected" << std::endl;
-	}
-	else
-		std::find(_clients.begin(), _clients.end(), *it)->buildBuffer(c);
-}
-
-void	Server::writeResponse( v_cli::iterator &it ) {
+v_cli::iterator	&Server::writeResponse( v_cli::iterator &c_it ) {
 	Request 	request;
 	Response	*response = NULL;
 
 	try {
-		std::cout << it->getBuffer() << std::endl;
-		request.parser(it->getBuffer(), _client_header_buffer_size);
+		std::cout << c_it->getBuffer() << std::endl;
+		request.parser(c_it->getBuffer(), _client_header_buffer_size);
 		request.uriMatcher(_locations);
 		request.translateUri();
 		response = new Valid(request);
@@ -146,15 +131,18 @@ void	Server::writeResponse( v_cli::iterator &it ) {
 	response->generateBody();
 	response->generateHeaders();
 	response->addHeader(*request.getHeaders().find("Connection"));
-	response->send(it->getSocket());
+	response->send(c_it->getSocket());
+	if (response->getHeaders().at("Connection") == "close")
+		c_it = eraseClient(c_it);
 	delete response;
-	std::find(_clients.begin(), _clients.end(), *it)->clearBuffer();
-	if (request.getHeaders().at("Connection") == "close")
-	{
-		close(it->getSocket());
-		_clients.erase(std::find(_clients.begin(), _clients.end(), *it));
-		std::cout << it->getSocket() << " is disconnected" << std::endl;
-	}
+	c_it->clearBuffer();
+	return c_it;
+}
+
+v_cli::iterator	Server::eraseClient( v_cli::iterator &c_it ) {
+	std::cout << c_it->getSocket() << " is disconnected" << std::endl;
+	close(c_it->getSocket());
+	return _clients.erase(c_it);
 }
 
 void	Server::displayServer( void ) const {

@@ -46,7 +46,7 @@ def run():
     http_response = send_request(request_header)
     if http_response.status != 400:
             print('error: {}'.format(__file__))
-            print('expected status: {}, actual status: {}'.format('200', str(http_response.status)))
+            print('expected status: {}, actual status: {}'.format('400', str(http_response.status)))
 
 if __name__ == '__main__':
     run()

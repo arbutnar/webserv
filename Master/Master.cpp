@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 15:48:06 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/04 17:53:55 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,48 +162,48 @@ void	Master::displayMaster( void ) const {
 
 void	Master::arrangeCluster( void ) {
 	std::sort(_cluster.begin(), _cluster.end());
-	for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+	v_ser::iterator it = _cluster.begin();
+	while (it != _cluster.end())
 	{
 		try {
 			it->ListenerInit();
+			it++;
 		} catch (std::exception &e) {
 			std::cout << it->getServerName() << ": " << e.what() << std::endl;
-			_cluster.erase(it);
-			it -= 1;
+			it = _cluster.erase(it);
 		}
 	}
 }
 
 void	Master::start( void ) {
 	fd_set	read;
-	fd_set	write;
 	int		max;
+
 	while (true)
 	{
 		for (v_ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
 		{
 			FD_ZERO(&read);
-			FD_ZERO(&write);
 			FD_SET(s_it->getListener(), &read);
-			v_cli temp = s_it->getClients();
-			for (v_cli::const_iterator it = temp.begin(); it != temp.end(); it++)
-			{
-				FD_SET(it->getSocket(), &read);
-				FD_SET(it->getSocket(), &write);
-			}
+			v_cli::iterator c_it;
+			for (c_it = s_it->getClients().begin(); c_it != s_it->getClients().end(); c_it++)
+				FD_SET(c_it->getSocket(), &read);
 			max = s_it->nfds();
 			if (max == 0)
 				max = s_it->getListener();
-			if (select(max + 1, &read, &write, NULL, NULL) == -1)
-				throw std::runtime_error("Select function failed");
+			if (select(max + 1, &read, NULL, NULL, NULL) < 1)
+				continue ;
 			if (FD_ISSET(s_it->getListener(), &read))
 				s_it->newConnection();
-			for (v_cli::iterator it = temp.begin(); it != temp.end(); it++)
+			c_it = s_it->getClients().begin();
+			while (c_it != s_it->getClients().end())
 			{
-				if (FD_ISSET(it->getSocket(), &read))
-					s_it->readRequest(it);
-				if (it->getBuffer().find("\r\n\r\n") != std::string::npos)
-					s_it->writeResponse(it);
+				if (FD_ISSET(c_it->getSocket(), &read) && c_it->readRequest())
+					c_it = s_it->eraseClient(c_it);
+				else if (c_it->getBuffer().find("\r\n\r\n") != std::string::npos)
+					c_it = s_it->writeResponse(c_it);
+				else
+					c_it++;
 			}
 		}
 	}
