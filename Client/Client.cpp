@@ -57,13 +57,13 @@ void	Client::setBuffer( std::string const &buffer ) {
 	_buffer = buffer;
 }
 
-int	Client::readRequest( void ) {
+bool	Client::readRequest( void ) {
 	char	c;
 	int		nBytes = recv(_socket, &c, 1, 0);
 	if (nBytes <= 0)
-		return 1;
+		return false;
 	_buffer += c;
-	return 0;
+	return true;
 }
 
 void	Client::clearBuffer( void ) {

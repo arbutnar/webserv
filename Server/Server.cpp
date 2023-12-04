@@ -65,7 +65,7 @@ const int &Server::getListener( void ) const {
 	return _listener;
 }
 
-v_cli	&Server::getClients( void ) {
+const v_cli	&Server::getClients( void ) const {
 	return _clients;
 }
 
@@ -79,6 +79,15 @@ s_locs::const_iterator	Server::findRoot( void ) const {
 		if (it->getLocationName() == "/")
 			return it;
 	return _locations.end();
+}
+
+int	Server::nfds( void ) const {
+	int temp = 0;
+
+	for (v_cli::const_iterator it = _clients.begin(); it != _clients.end(); it++)
+		if (temp < it->getSocket())
+			temp = it->getSocket();
+	return temp;
 }
 
 void	Server::ListenerInit( void ) {
@@ -98,15 +107,6 @@ void	Server::ListenerInit( void ) {
 		throw std::runtime_error("Socket cannot Listen");
 }
 
-int	Server::nfds( void ) const {
-	int temp = 0;
-
-	for (v_cli::const_iterator it = _clients.begin(); it != _clients.end(); it++)
-		if (temp < it->getSocket())
-			temp = it->getSocket();
-	return temp;
-}
-
 void	Server::newConnection( void ) {
 	int client = accept(_listener, NULL, NULL);
 	if (client == -1)
@@ -115,13 +115,28 @@ void	Server::newConnection( void ) {
 	std::cout << "ciao " << client << std::endl;
 }
 
-v_cli::iterator	&Server::writeResponse( v_cli::iterator &c_it ) {
+void	Server::clientInteraction( const fd_set &active ) {
+	v_cli::iterator it = _clients.begin();
+	while (it != _clients.end())
+	{
+		if (FD_ISSET(it->getSocket(), &active) && !it->readRequest())
+			it = eraseClient(it);
+		else if (it->getBuffer().find("\r\n\r\n") != std::string::npos && !writeResponse(it))
+			it = eraseClient(it);
+		else
+			it++;
+	}
+}
+
+bool	Server::writeResponse( v_cli::iterator &c_it ) {
 	Request 	request;
 	Response	*response = NULL;
+	bool		ret = true;;
 
 	try {
 		std::cout << c_it->getBuffer() << std::endl;
-		request.parser(c_it->getBuffer(), _client_header_buffer_size);
+		bufferChecker(c_it->getBuffer());
+		request.parser(c_it->getBuffer());
 		request.uriMatcher(_locations);
 		request.translateUri();
 		response = new Valid(request);
@@ -133,10 +148,21 @@ v_cli::iterator	&Server::writeResponse( v_cli::iterator &c_it ) {
 	response->addHeader(*request.getHeaders().find("Connection"));
 	response->send(c_it->getSocket());
 	if (response->getHeaders().at("Connection") == "close")
-		c_it = eraseClient(c_it);
-	delete response;
+		ret = false;
 	c_it->clearBuffer();
-	return c_it;
+	delete response;
+	return ret;
+}
+
+void	Server::bufferChecker( const std::string &buffer ) const {
+	std::stringstream	ss(buffer);
+	std::string			line;
+
+	std::getline(ss, line);
+	if (line.length() > _client_header_buffer_size)
+		throw std::runtime_error("414");
+	if (ss.str().length() - line.length() > _client_header_buffer_size)
+		throw std::runtime_error("400");
 }
 
 v_cli::iterator	Server::eraseClient( v_cli::iterator &c_it ) {

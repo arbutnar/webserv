@@ -39,7 +39,7 @@ class Request {
 		void				setMatch( const Location &match );
 		void				setHeaders( const m_strStr &headers );
 
-		void	parser( const std::string &buffer, const unsigned int &client_header_buffer_size );
+		void	parser( const std::string &buffer );
 		void	uriMatcher( const s_locs &locations );
 		void	translateUri( void );
 		void	displayRequest( void ) const;

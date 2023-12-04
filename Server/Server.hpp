@@ -32,7 +32,6 @@ class Server : public Directives {
 		s_locs	_locations;
 		int		_listener;
 		v_cli	_clients;
-		fd_set	_fd_sets;
 	public:
 		Server( void );
 		Server( std::string block );
@@ -44,19 +43,19 @@ class Server : public Directives {
 		void			setLocations( const s_locs &locations );
 		void			setListener( const int &listener );
 		void			setClients( const v_cli &clients );
-		void			setFdSets( const fd_set &fd_sets );
 		const s_locs	&getLocations( void ) const;
 		const int		&getListener( void ) const;
-		v_cli			&getClients( void );
-		const fd_set	&getFdSets( void ) const; 
+		const v_cli		&getClients( void ) const;
 
 		void					addLocation( const Location &location );
 		s_locs::const_iterator	findRoot( void ) const;
-		void					ListenerInit( void );
 		int						nfds( void ) const;
-		v_cli::iterator			eraseClient( v_cli::iterator &c_it );
+		void					ListenerInit( void );
 		void					newConnection( void );
-		v_cli::iterator			&writeResponse( v_cli::iterator &it );
+		void					clientInteraction( const fd_set &active );
+		void					bufferChecker( const std::string &buffer ) const;
+		v_cli::iterator			eraseClient( v_cli::iterator &c_it );
+		bool					writeResponse( v_cli::iterator &it );
 		void					displayServer( void ) const;
 };
 

@@ -176,35 +176,25 @@ void	Master::arrangeCluster( void ) {
 }
 
 void	Master::start( void ) {
-	fd_set	read;
+	fd_set	active;
 	int		max;
 
 	while (true)
 	{
-		for (v_ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
+		for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		{
-			FD_ZERO(&read);
-			FD_SET(s_it->getListener(), &read);
-			v_cli::iterator c_it;
-			for (c_it = s_it->getClients().begin(); c_it != s_it->getClients().end(); c_it++)
-				FD_SET(c_it->getSocket(), &read);
-			max = s_it->nfds();
+			FD_ZERO(&active);
+			FD_SET(it->getListener(), &active);
+			for (v_cli::const_iterator c_it = it->getClients().begin(); c_it != it->getClients().end(); c_it++)
+				FD_SET(c_it->getSocket(), &active);
+			max = it->nfds();
 			if (max == 0)
-				max = s_it->getListener();
-			if (select(max + 1, &read, NULL, NULL, NULL) < 1)
+				max = it->getListener();
+			if (select(max + 1, &active, NULL, NULL, NULL) < 1)
 				continue ;
-			if (FD_ISSET(s_it->getListener(), &read))
-				s_it->newConnection();
-			c_it = s_it->getClients().begin();
-			while (c_it != s_it->getClients().end())
-			{
-				if (FD_ISSET(c_it->getSocket(), &read) && c_it->readRequest())
-					c_it = s_it->eraseClient(c_it);
-				else if (c_it->getBuffer().find("\r\n\r\n") != std::string::npos)
-					c_it = s_it->writeResponse(c_it);
-				else
-					c_it++;
-			}
+			if (FD_ISSET(it->getListener(), &active))
+				it->newConnection();
+			it->clientInteraction(active);
 		}
 	}
 }
