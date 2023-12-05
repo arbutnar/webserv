@@ -57,7 +57,7 @@ void	Client::setBuffer( std::string const &buffer ) {
 	_buffer = buffer;
 }
 
-bool	Client::readRequest( void ) {
+bool	Client::writeRequest( void ) {
 	char	c;
 	int		nBytes = recv(_socket, &c, 1, 0);
 	if (nBytes <= 0)

@@ -33,7 +33,7 @@ class Client {
 		void				setSocket( int const &socket );
 		void				setBuffer( std::string const &buffer );
 
-		bool	readRequest( void );
+		bool	writeRequest( void );
 		void	clearBuffer( void );
 };
 

@@ -29,10 +29,10 @@ Error::Error( const std::string &code )
 				_status += "Not Found"; break ;
 			case METHOD_NOT_ALLOWED:
 				_status += "Method Not Allowed"; break ;
-			case LENGTH_REQUIRED:
-				_status += "Length Required"; break ;
 			case URI_TOO_LONG:
-				_status += "URI Too Long"; break;
+				_status += "URI Too Long"; break ;
+			case CLIENT_CLOSED_REQUEST:
+				_status += "Client Closed Request"; break ;
 			case NOT_IMPLEMENTED:
 				_status += "Not Implemented"; break;
 			case HTTP_NOT_SUPPORTED:

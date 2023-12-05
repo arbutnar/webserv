@@ -39,5 +39,6 @@ void	Valid::generateBody( void ) {
 	std::stringstream	ss;
 
 	ss << is.rdbuf();
-	_body = ss.str();
+	if(_request.getMethod() == "GET")
+		_body = ss.str();
 }

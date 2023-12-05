@@ -119,7 +119,7 @@ void	Server::clientInteraction( const fd_set &active ) {
 	v_cli::iterator it = _clients.begin();
 	while (it != _clients.end())
 	{
-		if (FD_ISSET(it->getSocket(), &active) && !it->readRequest())
+		if (FD_ISSET(it->getSocket(), &active) && !it->writeRequest())
 			it = eraseClient(it);
 		else if (it->getBuffer().find("\r\n\r\n") != std::string::npos && !writeResponse(it))
 			it = eraseClient(it);
@@ -136,16 +136,22 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 	try {
 		std::cout << c_it->getBuffer() << std::endl;
 		bufferChecker(c_it->getBuffer());
-		request.parser(c_it->getBuffer());
+		request.headersParser(c_it->getBuffer());
+		request.headersChecker();
 		request.uriMatcher(_locations);
+		request.matchChecker();
 		request.translateUri();
+		request.bodyParser(c_it->getSocket());
 		response = new Valid(request);
 	} catch(std::exception &e) {
 		response = new Error(e.what());
 	}
 	response->generateBody();
 	response->generateHeaders();
-	response->addHeader(*request.getHeaders().find("Connection"));
+	if (request.getHeaders().find("Connection") == request.getHeaders().end())
+		response->addHeader(std::make_pair("Connection", "keep-alive"));
+	else
+		response->addHeader(*request.getHeaders().find("Connection"));
 	response->send(c_it->getSocket());
 	if (response->getHeaders().at("Connection") == "close")
 		ret = false;
@@ -159,6 +165,8 @@ void	Server::bufferChecker( const std::string &buffer ) const {
 	std::string			line;
 
 	std::getline(ss, line);
+	if (line.find_first_of(" ") == std::string::npos)
+		throw std::runtime_error("400");
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("414");
 	if (ss.str().length() - line.length() > _client_header_buffer_size)
