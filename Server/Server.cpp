@@ -170,7 +170,7 @@ void	Server::bufferChecker( const std::string &buffer ) const {
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("414");
 	if (ss.str().length() - line.length() > _client_header_buffer_size)
-		throw std::runtime_error("400");
+		throw std::runtime_error("494");
 }
 
 v_cli::iterator	Server::eraseClient( v_cli::iterator &c_it ) {

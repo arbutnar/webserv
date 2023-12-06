@@ -19,10 +19,7 @@
 # include <ctime>
 # include "../Request/Request.hpp"
 
-enum Success {
-	OK = 200,
-	CREATED = 201,
-	NO_CONTENT = 204,
+enum Codes {
 	PERMANENT_REDIRECT = 308,
 	BAD_REQUEST = 400,
 	FORBIDDEN = 403,
@@ -30,10 +27,12 @@ enum Success {
 	METHOD_NOT_ALLOWED = 405,
 	CONFLICT = 409,
 	URI_TOO_LONG = 414,
+	REQUEST_HEADER_TOO_LARGE = 494,
 	CLIENT_CLOSED_REQUEST = 499,
 	INTERNAL_SERVER = 500,
 	NOT_IMPLEMENTED = 501,
-	HTTP_NOT_SUPPORTED = 505
+	HTTP_NOT_SUPPORTED = 505,
+	INSUFFICIENT_STORAGE = 507
 };
 
 class Response {
@@ -43,7 +42,7 @@ class Response {
 		std::string	_body;
 	public:
 		Response( void );
-		Response( const std::string &code );
+		Response( const std::string &status );
 		Response( const Response &src );
 		Response &operator=( const Response &src );
 		virtual ~Response( );

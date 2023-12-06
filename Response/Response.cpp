@@ -12,11 +12,12 @@
 
 #include "Response.hpp"
 
-Response::Response( void ) {
+Response::Response( void )
+	: _status(""), _body("") {
 }
 
-Response::Response(const std::string &code )
-	: _status (code + " "), _body("") {
+Response::Response(  const std::string &status )
+	: _status(status), _body("") {
 }
 
 Response::Response( const Response &src ) {
@@ -73,10 +74,13 @@ void	Response::generateHeaders( void ) {
 	tstruct = *localtime(&now);
 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
 	_headers.insert(std::make_pair("Date", buf));
-	_headers.insert(std::make_pair("Content-Type", "text/html"));
-	std::stringstream ss;
-	ss << _body.length();
-	_headers.insert(std::make_pair("Content-Length", ss.str()));
+	if (!_body.empty())
+	{
+		_headers.insert(std::make_pair("Content-Type", "text/html"));
+		std::stringstream ss;
+		ss << _body.length();
+		_headers.insert(std::make_pair("Content-Length", ss.str()));
+	}
 }
 
 void	Response::send( const int &socket ) const {

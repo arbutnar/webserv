@@ -183,9 +183,6 @@ void	Request::matchChecker( void ) const {
 }
 
 void	Request::translateUri( void ) {
-	v_str::const_iterator	it;
-	struct stat 			st;
-
 	if (_uri == "/")
 		_uri.clear();
 	if (_match.getAlias().empty())
@@ -197,12 +194,19 @@ void	Request::translateUri( void ) {
 		else
 			_translate = _match.getAlias();
 	}
+	_translate = absolutePath + _translate;
+	struct stat st;
 	if (_method == "PUT")
 	{
-		if (stat(_translate.c_str(), &st) == -1 || st.st_mode & S_IFREG)
+		if (stat(_translate.c_str(), &st) == -1)
 		{
 			std::ofstream	of(_translate.c_str());
 			if (!of.is_open())
+				throw std::runtime_error("500");
+		}
+		else if ((st.st_mode & S_IFREG))
+		{
+			if (access(_translate.c_str(), W_OK) == -1)
 				throw std::runtime_error("500");
 		}
 		else
@@ -212,11 +216,11 @@ void	Request::translateUri( void ) {
 	{
 		if (stat(_translate.c_str(), &st) == -1)
 			throw std::runtime_error("404");
-		_translate = absolutePath + _translate;
 		if (st.st_mode & S_IFDIR)
 		{
 			if (*_translate.rbegin() != '/')
 				_translate += "/";
+			v_str::const_iterator	it;
 			for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
 				if (access((_translate + *it).c_str(), R_OK) == 0)
 					break ;
@@ -229,61 +233,61 @@ void	Request::translateUri( void ) {
 	}
 }
 
+void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
+
+	unsigned	i;
+	int			nBytes;
+	char		*buffer;
+
+	buffer = (char*) malloc (sizeof(char) * (chunkSize + 1));
+	if (buffer == NULL)
+		throw std::runtime_error("507");
+	i = 0;
+	while (i < chunkSize)
+	{
+		nBytes = recv(socket, &buffer[i], chunkSize, 0);
+		if (nBytes <= 0)
+			throw std::runtime_error("499");
+		i += nBytes;
+	}
+	buffer[i] = '\0';
+	_body += buffer;
+	free(buffer);
+}
+
 void	Request::bodyParser( const int &socket ) {
 	if (_method != "POST" && _method != "PUT")
 		return ;
-	std::string		size;
-	//char			c;
-	int 			cl;
-	//int			pos;
-	int 			nBytes;
-	char			*buffer;
 
 	if (_headers.find("Content-Length") != _headers.end())
-	{
-		cl = std::atoi(_headers.at("Content-Length").c_str());
-		buffer = (char*)malloc(sizeof(char) * (cl + 1));
-		while (cl != 0)
-		{
-			nBytes = recv(socket, buffer, cl, 0);
-			if (nBytes <= 0)
-				throw std::runtime_error("499");
-			cl -= nBytes;
-			buffer += nBytes;
-		}
-		*buffer = '\0';
-		buffer -= std::atoi(_headers.at("Content-Length").c_str());
-	}
-	_body += buffer;
-	free(buffer);
-	std::cout << _body << std::endl;
-	else if (_headers.find("Transfer-Encoding") != _headers.end())
-	{
-		cl = 0;
-		while (true)
-		{
-			while (size.find("\r\n\r\n"))
-			{
-				nBytes = recv(socket, &c, 1, 0);
-				if (nBytes <= 0)
-					throw std::runtime_error("499");
-				size += c;
-			}
-			std::stringstream ss;
-			ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
-			ss >> cl;
-			if (cl == 0)
-				break ;
-			while (cl != 0)
-			{
-				nBytes = recv(socket, &buffer, cl, 0);
-				if (nBytes <= 0)
-					throw std::runtime_error("499");
-				cl -= nBytes;
-			}
-			_body += buffer;
-		}
-	}
+		readChunk(socket, strtoul(_headers.at("Content-Length").c_str(), NULL, 10));
+	// else if (_headers.find("Transfer-Encoding") != _headers.end())
+	// {
+	// 	cl = 0;
+	// 	while (true)
+	// 	{
+	// 		while (size.find("\r\n\r\n"))
+	// 		{
+	// 			nBytes = recv(socket, &c, 1, 0);
+	// 			if (nBytes <= 0)
+	// 				throw std::runtime_error("499");
+	// 			size += c;
+	// 		}
+	// 		std::stringstream ss;
+	// 		ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
+	// 		ss >> cl;
+	// 		if (cl == 0)
+	// 			break ;
+	// 		while (cl != 0)
+	// 		{
+	// 			nBytes = recv(socket, &buffer, cl, 0);
+	// 			if (nBytes <= 0)
+	// 				throw std::runtime_error("499");
+	// 			cl -= nBytes;
+	// 		}
+	// 		_body += buffer;
+	// 	}
+	// }
 }
 
 void	Request::displayRequest( void ) const {

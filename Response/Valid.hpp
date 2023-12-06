@@ -13,11 +13,15 @@
 #ifndef VALID_H
 # define VALID_H
 
-#include "Response.hpp"
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <cerrno>
+# include <cstring>
+# include "Response.hpp"
 
 class Valid : public Response {
 	private:
-		Request	_request;
+		Request _request;
 	public:
 		Valid( void );
 		Valid( const Request &request );
@@ -25,7 +29,9 @@ class Valid : public Response {
 		Valid &operator=( const Valid &src );
 		~Valid( );
 
-		void	generateBody( void );
+		const Request	&getRequest( void ) const;
+		void			setRequest( const Request &request );
+		void			generateBody( void );
 };
 
 #endif

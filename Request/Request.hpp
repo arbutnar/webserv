@@ -52,6 +52,7 @@ class Request {
 		void	uriMatcher( const s_locs &locations );
 		void	matchChecker( void ) const;
 		void	translateUri( void );
+		void	readChunk( const int &socket, const size_t &chunkSize );
 		void	bodyParser( const int &socket );
 		void	displayRequest( void ) const;
 };

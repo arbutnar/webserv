@@ -16,8 +16,9 @@ Error::Error( void )
 	: Response() {
 }
 
-Error::Error( const std::string &code )
-	: Response(code) {
+Error::Error( const std::string &code ) 
+	: Response() {
+		_status = code + " ";
 		int c = std::atoi(code.c_str());
 		switch (c)
 		{
@@ -33,12 +34,16 @@ Error::Error( const std::string &code )
 				_status += "Conflict"; break ;
 			case URI_TOO_LONG:
 				_status += "URI Too Long"; break ;
+			case REQUEST_HEADER_TOO_LARGE:
+				_status += "Request header too large"; break ;
 			case CLIENT_CLOSED_REQUEST:
 				_status += "Client Closed Request"; break ;
 			case NOT_IMPLEMENTED:
 				_status += "Not Implemented"; break;
 			case HTTP_NOT_SUPPORTED:
 				_status += "HTTP Not Supported"; break ;
+			case INSUFFICIENT_STORAGE:
+				_status += "Insufficient Storage"; break ;
 			default:
 				_status = "500 Internal Server Error";			
 		}
