@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/04 18:02:33 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/06 15:49:19 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,7 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		request.uriMatcher(_locations);
 		request.matchChecker();
 		request.translateUri();
+		exit(0);
 		request.bodyParser(c_it->getSocket());
 		response = new Valid(request);
 	} catch(std::exception &e) {

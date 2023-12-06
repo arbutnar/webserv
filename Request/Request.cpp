@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/04 14:47:32 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/06 15:49:28 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void	Request::matchChecker( void ) const {
 
 void	Request::translateUri( void ) {
 	v_str::const_iterator	it;
-	struct stat 			st;
+	// struct stat 			st;
 
 	if (_uri == "/")
 		_uri.clear();
@@ -197,23 +197,9 @@ void	Request::translateUri( void ) {
 		else
 			_translate = _match.getAlias();
 	}
-	if (stat(_translate.c_str(), &st) == -1)
-		throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
-	if (st.st_mode & S_IFDIR)
-	{
-		_translate = absolutePath + _translate;
-		if (*_translate.rbegin() != '/')
-			_translate += "/";
-		for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
-		{
-			if (_match.getLimitExcept().at("GET") == true)
-				if (access((_translate + *it).c_str(), R_OK) == 0)
-					break ;	
-		}
-		if (it == _match.getIndex().end())
-			throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
-		_translate += *it;
-	}
+	std::cout << '$' << _translate << '$' << std::endl;
+	// if (stat(_translate.c_str(), &st) == -1)
+	
 }
 
 void	Request::bodyParser( const int &socket ) {
@@ -279,3 +265,19 @@ void	Request::displayRequest( void ) const {
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 }
+
+// if (st.st_mode & S_IFDIR)
+// 	{
+// 		_translate = absolutePath + _translate;
+// 		if (*_translate.rbegin() != '/')
+// 			_translate += "/";
+// 		for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
+// 		{
+// 			if (_match.getLimitExcept().at("GET") == true)
+// 				if (access((_translate + *it).c_str(), R_OK) == 0)
+// 					break ;	
+// 		}
+// 		if (it == _match.getIndex().end())
+// 			throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
+// 		_translate += *it;
+// 	}
