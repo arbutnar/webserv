@@ -14,6 +14,7 @@
 # define REQUEST_HPP
 
 # include <sys/socket.h>
+# include <fstream>
 # include "../Location/Location.hpp"
 
 class Request {

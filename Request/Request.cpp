@@ -184,7 +184,7 @@ void	Request::matchChecker( void ) const {
 
 void	Request::translateUri( void ) {
 	v_str::const_iterator	it;
-	// struct stat 			st;
+	struct stat 			st;
 
 	if (_uri == "/")
 		_uri.clear();
@@ -197,9 +197,36 @@ void	Request::translateUri( void ) {
 		else
 			_translate = _match.getAlias();
 	}
-	std::cout << '$' << _translate << '$' << std::endl;
-	// if (stat(_translate.c_str(), &st) == -1)
-	
+	if (_method == "PUT")
+	{
+		if (stat(_translate.c_str(), &st) == -1 || st.st_mode & S_IFREG)
+		{
+			std::ofstream	of(_translate.c_str());
+			if (!of.is_open())
+				throw std::runtime_error("500");
+		}
+		else
+			throw std::runtime_error("409");
+	}
+	else if (_method == "GET" || _method == "HEAD")
+	{
+		if (stat(_translate.c_str(), &st) == -1)
+			throw std::runtime_error("404");
+		_translate = absolutePath + _translate;
+		if (st.st_mode & S_IFDIR)
+		{
+			if (*_translate.rbegin() != '/')
+				_translate += "/";
+			for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
+				if (access((_translate + *it).c_str(), R_OK) == 0)
+					break ;
+			if (it == _match.getIndex().end())
+				throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
+			_translate += *it;
+		}
+		if (access((_translate).c_str(), R_OK) == -1)
+			throw std::runtime_error("404");
+	}
 }
 
 void	Request::bodyParser( const int &socket ) {
@@ -208,7 +235,7 @@ void	Request::bodyParser( const int &socket ) {
 	std::string		size;
 	//char			c;
 	int 			cl;
-	//int				pos;
+	//int			pos;
 	int 			nBytes;
 	char			*buffer;
 
@@ -224,37 +251,39 @@ void	Request::bodyParser( const int &socket ) {
 			cl -= nBytes;
 			buffer += nBytes;
 		}
-		buffer[cl] = '\0';
+		*buffer = '\0';
+		buffer -= std::atoi(_headers.at("Content-Length").c_str());
 	}
-	_body = buffer;
+	_body += buffer;
+	free(buffer);
 	std::cout << _body << std::endl;
-	//else if (_headers.find("Transfer-Encoding") != _headers.end())
-	//{
-	//	cl = 0;
-	//	while (true)
-	//	{
-	//		while (size.find("\r\n\r\n"))
-	//		{
-	//			nBytes = recv(socket, &c, 1, 0);
-	//			if (nBytes <= 0)
-	//				throw std::runtime_error("499");
-	//			size += c;
-	//		}
-	//		std::stringstream ss;
-	//		ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
-	//		ss >> cl;
-	//		if (cl == 0)
-	//			break ;
-	//		while (cl != 0)
-	//		{
-	//			nBytes = recv(socket, &buffer, cl, 0);
-	//			if (nBytes <= 0)
-	//				throw std::runtime_error("499");
-	//			cl -= nBytes;
-	//		}
-	//		_body += buffer;
-	//	}
-	//}
+	else if (_headers.find("Transfer-Encoding") != _headers.end())
+	{
+		cl = 0;
+		while (true)
+		{
+			while (size.find("\r\n\r\n"))
+			{
+				nBytes = recv(socket, &c, 1, 0);
+				if (nBytes <= 0)
+					throw std::runtime_error("499");
+				size += c;
+			}
+			std::stringstream ss;
+			ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
+			ss >> cl;
+			if (cl == 0)
+				break ;
+			while (cl != 0)
+			{
+				nBytes = recv(socket, &buffer, cl, 0);
+				if (nBytes <= 0)
+					throw std::runtime_error("499");
+				cl -= nBytes;
+			}
+			_body += buffer;
+		}
+	}
 }
 
 void	Request::displayRequest( void ) const {
@@ -265,19 +294,3 @@ void	Request::displayRequest( void ) const {
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 }
-
-// if (st.st_mode & S_IFDIR)
-// 	{
-// 		_translate = absolutePath + _translate;
-// 		if (*_translate.rbegin() != '/')
-// 			_translate += "/";
-// 		for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
-// 		{
-// 			if (_match.getLimitExcept().at("GET") == true)
-// 				if (access((_translate + *it).c_str(), R_OK) == 0)
-// 					break ;	
-// 		}
-// 		if (it == _match.getIndex().end())
-// 			throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
-// 		_translate += *it;
-// 	}

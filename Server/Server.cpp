@@ -141,7 +141,6 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		request.uriMatcher(_locations);
 		request.matchChecker();
 		request.translateUri();
-		exit(0);
 		request.bodyParser(c_it->getSocket());
 		response = new Valid(request);
 	} catch(std::exception &e) {

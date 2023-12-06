@@ -29,6 +29,8 @@ Error::Error( const std::string &code )
 				_status += "Not Found"; break ;
 			case METHOD_NOT_ALLOWED:
 				_status += "Method Not Allowed"; break ;
+			case CONFLICT:
+				_status += "Conflict"; break ;
 			case URI_TOO_LONG:
 				_status += "URI Too Long"; break ;
 			case CLIENT_CLOSED_REQUEST:

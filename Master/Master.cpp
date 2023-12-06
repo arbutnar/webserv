@@ -173,6 +173,8 @@ void	Master::arrangeCluster( void ) {
 			it = _cluster.erase(it);
 		}
 	}
+	if (_cluster.size() == 0)
+		throw std::runtime_error("No Server available");
 }
 
 void	Master::start( void ) {

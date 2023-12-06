@@ -35,10 +35,19 @@ Valid::~Valid( ) {
 }
 
 void	Valid::generateBody( void ) {
-	std::ifstream		is(_request.getTranslate().c_str());
-	std::stringstream	ss;
-
-	ss << is.rdbuf();
 	if(_request.getMethod() == "GET")
+	{
+		std::ifstream		is(_request.getTranslate().c_str());
+		std::stringstream	ss;
+
+		ss << is.rdbuf();
 		_body = ss.str();
+	}
+	else if (_request.getMethod() == "PUT")
+	{
+		std::ofstream	of(_request.getTranslate().c_str());
+
+		std::cout << _request.getTranslate() << std::endl;
+		of << _request.getBody();
+	}
 }
