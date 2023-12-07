@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/06 15:49:28 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 12:21:54 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,7 @@ void	Request::translateUri( void ) {
 			if (!of.is_open())
 				throw std::runtime_error("500");
 		}
-		else if ((st.st_mode & S_IFREG))
+		else if (st.st_mode & S_IFREG)
 		{
 			if (access(_translate.c_str(), W_OK) == -1)
 				throw std::runtime_error("500");
@@ -236,7 +236,7 @@ void	Request::translateUri( void ) {
 void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
 
 	unsigned	i;
-	int			nBytes;
+	int			nBytes = 0;
 	char		*buffer;
 
 	buffer = (char*) malloc (sizeof(char) * (chunkSize + 1));
@@ -261,33 +261,40 @@ void	Request::bodyParser( const int &socket ) {
 
 	if (_headers.find("Content-Length") != _headers.end())
 		readChunk(socket, strtoul(_headers.at("Content-Length").c_str(), NULL, 10));
-	// else if (_headers.find("Transfer-Encoding") != _headers.end())
-	// {
-	// 	cl = 0;
-	// 	while (true)
-	// 	{
-	// 		while (size.find("\r\n\r\n"))
-	// 		{
-	// 			nBytes = recv(socket, &c, 1, 0);
-	// 			if (nBytes <= 0)
-	// 				throw std::runtime_error("499");
-	// 			size += c;
-	// 		}
-	// 		std::stringstream ss;
-	// 		ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
-	// 		ss >> cl;
-	// 		if (cl == 0)
-	// 			break ;
-	// 		while (cl != 0)
-	// 		{
-	// 			nBytes = recv(socket, &buffer, cl, 0);
-	// 			if (nBytes <= 0)
-	// 				throw std::runtime_error("499");
-	// 			cl -= nBytes;
-	// 		}
-	// 		_body += buffer;
-	// 	}
-	// }
+	else if (_headers.find("Transfer-Encoding") != _headers.end())
+	{
+		std::string			size;
+		char				c;
+		std::stringstream	ss;
+		unsigned			chunkSize = 0;
+		int					nBytes;
+		while (true)
+		{
+			while (size.find("\r\n\r\n") == std::string::npos)
+			{
+				nBytes = recv(socket, &c, 1, 0);
+				if (nBytes <= 0)
+					throw std::runtime_error("499");
+				size += c;
+			}
+			ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
+			ss >> chunkSize;
+			std::cout << chunkSize << std::endl;
+			if (chunkSize == 0)
+				break ;
+			readChunk(socket, chunkSize);
+			std::cout << "ciao" << std::endl;
+			size.clear();
+			while (size.find("\r\n\r\n") == std::string::npos)
+			{
+				nBytes = recv(socket, &c, 1, 0);
+				if (nBytes <= 0)
+					throw std::runtime_error("499");
+				size += c;
+			}
+			size.clear();
+		}
+	}
 }
 
 void	Request::displayRequest( void ) const {

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/03 14:18:15 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 11:20:40 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ void	Valid::generateBody( void ) {
 		std::ofstream	of;
 
 		_status = "204 No Content";
-		exit(0);
 		if (stat(_request.getTranslate().c_str(), &st) == -1)
 			_status = "201 Created";
 		of.open(_request.getTranslate().c_str());
