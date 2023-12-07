@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 13:58:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 11:42:16 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 18:14:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ class Request {
 		std::string	_body;
 		std::string	_translate;
 		Location	_match;
+
+		void		readChunk( const int &socket, const size_t &chunkSize );
+		static unsigned	getChunkSize( const int &socket );
 	public:
 		Request( void );
 		Request( const Request &src );
@@ -52,7 +55,6 @@ class Request {
 		void	uriMatcher( const s_locs &locations );
 		void	matchChecker( void ) const;
 		void	translateUri( void );
-		void	readChunk( const int &socket, const size_t &chunkSize );
 		void	bodyParser( const int &socket );
 		void	displayRequest( void ) const;
 };

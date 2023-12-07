@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 11:20:40 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 19:12:22 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,22 @@ Valid::Valid( void )
 
 Valid::Valid( const Request &request )
 	:  Response ("200 Ok"), _request(request) {
+		if (_request.getMatch().getLimitExcept().at(_request.getMethod()) == false)
+			throw std::runtime_error("405");
+		if (_request.getMethod() == "GET" || _request.getMethod() == "HEAD")
+			_file.open(request.getTranslate().c_str(), std::fstream::in);
+		if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
+		{
+			struct stat st;
+			if (stat(request.getTranslate().c_str(), &st) == 0 && st.st_mode & S_IFDIR)
+				throw std::runtime_error("409");
+			_status = "201 Created";
+			if (stat(request.getTranslate().c_str(), &st) == 0)
+				_status = "204 No Content";
+			_file.open(request.getTranslate().c_str(), std::fstream::out);
+		}
+		if (!_file.is_open())
+			throw std::runtime_error("500");
 }
 
 Valid::Valid( const Valid &src )
@@ -47,21 +63,11 @@ void	Valid::setRequest( const Request &request ) {
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")
 	{
-		std::ifstream		is(_request.getTranslate().c_str());
 		std::stringstream	ss;
 
-		ss << is.rdbuf();
+		ss << _file.rdbuf();
 		_body = ss.str();
 	}
 	else if (_request.getMethod() == "PUT")
-	{
-		struct stat		st;
-		std::ofstream	of;
-
-		_status = "204 No Content";
-		if (stat(_request.getTranslate().c_str(), &st) == -1)
-			_status = "201 Created";
-		of.open(_request.getTranslate().c_str());
-		of << _request.getBody();
-	}
+		_file << _request.getBody();
 }

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:00:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/03 15:19:54 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 16:38:52 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,8 +54,7 @@ class Response {
 		void				setHeaders( const m_strStr &headers );
 		void				setBody( const std::string &body);
 
-		void			addHeader( const p_strStr &header );
-		void			generateHeaders( void );
+		void			generateHeaders( const Request &request );
 		virtual void	generateBody( void ) = 0;
 		void			send( const int &socket ) const;
 };

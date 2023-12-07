@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 12:20:36 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 16:39:12 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ void	Server::clientInteraction( const fd_set &active ) {
 bool	Server::writeResponse( v_cli::iterator &c_it ) {
 	Request 	request;
 	Response	*response = NULL;
-	bool		ret = true;;
+	bool		ret = true;
 
 	try {
 		std::cout << c_it->getBuffer() << std::endl;
@@ -147,11 +147,7 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		response = new Error(e.what());
 	}
 	response->generateBody();
-	response->generateHeaders();
-	if (request.getHeaders().find("Connection") == request.getHeaders().end())
-		response->addHeader(std::make_pair("Connection", "keep-alive"));
-	else
-		response->addHeader(*request.getHeaders().find("Connection"));
+	response->generateHeaders(request);
 	response->send(c_it->getSocket());
 	if (response->getHeaders().at("Connection") == "close")
 		ret = false;

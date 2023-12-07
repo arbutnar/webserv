@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:25:35 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/04 14:23:52 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 19:43:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,7 @@ void	Response::setBody( const std::string &body ) {
 	_body = body;
 }
 
-void	Response::addHeader( const p_strStr &header ) {
-	_headers.insert(header);
-}
-
-void	Response::generateHeaders( void ) {
+void	Response::generateHeaders( const Request &request ) {
 	std::time_t	now = time(0);
 	struct tm	tstruct;
 	char		buf[30];
@@ -74,6 +70,12 @@ void	Response::generateHeaders( void ) {
 	tstruct = *localtime(&now);
 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
 	_headers.insert(std::make_pair("Date", buf));
+	if (_status == "499 Client Closed Request")
+		_headers.insert(std::make_pair("Connection", "close"));
+	else if (request.getHeaders().find("Connection") != request.getHeaders().end())
+		_headers.insert(*request.getHeaders().find("Connection"));
+	else
+		_headers.insert(std::make_pair("Connection", "keep-alive"));
 	if (!_body.empty())
 	{
 		_headers.insert(std::make_pair("Content-Type", "text/html"));

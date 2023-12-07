@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:47:36 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/03 14:03:58 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 18:16:03 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@
 
 class Valid : public Response {
 	private:
-		Request _request;
+		Request			_request;
+		std::fstream	_file;
 	public:
 		Valid( void );
 		Valid( const Request &request );

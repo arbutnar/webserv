@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 12:21:54 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/07 19:10:10 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,8 +146,12 @@ void	Request::headersChecker( void ) const {
 			throw std::runtime_error("400");
 	}
 	if (_headers.find("Content-Length") != _headers.end())
+	{
 		if (_headers.at("Content-Length").find_first_not_of("0123456789") != std::string::npos)
 			throw std::runtime_error("400");
+		if (_headers.find("Transfer-Encoding") != _headers.end())
+			throw std::runtime_error("400");
+	}
 	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
 		throw std::runtime_error("400");
 }
@@ -174,8 +178,6 @@ void	Request::uriMatcher( const s_locs &locations ) {
 void	Request::matchChecker( void ) const {
 	unsigned int	cl = 0;
 
-	if (_match.getLimitExcept().at(_method) == false)
-		throw std::runtime_error("405");
 	if (_headers.find("Content-Length") != _headers.end())
 		cl = strtoul(_headers.at("Content-Length").c_str(), NULL, 10);
 	if (cl > _match.getClientMaxBodySize())
@@ -196,23 +198,7 @@ void	Request::translateUri( void ) {
 	}
 	_translate = absolutePath + _translate;
 	struct stat st;
-	if (_method == "PUT")
-	{
-		if (stat(_translate.c_str(), &st) == -1)
-		{
-			std::ofstream	of(_translate.c_str());
-			if (!of.is_open())
-				throw std::runtime_error("500");
-		}
-		else if (st.st_mode & S_IFREG)
-		{
-			if (access(_translate.c_str(), W_OK) == -1)
-				throw std::runtime_error("500");
-		}
-		else
-			throw std::runtime_error("409");
-	}
-	else if (_method == "GET" || _method == "HEAD")
+	if (_method == "GET" || _method == "HEAD")
 	{
 		if (stat(_translate.c_str(), &st) == -1)
 			throw std::runtime_error("404");
@@ -255,46 +241,46 @@ void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
 	free(buffer);
 }
 
+unsigned	Request::getChunkSize( const int &socket ) {
+	std::string			size;
+	char				c;
+	std::stringstream	ss;
+	int					nBytes;
+	unsigned			chunkSize = 0;
+
+	while (size.find("\r\n") == std::string::npos)
+	{
+		nBytes = recv(socket, &c, 1, 0);
+		if (nBytes <= 0)
+			throw std::runtime_error("499");
+		size += c;
+	}
+	ss << std::hex << size.substr(0, size.find("\r\n"));
+	chunkSize = 0;
+	ss >> chunkSize;
+	return chunkSize;
+}
+
 void	Request::bodyParser( const int &socket ) {
 	if (_method != "POST" && _method != "PUT")
 		return ;
-
 	if (_headers.find("Content-Length") != _headers.end())
 		readChunk(socket, strtoul(_headers.at("Content-Length").c_str(), NULL, 10));
-	else if (_headers.find("Transfer-Encoding") != _headers.end())
+	else if (_headers.at("Transfer-Encoding") == "chunked")
 	{
-		std::string			size;
-		char				c;
-		std::stringstream	ss;
-		unsigned			chunkSize = 0;
-		int					nBytes;
+		unsigned	chunkSize;
 		while (true)
 		{
-			while (size.find("\r\n\r\n") == std::string::npos)
-			{
-				nBytes = recv(socket, &c, 1, 0);
-				if (nBytes <= 0)
-					throw std::runtime_error("499");
-				size += c;
-			}
-			ss << std::hex << size.substr(0, size.find("\r\n\r\n"));
-			ss >> chunkSize;
-			std::cout << chunkSize << std::endl;
+			chunkSize = getChunkSize(socket);
 			if (chunkSize == 0)
 				break ;
 			readChunk(socket, chunkSize);
-			std::cout << "ciao" << std::endl;
-			size.clear();
-			while (size.find("\r\n\r\n") == std::string::npos)
-			{
-				nBytes = recv(socket, &c, 1, 0);
-				if (nBytes <= 0)
-					throw std::runtime_error("499");
-				size += c;
-			}
-			size.clear();
+			chunkSize = getChunkSize(socket);
 		}
+		chunkSize = getChunkSize(socket);
 	}
+	else
+		throw std::runtime_error("501");
 }
 
 void	Request::displayRequest( void ) const {
