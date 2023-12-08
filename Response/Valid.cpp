@@ -32,8 +32,11 @@ Valid::Valid( const Request &request )
 				_status = "204 No Content";
 			_file.open(request.getTranslate().c_str(), std::fstream::out);
 		}
-		if (!_file.is_open())
+		if (!_file.is_open() && _request.getMethod() != "DELETE")
 			throw std::runtime_error("500");
+		else if (_request.getMethod() == "DELETE")
+			if ((remove(_request.getTranslate().c_str())) == 0)
+				_status = "204 No Content";
 }
 
 Valid::Valid( const Valid &src )
@@ -49,7 +52,6 @@ Valid	&Valid::operator=( const Valid &src ) {
 }
 
 Valid::~Valid( ) {
-
 }
 
 const Request	&Valid::getRequest( void ) const {
@@ -63,8 +65,7 @@ void	Valid::setRequest( const Request &request ) {
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")
 	{
-		std::stringstream	ss;
-
+		std::stringstream ss;
 		ss << _file.rdbuf();
 		_body = ss.str();
 	}

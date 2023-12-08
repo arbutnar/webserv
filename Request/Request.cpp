@@ -198,10 +198,11 @@ void	Request::translateUri( void ) {
 	}
 	_translate = absolutePath + _translate;
 	struct stat st;
-	if (_method == "GET" || _method == "HEAD")
-	{
+	if (_method != "PUT" && _method != "POST")
 		if (stat(_translate.c_str(), &st) == -1)
 			throw std::runtime_error("404");
+	if (_method == "GET" || _method == "HEAD")
+	{
 		if (st.st_mode & S_IFDIR)
 		{
 			if (*_translate.rbegin() != '/')
@@ -239,6 +240,7 @@ void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
 	buffer[i] = '\0';
 	_body += buffer;
 	free(buffer);
+	std::cout << _body << std::endl;
 }
 
 unsigned	Request::getChunkSize( const int &socket ) {

@@ -17,8 +17,7 @@ Error::Error( void )
 }
 
 Error::Error( const std::string &code ) 
-	: Response() {
-		_status = code + " ";
+	: Response(code + " ") {
 		int c = std::atoi(code.c_str());
 		switch (c)
 		{
@@ -34,6 +33,8 @@ Error::Error( const std::string &code )
 				_status += "Conflict"; break ;
 			case URI_TOO_LONG:
 				_status += "URI Too Long"; break ;
+			case UNSUPPORTED_MEDIA_TYPE:
+				_status += "Unsupported Media Type"; break ;
 			case REQUEST_HEADER_TOO_LARGE:
 				_status += "Request header too large"; break ;
 			case CLIENT_CLOSED_REQUEST:
