@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/04 17:53:55 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/08 16:13:52 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,10 @@ void	Master::arrangeCluster( void ) {
 void	Master::start( void ) {
 	fd_set	active;
 	int		max;
+	struct timeval  tv;
 
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
 	while (true)
 	{
 		for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
@@ -192,7 +195,7 @@ void	Master::start( void ) {
 			max = it->nfds();
 			if (max == 0)
 				max = it->getListener();
-			if (select(max + 1, &active, NULL, NULL, NULL) < 1)
+			if (select(max + 1, &active, NULL, NULL, &tv) < 1)
 				continue ;
 			if (FD_ISSET(it->getListener(), &active))
 				it->newConnection();
