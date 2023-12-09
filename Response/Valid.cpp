@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 19:12:22 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/09 18:14:30 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,31 @@ void	Valid::setRequest( const Request &request ) {
 	_request = request;
 }
 
+void	Valid::createEnv( void ) {
+	char	*env[8];
+
+	// GATEWAY_INTERFACE
+	// PATH_INFO
+	// PATH_TRANSLATED	
+	env[0] = strdup("SERVER_SOFTWARE=42webserv/1.0");
+	env[1] = strdup("SERVER_NAME=127.0.0.1");
+	env[2] = strdup("SERVER_PROTOCOL=HTTP/1.1");
+	std::stringstream	ss;
+	ss <<  _request.getMatch().getListenPort();
+	env[3] = strdup((static_cast<std::string>("SERVER_PORT=") + ss.str()).c_str());
+	env[4] = strdup((static_cast<std::string>("REQUEST_METHOD=") + _request.getMethod()).c_str());
+	env[5] = strdup((static_cast<std::string>("SCRIPT_NAME=") + _request.getMatch().getCgiPass()).c_str());
+	env[6] = strdup((static_cast<std::string>("REMOTE_HOST") + _request.getHeaders().at("Host")).c_str());
+	ss << _body.size();
+	env[7] = strdup((static_cast<std::string>("CONTENT_LENGTH") + ss.str()).c_str());
+	env[8] = NULL;
+	(void)env;
+}
+
+void	Valid::handleCgi( void ) {
+	createEnv();
+}
+
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")
 	{
@@ -69,6 +94,13 @@ void	Valid::generateBody( void ) {
 		ss << _file.rdbuf();
 		_body = ss.str();
 	}
-	else if (_request.getMethod() == "PUT")
-		_file << _request.getBody();
+	else if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
+	{
+		_body = _request.getBody();
+		if (!_request.getMatch().getCgiPass().empty())
+			handleCgi();
+		_file << _body;
+		if (_request.getMethod() == "PUT")
+			_body.clear();
+	}
 }

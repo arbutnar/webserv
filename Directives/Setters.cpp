@@ -40,8 +40,8 @@ void	Directives::setAutoindex( const bool &autoindex ) {
 	_autoindex = autoindex;
 }
 
-void	Directives::setScgiPass( const std::string &scgi_pass ) {
-	_scgi_pass = scgi_pass;
+void	Directives::setCgiPass( const std::string &cgi_pass ) {
+	_cgi_pass = cgi_pass;
 }
 
 void	Directives::setTryFiles( const v_str &try_files ) {

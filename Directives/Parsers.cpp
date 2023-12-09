@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 14:40:37 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 19:44:00 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/09 17:29:30 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,13 +121,13 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
 }
 
-void	Directives::parseScgiPass( const std::string &attribute ) {
-	_scgi_pass = attribute;
-	if (*_scgi_pass.begin() == '/')
-		_scgi_pass.erase(0, 1);
-	_scgi_pass = absolutePath + _scgi_pass;
-	if (access(_scgi_pass.c_str(), X_OK) == -1)
-		throw std::runtime_error("Syntax Error: scgi_pass Directive");
+void	Directives::parseCgiPass( const std::string &attribute ) {
+	_cgi_pass = attribute;
+	if (*_cgi_pass.begin() == '/')
+		_cgi_pass.erase(0, 1);
+	_cgi_pass = absolutePath + _cgi_pass;
+	if (access(_cgi_pass.c_str(), X_OK) == -1)
+		throw std::runtime_error("Syntax Error: cgi_pass Directive");
 }
 
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {

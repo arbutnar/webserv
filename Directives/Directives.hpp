@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/02 17:56:16 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/09 17:27:35 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ enum	commonDirectives {
 	ALIAS,
 	INDEX,
 	AUTOINDEX,
-	SCGI_PASS,
+	CGI_PASS,
 	TRY_FILES,
 	LIMIT_EXCEPT,
 	ERROR_PAGE,
@@ -62,7 +62,7 @@ class Directives {
 		std::string		_alias;
 		v_str			_index;
 		bool			_autoindex;
-		std::string		_scgi_pass;
+		std::string		_cgi_pass;
 		v_str			_try_files;
 		m_strBool		_limit_except;
 		m_intStr		_error_page;
@@ -89,7 +89,7 @@ class Directives {
 		void	parseTryFiles( const std::string &attribute );
 		void	parseLimitExcept( const std::string &attribute );
 		void	parseErrorPage( const std::string &attribute );
-		void	parseScgiPass( const std::string &attribute );
+		void	parseCgiPass( const std::string &attribute );
 		void	parseClientMaxBodySize( const std::string &attribute );
 		void	parseClientHeaderBufferSize( const std::string &attribute );
 		void	parseReturn( const std::string &attribute );
@@ -101,7 +101,7 @@ class Directives {
 		void	setAlias( const std::string &root );
 		void	setIndex( const v_str &index );
 		void	setAutoindex( const bool &autoindex );
-		void	setScgiPass( const std::string &scgi_pass );
+		void	setCgiPass( const std::string &cgi_pass );
 		void	setTryFiles( const v_str &try_files );
 		void	setLimitExcept( const m_strBool &limit_except );
 		void	setErrorPage( const m_intStr &error_page );
@@ -116,7 +116,7 @@ class Directives {
 		const std::string	&getAlias( void ) const;
 		const v_str			&getIndex( void ) const;
 		const bool			&getAutoindex( void ) const;
-		const std::string	&getScgiPass( void ) const;
+		const std::string	&getCgiPass( void ) const;
 		const v_str			&getTryFiles( void ) const;
 		const m_strBool		&getLimitExcept( void ) const;
 		const m_intStr		&getErrorPage( void ) const;

@@ -24,7 +24,7 @@ Directives::Directives( void ) {
 	_index.clear();
 	_index.push_back("index.html");
 	_autoindex = false;
-	_scgi_pass = "";
+	_cgi_pass = "";
 	_try_files.clear();
 	_error_page.clear();
 	_client_max_body_size = 1000000;
@@ -55,7 +55,7 @@ Directives& Directives::operator=( const Directives &src ) {
 	_alias = src._alias;
 	_index = src._index;
 	_autoindex = src._autoindex;
-	_scgi_pass = src._scgi_pass;
+	_cgi_pass = src._cgi_pass;
 	_try_files = src._try_files;
 	_limit_except = src._limit_except;
 	_error_page = src._error_page;
@@ -66,7 +66,7 @@ Directives& Directives::operator=( const Directives &src ) {
 }
 
 void	Directives::directiveParser( std::string line ) {
-	std::string	arr[] = { "listen", "server_name", "root", "alias", "index", "autoindex", "scgi_pass", "try_files", 
+	std::string	arr[] = { "listen", "server_name", "root", "alias", "index", "autoindex", "cgi_pass", "try_files", 
 							"limit_except", "error_page", "client_max_body_size", "client_header_buffer_size", "return" };
 	std::string	key;
 	std::string	value;
@@ -102,8 +102,8 @@ void	Directives::directiveParser( std::string line ) {
 			parseLimitExcept(value); break;
 		case TRY_FILES:
 			parseTryFiles(value); break;
-		case SCGI_PASS:
-			parseScgiPass(value); break;
+		case CGI_PASS:
+			parseCgiPass(value); break;
 		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
 		case CLIENT_HEADER_BUFFER_SIZE:
@@ -126,7 +126,7 @@ void	Directives::displayDirectives( void ) const {
 		std::cout << *it << ' ';
 	std::cout << std::endl;
 	std::cout << "Autoindex: " << _autoindex << std::endl;
-	std::cout << "Scgi Pass: " << _scgi_pass << std::endl;
+	std::cout << "Cgi Pass: " << _cgi_pass << std::endl;
 	std::cout << "Try Files: ";
 	for (v_str::const_iterator it = _try_files.begin(); it != _try_files.end(); it++)
 		std::cout << *it << ' ';
