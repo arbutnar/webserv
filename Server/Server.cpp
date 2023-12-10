@@ -134,7 +134,6 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 	bool		ret = true;
 
 	try {
-		std::cout << c_it->getBuffer() << std::endl;
 		bufferChecker(c_it->getBuffer());
 		request.headersParser(c_it->getBuffer());
 		request.headersChecker();
@@ -142,6 +141,7 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		request.matchChecker();
 		request.translateUri();
 		request.bodyParser(c_it->getSocket());
+		request.displayRequest();
 		response = new Valid(request);
 	} catch(std::exception &e) {
 		response = new Error(e.what());

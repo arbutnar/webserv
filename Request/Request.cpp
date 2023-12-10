@@ -240,7 +240,6 @@ void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
 	buffer[i] = '\0';
 	_body += buffer;
 	free(buffer);
-	std::cout << _body << std::endl;
 }
 
 unsigned	Request::getChunkSize( const int &socket ) {
@@ -288,7 +287,7 @@ void	Request::bodyParser( const int &socket ) {
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;
 	std::cout << "uri: " << _uri << std::endl;
-	std::cout << "match Loocation name: " << _match.getLocationName() << std::endl;
+	std::cout << "match Location name: " << _match.getLocationName() << std::endl;
 	std::cout << "uri translated: " << _translate << std::endl;
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;

@@ -62,30 +62,63 @@ void	Valid::setRequest( const Request &request ) {
 	_request = request;
 }
 
-void	Valid::createEnv( void ) {
-	char	*env[8];
-
-	// GATEWAY_INTERFACE
-	// PATH_INFO
-	// PATH_TRANSLATED	
-	env[0] = strdup("SERVER_SOFTWARE=42webserv/1.0");
-	env[1] = strdup("SERVER_NAME=127.0.0.1");
-	env[2] = strdup("SERVER_PROTOCOL=HTTP/1.1");
-	std::stringstream	ss;
-	ss <<  _request.getMatch().getListenPort();
-	env[3] = strdup((static_cast<std::string>("SERVER_PORT=") + ss.str()).c_str());
-	env[4] = strdup((static_cast<std::string>("REQUEST_METHOD=") + _request.getMethod()).c_str());
-	env[5] = strdup((static_cast<std::string>("SCRIPT_NAME=") + _request.getMatch().getCgiPass()).c_str());
-	env[6] = strdup((static_cast<std::string>("REMOTE_HOST") + _request.getHeaders().at("Host")).c_str());
-	ss << _body.size();
-	env[7] = strdup((static_cast<std::string>("CONTENT_LENGTH") + ss.str()).c_str());
-	env[8] = NULL;
-	(void)env;
-}
-
 void	Valid::handleCgi( void ) {
-	createEnv();
+	int			fd_in = fileno(tmpfile());
+	int			fd_out = fileno(tmpfile());
+	pid_t		pid;
+	std::string	path;
+	char*		args[3];
+	char*		env[10];
+
+	write(fd_in, _body.c_str(), _body.size());
+	lseek(fd_in, 0, SEEK_SET);
+	path = _request.getMatch().getCgiPass();
+	args[0] = strdup(_request.getMatch().getCgiPass().c_str());
+	args[1] = strdup(_request.getTranslate().c_str());
+	args[2] = NULL;
+	env[0] = strdup("SERVER_PROTOCOL=HTTP/1.1");
+	env[1] = strdup(("REQUEST_METHOD=" + _request.getMethod()).c_str());
+	env[2] = strdup(("PATH_INFO=" + _request.getUri()).c_str());
+	env[3] = NULL;
+	pid = fork();
+	if (pid < 0)
+		throw std::runtime_error("Error in handling CGI");
+	else if (pid == 0)
+	{
+		if (dup2(fd_in, 0) == -1 || dup2(fd_out, 1) == -1)
+			throw std::runtime_error("Error in handling CGI");
+		execve(args[0], args, env);
+		throw std::runtime_error("Error in handling CGI");
+	}
+	else
+	{
+		waitpid(-1, NULL, 0);	// aspetta che qualsiasi figlio termini o cambi di stato, non gli interessa quale cambiamento di stato e' avvennuto e non e' importante l'opzione con la quale il processo padre ritorna ad essere
+		lseek(fd_out, 0, SEEK_SET);
+		struct stat st;
+		fstat(fd_out, &st);
+		size_t	size = st.st_size;
+		char*	buffer = (char *) calloc (size + 1, sizeof(char));
+		size_t	nBytes;
+		size_t	i = 0;
+		while (i < size)
+		{
+			nBytes = read(fd_out, &buffer[i], size);		// typically send()/recv() are used for sockets, write()/read() for files.
+			if (nBytes <= 0)
+				throw std::runtime_error("Error in handling CGI");
+			i += nBytes;
+		}
+		buffer[i] = '\0';
+		_body = buffer;
+		free(buffer);
+	}
+	close(fd_in);
+	close(fd_out);
+	for(int i = 0; args[i]; i++)
+		delete[] args[i];
+	for(int i = 0; env[i]; i++)
+		delete[] env[i];
 }
+
 
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")

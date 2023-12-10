@@ -15,6 +15,7 @@
 
 # include <sys/types.h>
 # include <sys/stat.h>
+# include <sys/wait.h>
 # include <cerrno>
 # include <cstring>
 # include <string.h>
@@ -31,9 +32,9 @@ class Valid : public Response {
 		Valid &operator=( const Valid &src );
 		~Valid( );
 
-		const Request	&getRequest( void ) const;
+		const Request&	getRequest( void ) const;
 		void			setRequest( const Request &request );
-		void			createEnv( void );
+		void			fillEnv( char** env );
 		void			handleCgi( void );
 		void			generateBody( void );
 };
