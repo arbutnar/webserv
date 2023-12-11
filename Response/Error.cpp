@@ -69,6 +69,5 @@ Error::~Error( ) {
 void	Error::generateBody( void ) {
 	_body = "<!DOCTYPE HTML>\n";
 	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t<h1>";
-	_body += _status.substr(4, std::string::npos);
-	_body += "</h1>\n</body>\n</html>\n";
+	_body += _status + "</h1>\n</body>\n</html>\n";
 }

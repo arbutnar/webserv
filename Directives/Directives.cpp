@@ -22,7 +22,6 @@ Directives::Directives( void ) {
 	_root = "";
 	_alias = "";
 	_index.clear();
-	_index.push_back("index.html");
 	_autoindex = false;
 	_cgi_pass = "";
 	_try_files.clear();

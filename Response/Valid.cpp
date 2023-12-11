@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/09 18:14:30 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/11 18:10:25 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@ Valid::Valid( void )
 
 Valid::Valid( const Request &request )
 	:  Response ("200 Ok"), _request(request) {
-		if (_request.getMatch().getLimitExcept().at(_request.getMethod()) == false)
-			throw std::runtime_error("405");
 		if (_request.getMethod() == "GET" || _request.getMethod() == "HEAD")
 			_file.open(request.getTranslate().c_str(), std::fstream::in);
 		if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
@@ -62,6 +60,31 @@ void	Valid::setRequest( const Request &request ) {
 	_request = request;
 }
 
+void	Valid::handleAutoindex( void ) {
+	DIR				*dir;
+	struct dirent	*entry;
+	std::string		uri = _request.getUri();
+	std::cout << _request.getTranslate() << std::endl;
+	dir = opendir(_request.getTranslate().c_str());
+	_body = "<!DOCTYPE HTML>\n";
+	_body += "<html>\n<head>\n\t<title>" + uri + "</title>\n</head>\n<body>\n";
+	_body += "\t<h1>Index of " + uri + "</h1>\n\t<hr>\n";
+	if (*uri.rbegin() != '/')
+		uri += "/";
+	if (*uri.begin() != '/')
+		uri = "/" + uri;
+	while ((entry = readdir(dir)) != NULL)
+	{
+		_body += "\t<a href=\"";
+		_body += uri + entry->d_name;
+		_body += "\">";
+		_body += entry->d_name;
+		_body += "</a><br>\n";
+	}
+	_body += "\t<hr>\n</body>\n</html>\n";
+	closedir(dir);
+}
+
 void	Valid::handleCgi( void ) {
 	int			fd_in = fileno(tmpfile());
 	int			fd_out = fileno(tmpfile());
@@ -72,7 +95,6 @@ void	Valid::handleCgi( void ) {
 
 	write(fd_in, _body.c_str(), _body.size());
 	lseek(fd_in, 0, SEEK_SET);
-	path = _request.getMatch().getCgiPass();
 	args[0] = strdup(_request.getMatch().getCgiPass().c_str());
 	args[1] = strdup(_request.getTranslate().c_str());
 	args[2] = NULL;
@@ -82,13 +104,13 @@ void	Valid::handleCgi( void ) {
 	env[3] = NULL;
 	pid = fork();
 	if (pid < 0)
-		throw std::runtime_error("Error in handling CGI");
+		throw std::runtime_error("500");
 	else if (pid == 0)
 	{
 		if (dup2(fd_in, 0) == -1 || dup2(fd_out, 1) == -1)
-			throw std::runtime_error("Error in handling CGI");
+			throw std::runtime_error("500");
 		execve(args[0], args, env);
-		throw std::runtime_error("Error in handling CGI");
+		throw std::runtime_error("500");
 	}
 	else
 	{
@@ -104,7 +126,7 @@ void	Valid::handleCgi( void ) {
 		{
 			nBytes = read(fd_out, &buffer[i], size);		// typically send()/recv() are used for sockets, write()/read() for files.
 			if (nBytes <= 0)
-				throw std::runtime_error("Error in handling CGI");
+				throw std::runtime_error("500");
 			i += nBytes;
 		}
 		buffer[i] = '\0';
@@ -123,9 +145,17 @@ void	Valid::handleCgi( void ) {
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")
 	{
-		std::stringstream ss;
-		ss << _file.rdbuf();
-		_body = ss.str();
+		if (_request.getMatch().getAutoindex() == true && *_request.getTranslate().rbegin() == '/')
+			handleAutoindex();
+		else
+		{
+			std::stringstream ss;
+			ss << _file.rdbuf();
+			_body = ss.str();
+			if (!_request.getMatch().getCgiPass().empty())
+				handleCgi();
+		}
+			
 	}
 	else if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
 	{

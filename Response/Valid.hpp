@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:47:36 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/09 18:13:12 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/11 15:09:26 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <cerrno>
 # include <cstring>
 # include <string.h>
+# include <dirent.h>
 # include "Response.hpp"
 
 class Valid : public Response {
@@ -34,7 +35,7 @@ class Valid : public Response {
 
 		const Request&	getRequest( void ) const;
 		void			setRequest( const Request &request );
-		void			fillEnv( char** env );
+		void			handleAutoindex( void );
 		void			handleCgi( void );
 		void			generateBody( void );
 };

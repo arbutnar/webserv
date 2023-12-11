@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 19:10:10 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/11 17:35:40 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void	Request::headersParser( const std::string &buffer ) {
 	if (_headers.find("Content-Length") != _headers.end() && _headers.find("Transfer-Encoding") != _headers.end())
 		_headers.erase("Content-Length");
 	else if (_headers.find("Content-Length") == _headers.end())
-		_headers.insert(std::make_pair("Transfer-Encoding", "chuncked"));
+		_headers.insert(std::make_pair("Transfer-Encoding", "chunked"));
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri.erase(0, 1);
 }
@@ -178,6 +178,8 @@ void	Request::uriMatcher( const s_locs &locations ) {
 void	Request::matchChecker( void ) const {
 	unsigned int	cl = 0;
 
+	if (_match.getLimitExcept().at(_method) == false)
+		throw std::runtime_error("405");
 	if (_headers.find("Content-Length") != _headers.end())
 		cl = strtoul(_headers.at("Content-Length").c_str(), NULL, 10);
 	if (cl > _match.getClientMaxBodySize())
@@ -196,6 +198,8 @@ void	Request::translateUri( void ) {
 		else
 			_translate = _match.getAlias();
 	}
+	if (_uri.empty())
+		_uri = "/";
 	_translate = absolutePath + _translate;
 	struct stat st;
 	if (_method != "PUT" && _method != "POST")
@@ -211,11 +215,14 @@ void	Request::translateUri( void ) {
 			for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
 				if (access((_translate + *it).c_str(), R_OK) == 0)
 					break ;
-			if (it == _match.getIndex().end())
-				throw std::runtime_error("404");		// testare con nginx e capire quando e' FORBIDDEN
-			_translate += *it;
+			if (it != _match.getIndex().end())
+				_translate += *it;
+			else if (access((_translate + "index.html").c_str(), R_OK) == 0)
+				_translate += "index.html";
+			else if (_match.getAutoindex() == false)
+				throw std::runtime_error("404");
 		}
-		if (access((_translate).c_str(), R_OK) == -1)
+		else if (access((_translate).c_str(), R_OK) == -1)
 			throw std::runtime_error("404");
 	}
 }
@@ -252,7 +259,9 @@ unsigned	Request::getChunkSize( const int &socket ) {
 	while (size.find("\r\n") == std::string::npos)
 	{
 		nBytes = recv(socket, &c, 1, 0);
-		if (nBytes <= 0)
+		if (nBytes == -1)
+			throw std::runtime_error("400");
+		else if (nBytes == 0)
 			throw std::runtime_error("499");
 		size += c;
 	}

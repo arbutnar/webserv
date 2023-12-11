@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 16:39:12 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/11 17:41:10 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,8 @@ void	Server::ListenerInit( void ) {
 	_listener = socket(AF_INET, SOCK_STREAM, 0);
 	if (_listener == -1)
 		throw std::runtime_error("Cannot create socket");
+	if (fcntl(_listener, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+		throw std::runtime_error("Unable to make socket non-blocking");
 	const int enable = 1;
 	if (setsockopt(_listener, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 		throw std::runtime_error("setsockopt(SO_REUSEADDR) failed");
@@ -110,7 +112,9 @@ void	Server::ListenerInit( void ) {
 void	Server::newConnection( void ) {
 	int client = accept(_listener, NULL, NULL);
 	if (client == -1)
-		throw std::runtime_error("Cannot create Client socket");
+		return ;
+	if (fcntl(client, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+		return ;
 	_clients.push_back(client);
 	std::cout << "ciao " << client << std::endl;
 }
@@ -134,6 +138,7 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 	bool		ret = true;
 
 	try {
+		std::cout << c_it->getBuffer() << std::endl;
 		bufferChecker(c_it->getBuffer());
 		request.headersParser(c_it->getBuffer());
 		request.headersChecker();
@@ -141,12 +146,12 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		request.matchChecker();
 		request.translateUri();
 		request.bodyParser(c_it->getSocket());
-		request.displayRequest();
 		response = new Valid(request);
+		response->generateBody();
 	} catch(std::exception &e) {
 		response = new Error(e.what());
+		response->generateBody();
 	}
-	response->generateBody();
 	response->generateHeaders(request);
 	response->send(c_it->getSocket());
 	if (response->getHeaders().at("Connection") == "close")
