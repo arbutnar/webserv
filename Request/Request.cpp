@@ -173,6 +173,12 @@ void	Request::uriMatcher( const s_locs &locations ) {
 		for (s_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
 			if (it->getLocationName() == "/")
 				_match = *it;
+	if (_match.getReturn().first != -1)
+	{
+		std::stringstream	ss;
+		ss << _match.getReturn().first;
+		std::runtime_error(ss.str());
+	}
 }
 
 void	Request::matchChecker( void ) const {

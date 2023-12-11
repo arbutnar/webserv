@@ -28,13 +28,13 @@ Directives::Directives( void ) {
 	_error_page.clear();
 	_client_max_body_size = 1000000;
 	_client_header_buffer_size = 4000;
-	_return.clear();
 	_limit_except.clear();
 	_limit_except.insert(std::make_pair("GET", true));
 	_limit_except.insert(std::make_pair("HEAD", true));
 	_limit_except.insert(std::make_pair("POST", true));
 	_limit_except.insert(std::make_pair("PUT", true));
 	_limit_except.insert(std::make_pair("DELETE", true));
+	_return = std::make_pair(-1, "");
 }
 
 Directives::Directives( const Directives &src ) {
@@ -139,10 +139,7 @@ void	Directives::displayDirectives( void ) const {
 	for (m_intStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
 		std::cout << it->first << ' ' << it->second << std::endl;
 	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
-	std::cout << "Return: ";
-	for (v_str::const_iterator it = _return.begin(); it != _return.end(); it++)
-		std::cout << *it << ' ';
-	std::cout << std::endl;
+	std::cout << "Return: " << _return.first << " " << _return.second << std::endl;
 }
 
 void	Directives::addLocation( const Location &location ) {		//implemented only to avoid hpp files recurion.

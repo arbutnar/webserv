@@ -83,6 +83,9 @@ void	Response::generateHeaders( const Request &request ) {
 		ss << _body.length();
 		_headers.insert(std::make_pair("Content-Length", ss.str()));
 	}
+	int	code = atoi(_status.c_str());
+	if (code > 300 && code < 309)
+		_headers.insert(std::make_pair("Location", request.getMatch().getReturn().second));
 }
 
 void	Response::send( const int &socket ) const {

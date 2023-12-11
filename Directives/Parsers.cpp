@@ -169,28 +169,22 @@ void	Directives::parseClientHeaderBufferSize( const std::string &attribute ) {
 }
 
 void	Directives::parseReturn( const std::string &attribute ) {
-	int count = 0;
-
-	for (size_t i = 0; i < attribute.size(); i++)
-		if (attribute.at(i) == ' ' || attribute.at(i) == '\t')
-			count++;
-	if (count == 1)
-	{
-		size_t pos = attribute.find_first_of(' ');
-		std::string	code = attribute.substr(0, pos);
-		if (std::atoi(code.c_str()))
-			_return.push_back(attribute.substr(0, pos));
-		else
-			throw std::runtime_error("Syntax Error: return Directive");
-		pos = attribute.find_first_not_of(' ', pos);
-		std::string uri = attribute.substr(pos, std::string::npos);
-		if (!std::atoi(uri.c_str()))
-			_return.push_back(uri);
-		else
-			throw std::runtime_error("Syntax Error: return Directive");
-	}
-	else if (count < 1)
-		_return.push_back(attribute);
-	else
+	int			code;
+	std::string str;
+	
+	size_t pos = attribute.find_first_of(" \t");
+	str = attribute.substr(0, pos);
+	if (str.find_first_not_of("0123456789") != std::string::npos)
 		throw std::runtime_error("Syntax Error: return Directive");
+	code = atoi(str.c_str());
+	if (code < 0 || code > 999)
+		throw std::runtime_error("Syntax Error: return Directive");
+	_return.first = code;
+	if (pos == std::string::npos)
+		return ;
+	pos = attribute.find_first_not_of(" \t", pos);
+	str = attribute.substr(pos, std::string::npos);
+	if (str.find_first_of(" \t") != std::string::npos)
+		throw std::runtime_error("Syntax Error: return Directive");
+	_return.second = str;
 }

@@ -64,6 +64,6 @@ void	Directives::setClientHeaderBufferSize( const unsigned int &client_header_bu
 	_client_header_buffer_size = client_header_buffer_size;
 }
 
-void	Directives::setReturn( const v_str &ret ) {
+void	Directives::setReturn( const p_intStr &ret ) {
 	_return = ret;
 }

@@ -64,6 +64,6 @@ const unsigned int	&Directives::getClientHeaderBufferSize( void ) const {
 	return _client_header_buffer_size;
 }
 
-const v_str	&Directives::getReturn( void ) const {
+const p_intStr	&Directives::getReturn( void ) const {
 	return _return;
 }

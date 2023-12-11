@@ -34,6 +34,7 @@ typedef std::map<std::string, bool> m_strBool;
 typedef std::map<std::string, std::string> m_strStr;
 typedef	std::pair<std::string, std::string> p_strStr;
 typedef std::set<Location> s_locs;
+typedef std::pair<int, std::string> p_intStr;
 
 extern std::string	absolutePath;
 
@@ -68,7 +69,7 @@ class Directives {
 		m_intStr		_error_page;
 		unsigned int	_client_max_body_size;
 		unsigned int	_client_header_buffer_size;
-		v_str			_return;
+		p_intStr		_return;
 	public:
 		struct SyntaxError : public std::exception {
 			virtual const char* what() const throw() { return ("Incomplete or wrong configurations Syntax"); }
@@ -107,7 +108,7 @@ class Directives {
 		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
 		void	setClientHeaderBufferSize( const unsigned int &client_header_buffer_size );
-		void	setReturn( const v_str &ret );
+		void	setReturn( const p_intStr &ret );
 
 		const u_int32_t		&getListenHost( void ) const;
 		const u_int16_t		&getListenPort( void ) const;
@@ -122,7 +123,7 @@ class Directives {
 		const m_intStr		&getErrorPage( void ) const;
 		const unsigned int	&getClientMaxBodySize( void ) const;
 		const unsigned int	&getClientHeaderBufferSize( void ) const;
-		const v_str			&getReturn( void ) const;
+		const p_intStr		&getReturn( void ) const;
 
 		void			directiveParser( std::string line );
 		void			displayDirectives( void ) const;
