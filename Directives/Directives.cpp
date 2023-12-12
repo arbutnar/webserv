@@ -135,9 +135,10 @@ void	Directives::displayDirectives( void ) const {
 		if (it->second == true)
 			std::cout << it->first << ' ';
 	std::cout << std::endl;
-	std::cout << "Error Page: " << std::endl;
+	std::cout << "Error Page: ";
 	for (m_intStr::const_iterator it = _error_page.begin(); it != _error_page.end(); it++)
-		std::cout << it->first << ' ' << it->second << std::endl;
+		std::cout << it->first << ' ' << it->second;
+	std::cout << std::endl;
 	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
 	std::cout << "Return: " << _return.first << " " << _return.second << std::endl;
 }

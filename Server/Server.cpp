@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/11 17:41:10 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 11:59:32 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,10 +149,10 @@ bool	Server::writeResponse( v_cli::iterator &c_it ) {
 		response = new Valid(request);
 		response->generateBody();
 	} catch(std::exception &e) {
-		response = new Error(e.what());
+		response = new Error(e.what(), request);
 		response->generateBody();
 	}
-	response->generateHeaders(request);
+	response->generateHeaders();
 	response->send(c_it->getSocket());
 	if (response->getHeaders().at("Connection") == "close")
 		ret = false;

@@ -18,7 +18,7 @@
 class Error : public Response {
 	public:
 		Error( void );
-		Error( const std::string &code );
+		Error( const std::string &code, const Request &request );
 		Error( const Error &src );
 		Error &operator=( const Error &src );
 		~Error( );

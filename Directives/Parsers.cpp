@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 14:40:37 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/09 17:29:30 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 19:26:01 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,9 +116,17 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	std::string	key = attribute.substr(0, pos);
 	std::string	value = attribute.substr(attribute.find_first_not_of(" \t", pos), std::string::npos);
 	
-	if (key.empty() || value.empty() || key.find_first_not_of("0123456789") != std::string::npos)
+	if (key.empty() || value.empty())
 		throw std::runtime_error("Syntax Error: error_page Directive");
-	_error_page.insert(std::make_pair(std::atoi(key.c_str()), value));
+	int	code = atoi(key.c_str());
+	if (key.find_first_not_of("0123456789") != std::string::npos || code < 300 || code > 600)
+		throw std::runtime_error("Syntax Error: error_page Directive");
+	if (*value.begin() == '/')
+		value.erase(0, 1);
+	value = absolutePath + value;
+	if (access(value.c_str(), R_OK) == -1)
+		throw std::runtime_error("Syntax Error: error_page Directive");
+	_error_page.insert(std::make_pair(code, value));
 }
 
 void	Directives::parseCgiPass( const std::string &attribute ) {

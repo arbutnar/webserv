@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:00:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 16:38:52 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 17:10:05 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,11 @@ class Response {
 		std::string	_status;
 		m_strStr	_headers;
 		std::string	_body;
+		Request		_request;
 	public:
 		Response( void );
 		Response( const std::string &status );
+		Response( const std::string &status, const Request &request );
 		Response( const Response &src );
 		Response &operator=( const Response &src );
 		virtual ~Response( );
@@ -56,11 +58,14 @@ class Response {
 		const std::string	&getStatus( void ) const;
 		const m_strStr		&getHeaders( void ) const;
 		const std::string	&getBody( void ) const;
+		const Request		&getRequest( void ) const;
 		void				setStatus( const std::string &status );
 		void				setHeaders( const m_strStr &headers );
 		void				setBody( const std::string &body);
+		void				setRequest( const Request &request );
 
-		void			generateHeaders( const Request &request );
+		std::string		createCookie( const int len );
+		void			generateHeaders( void );
 		virtual void	generateBody( void ) = 0;
 		void			send( const int &socket ) const;
 };

@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:47:36 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/11 15:09:26 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 10:58:37 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 
 class Valid : public Response {
 	private:
-		Request			_request;
 		std::fstream	_file;
 	public:
 		Valid( void );
@@ -33,8 +32,6 @@ class Valid : public Response {
 		Valid &operator=( const Valid &src );
 		~Valid( );
 
-		const Request&	getRequest( void ) const;
-		void			setRequest( const Request &request );
 		void			handleAutoindex( void );
 		void			handleCgi( void );
 		void			generateBody( void );

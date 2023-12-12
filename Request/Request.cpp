@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/11 17:35:40 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 19:02:43 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ void	Request::uriMatcher( const s_locs &locations ) {
 	{
 		std::stringstream	ss;
 		ss << _match.getReturn().first;
-		std::runtime_error(ss.str());
+		throw std::runtime_error(ss.str());
 	}
 }
 
@@ -226,10 +226,10 @@ void	Request::translateUri( void ) {
 			else if (access((_translate + "index.html").c_str(), R_OK) == 0)
 				_translate += "index.html";
 			else if (_match.getAutoindex() == false)
-				throw std::runtime_error("404");
+				throw std::runtime_error("403");
 		}
 		else if (access((_translate).c_str(), R_OK) == -1)
-			throw std::runtime_error("404");
+			throw std::runtime_error("403");
 	}
 }
 

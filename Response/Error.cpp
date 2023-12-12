@@ -16,8 +16,8 @@ Error::Error( void )
 	: Response() {
 }
 
-Error::Error( const std::string &code ) 
-	: Response(code) {
+Error::Error( const std::string &code, const Request &request ) 
+	: Response(code, request) {
 		int c = std::atoi(code.c_str());
 		switch (c)
 		{
@@ -77,8 +77,25 @@ Error::~Error( ) {
 }
 
 void	Error::generateBody( void ) {
-	// return;
+	int status = atoi(_status.c_str());
+
+	m_intStr::const_iterator it = _request.getMatch().getErrorPage().find(status);
+	if (it != _request.getMatch().getErrorPage().end())
+	{
+		std::ifstream		error_page(it->second.c_str());
+		std::stringstream	buffer;
+		buffer << error_page.rdbuf();
+		_body = buffer.str();
+		return ;
+	}
 	_body = "<!DOCTYPE HTML>\n";
-	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t<h1>";
-	_body += _status + "</h1>\n</body>\n</html>\n";
+	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t";
+	if ((status < 301 || status > 308) && _request.getMatch().getReturn().first != -1)
+	{
+		std::cout << _request.getMatch().getReturn().first << std::endl;
+		_body += _request.getMatch().getReturn().second;
+	}
+	else
+		_body += "<h1>" + _status + "</h1>";
+	_body += "\n</body>\n</html>\n";
 }

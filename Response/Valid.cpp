@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/11 18:10:25 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/12 11:08:42 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Valid::Valid( void )
 }
 
 Valid::Valid( const Request &request )
-	:  Response ("200 Ok"), _request(request) {
+	:  Response ("200 Ok", request) {
 		if (_request.getMethod() == "GET" || _request.getMethod() == "HEAD")
 			_file.open(request.getTranslate().c_str(), std::fstream::in);
 		if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
@@ -45,19 +45,10 @@ Valid	&Valid::operator=( const Valid &src ) {
 	if (this == &src)
 		return *this;
 	Response::operator=(src);
-	_request = src._request;
 	return *this;
 }
 
 Valid::~Valid( ) {
-}
-
-const Request	&Valid::getRequest( void ) const {
-	return _request;
-}
-
-void	Valid::setRequest( const Request &request ) {
-	_request = request;
 }
 
 void	Valid::handleAutoindex( void ) {
