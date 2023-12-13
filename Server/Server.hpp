@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/11 14:16:12 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 21:13:44 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ class Server : public Directives {
 		v_cli	_clients;
 	public:
 		Server( void );
-		Server( std::string block );
 		Server( const Server &src );
 		Server& operator=( const Server &src );
 		bool	operator<( const Server &src );
@@ -48,16 +47,15 @@ class Server : public Directives {
 		const int		&getListener( void ) const;
 		const v_cli		&getClients( void ) const;
 
-		void					addLocation( const Location &location );
-		s_locs::const_iterator	findRoot( void ) const;
-		int						nfds( void ) const;
-		void					ListenerInit( void );
-		void					newConnection( void );
-		void					clientInteraction( const fd_set &active );
-		void					bufferChecker( const std::string &buffer ) const;
-		v_cli::iterator			eraseClient( v_cli::iterator &c_it );
-		bool					writeResponse( v_cli::iterator &it );
-		void					displayServer( void ) const;
+		void			addLocation( const Location &location );
+		int				nfds( void ) const;
+		void			ListenerInit( void );
+		void			newConnection( void );
+		v_cli::iterator	eraseClient( v_cli::iterator &c_it );
+		void			clientInteraction( const fd_set &active );
+		void			bufferChecker( const std::string &buffer ) const;
+		bool			writeResponse( v_cli::iterator &it );
+		void			displayServer( void ) const;
 };
 
 #endif

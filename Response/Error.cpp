@@ -92,7 +92,6 @@ void	Error::generateBody( void ) {
 	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t";
 	if ((status < 301 || status > 308) && _request.getMatch().getReturn().first != -1)
 	{
-		std::cout << _request.getMatch().getReturn().first << std::endl;
 		_body += _request.getMatch().getReturn().second;
 	}
 	else

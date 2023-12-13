@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/08 16:13:52 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 22:05:19 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ void	Master::configDivider( const char* path ) {
 		throw Directives::SyntaxError();
 	for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
 	{
-		if (it->findRoot() != it->getLocations().end())
+		if (std::find(it->getLocations().begin(), it->getLocations().end(), "/") != it->getLocations().end())
 			continue ;
 		Directives *root = new Location("/");
 		Directives *server = &(*it);
@@ -114,44 +114,53 @@ void	Master::serverParser( std::string &block ) {
 	Directives*			locationPtr;
 	bool				inLocation = false;
 
-	while (std::getline(ss, line))
-	{
-		if (line.find("location ") != std::string::npos)
+	try {
+		while (std::getline(ss, line))
 		{
-			if (inLocation)
-				throw Directives::SyntaxError();
-			if (line.find("{") != line.length() - 1)
-				throw Directives::SyntaxError();
-			inLocation = true;
-			locationPtr = new Location(line);
-			*locationPtr = *serverPtr;
-			locationPtr->setRoot("");
-			locationPtr->setAlias("");
-		}
-		else if (line.find("}") != std::string::npos)
-		{
-			if (!inLocation)
-				throw Directives::SyntaxError();
-			inLocation = false;
-			if (locationPtr->getRoot().empty() && locationPtr->getAlias().empty())
+			if (line.find("location ") != std::string::npos)
 			{
-				locationPtr->setRoot(serverPtr->getRoot());
-				locationPtr->setAlias(serverPtr->getAlias());
+				if (inLocation)
+					throw Directives::SyntaxError();
+				if (line.find("{") != line.length() - 1)
+					throw Directives::SyntaxError();
+				inLocation = true;
+				locationPtr = new Location(line);
+				*locationPtr = *serverPtr;
+				locationPtr->setRoot("");
+				locationPtr->setAlias("");
 			}
-			serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
-			delete locationPtr;
+			else if (line.find("}") != std::string::npos)
+			{
+				if (!inLocation)
+					throw Directives::SyntaxError();
+				inLocation = false;
+				if (locationPtr->getRoot().empty() && locationPtr->getAlias().empty())
+				{
+					locationPtr->setRoot(serverPtr->getRoot());
+					locationPtr->setAlias(serverPtr->getAlias());
+				}
+				serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
+				delete locationPtr;
+			}
+			else if (inLocation)
+			{
+				if (line.find("client_header_buffer_size") != std::string::npos)
+					throw Directives::SyntaxError();
+				locationPtr->directiveParser(line);
+			}
+			else
+				serverPtr->directiveParser(line);
 		}
-		else if (inLocation)
-		{
-			if (line.find("client_header_buffer_size") != std::string::npos)
-				throw Directives::SyntaxError();
-			locationPtr->directiveParser(line);
-		}
-		else
-			serverPtr->directiveParser(line);
+		_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
+		delete serverPtr;
 	}
-	_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
-	delete serverPtr;
+	catch (std::exception &e) {
+		if (locationPtr != NULL)
+			delete locationPtr;
+		if (serverPtr != NULL)
+			delete serverPtr;
+		throw std::runtime_error(e.what());
+	}
 }
 
 void	Master::displayMaster( void ) const {

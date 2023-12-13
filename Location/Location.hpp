@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:16:45 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 16:59:24 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 19:47:48 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ class   Location : public Directives {
 		Location( const Location &src );
 		Location	&operator=( const Location &src );
 		bool		operator<( const Location &src ) const;
+		bool		operator==( const std::string &locationName ) const;
 		~Location( );
 		
 		const int			&getModifier( void ) const;

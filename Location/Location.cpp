@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/05 17:51:54 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/29 18:18:26 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 19:47:35 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,12 @@ Location	&Location::operator=( const Location &src ) {
 
 bool	Location::operator<( const Location &src ) const {
 	if (_location_name.compare(src._location_name) < 0)
+		return true;
+	return false;
+}
+
+bool	Location::operator==( const std::string &locationName ) const {
+	if (_location_name == locationName)
 		return true;
 	return false;
 }

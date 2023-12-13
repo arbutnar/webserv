@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:48 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/11/25 13:34:09 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 17:52:53 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Master {
 
 		void			setCluster( const v_ser &cluster);
 		const v_ser&	getCluster( void ) const;
-
+		
 		void	configDivider( const char* path );
 		void	serverParser( std::string &block );
 		void	displayMaster( void ) const;

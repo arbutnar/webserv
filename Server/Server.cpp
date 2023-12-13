@@ -6,17 +6,14 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/12 11:59:32 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 21:49:36 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 Server::Server( void ) {
-}
-
-Server::Server( std::string block ) {
-    std::cout << block << std::endl;
+	_listener = 0;
 }
 
 Server::Server( const Server &src )
@@ -43,6 +40,11 @@ bool	Server::operator<( const Server &src ) {
 }
 
 Server::~Server() {
+	if (_listener != 0)
+		close(_listener);
+	v_cli::iterator it = _clients.begin();
+	while ( it != _clients.end() )
+		it = eraseClient(it);
 }
 
 void    Server::setLocations( const s_locs &locations ) {
@@ -74,13 +76,6 @@ void    Server::addLocation( const Location &location ) {
 		throw Directives::SyntaxError();
 }
 
-s_locs::const_iterator	Server::findRoot( void ) const {
-	for (s_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
-		if (it->getLocationName() == "/")
-			return it;
-	return _locations.end();
-}
-
 int	Server::nfds( void ) const {
 	int temp = 0;
 
@@ -110,13 +105,13 @@ void	Server::ListenerInit( void ) {
 }
 
 void	Server::newConnection( void ) {
-	int client = accept(_listener, NULL, NULL);
-	if (client == -1)
+	int socket = accept(_listener, NULL, NULL);
+	if (socket == -1)
 		return ;
-	if (fcntl(client, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
+	if (fcntl(socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
 		return ;
-	_clients.push_back(client);
-	std::cout << "ciao " << client << std::endl;
+	_clients.push_back(socket);
+	std::cout << "ciao " << socket << std::endl;
 }
 
 void	Server::clientInteraction( const fd_set &active ) {

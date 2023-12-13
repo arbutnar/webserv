@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/18 16:38:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/04 18:03:42 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 17:57:15 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <iostream>
 # include <sys/socket.h>
+# include <unistd.h>
 
 class Client {
 	private:

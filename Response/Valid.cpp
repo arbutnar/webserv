@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/12 11:08:42 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/13 21:40:45 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ void	Valid::handleAutoindex( void ) {
 	DIR				*dir;
 	struct dirent	*entry;
 	std::string		uri = _request.getUri();
-	std::cout << _request.getTranslate() << std::endl;
 	dir = opendir(_request.getTranslate().c_str());
 	_body = "<!DOCTYPE HTML>\n";
 	_body += "<html>\n<head>\n\t<title>" + uri + "</title>\n</head>\n<body>\n";
@@ -77,12 +76,14 @@ void	Valid::handleAutoindex( void ) {
 }
 
 void	Valid::handleCgi( void ) {
-	int			fd_in = fileno(tmpfile());
-	int			fd_out = fileno(tmpfile());
+	FILE        *file_in = tmpfile();
+	FILE		*file_out = tmpfile();
+	int			fd_in = fileno(file_in);
+	int			fd_out = fileno(file_out);
 	pid_t		pid;
 	std::string	path;
 	char*		args[3];
-	char*		env[10];
+	char*		env[4];
 
 	write(fd_in, _body.c_str(), _body.size());
 	lseek(fd_in, 0, SEEK_SET);
@@ -124,12 +125,14 @@ void	Valid::handleCgi( void ) {
 		_body = buffer;
 		free(buffer);
 	}
+	fclose(file_in);
+	fclose(file_out);
 	close(fd_in);
 	close(fd_out);
 	for(int i = 0; args[i]; i++)
-		delete[] args[i];
+		free(args[i]);
 	for(int i = 0; env[i]; i++)
-		delete[] env[i];
+		free(env[i]);
 }
 
 
