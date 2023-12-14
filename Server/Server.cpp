@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 21:49:36 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/14 15:18:46 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ void	Server::newConnection( void ) {
 	std::cout << "ciao " << socket << std::endl;
 }
 
-void	Server::clientInteraction( const fd_set &active ) {
+void	Server::menageConnection( const fd_set &active ) {
 	v_cli::iterator it = _clients.begin();
 	while (it != _clients.end())
 	{

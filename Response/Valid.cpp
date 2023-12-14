@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/01 11:48:05 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 21:40:45 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/14 18:54:02 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,17 +76,14 @@ void	Valid::handleAutoindex( void ) {
 }
 
 void	Valid::handleCgi( void ) {
-	FILE        *file_in = tmpfile();
-	FILE		*file_out = tmpfile();
-	int			fd_in = fileno(file_in);
-	int			fd_out = fileno(file_out);
-	pid_t		pid;
-	std::string	path;
 	char*		args[3];
 	char*		env[4];
+	int			pipe_in[2];
+	int			pipe_out[2];
+	pid_t		pid;
 
-	write(fd_in, _body.c_str(), _body.size());
-	lseek(fd_in, 0, SEEK_SET);
+	pipe(pipe_in);
+	pipe(pipe_out);
 	args[0] = strdup(_request.getMatch().getCgiPass().c_str());
 	args[1] = strdup(_request.getTranslate().c_str());
 	args[2] = NULL;
@@ -94,41 +91,31 @@ void	Valid::handleCgi( void ) {
 	env[1] = strdup(("REQUEST_METHOD=" + _request.getMethod()).c_str());
 	env[2] = strdup(("PATH_INFO=" + _request.getUri()).c_str());
 	env[3] = NULL;
+	pipe(pipe_in);
+	pipe(pipe_out);
 	pid = fork();
 	if (pid < 0)
 		throw std::runtime_error("500");
 	else if (pid == 0)
 	{
-		if (dup2(fd_in, 0) == -1 || dup2(fd_out, 1) == -1)
-			throw std::runtime_error("500");
+		dup2(pipe_in[0], 0);
+		dup2(pipe_out[1], 1);
+		close(pipe_in[0]);
+		close(pipe_in[1]);
+		close(pipe_out[0]);
+		close(pipe_out[1]);
 		execve(args[0], args, env);
 		throw std::runtime_error("500");
 	}
-	else
-	{
-		waitpid(-1, NULL, 0);	// aspetta che qualsiasi figlio termini o cambi di stato, non gli interessa quale cambiamento di stato e' avvennuto e non e' importante l'opzione con la quale il processo padre ritorna ad essere
-		lseek(fd_out, 0, SEEK_SET);
-		struct stat st;
-		fstat(fd_out, &st);
-		size_t	size = st.st_size;
-		char*	buffer = (char *) calloc (size + 1, sizeof(char));
-		size_t	nBytes;
-		size_t	i = 0;
-		while (i < size)
-		{
-			nBytes = read(fd_out, &buffer[i], size);		// typically send()/recv() are used for sockets, write()/read() for files.
-			if (nBytes <= 0)
-				throw std::runtime_error("500");
-			i += nBytes;
-		}
-		buffer[i] = '\0';
-		_body = buffer;
-		free(buffer);
-	}
-	fclose(file_in);
-	fclose(file_out);
-	close(fd_in);
-	close(fd_out);
+	close(pipe_in[0]);
+	close(pipe_out[1]);
+	write(pipe_in[1], _body.c_str(), _body.size());
+	close(pipe_in[1]);
+	_body.clear();
+	char c;
+	while (read(pipe_out[0], &c, 1))
+		_body += c;
+	close(pipe_out[0]);
 	for(int i = 0; args[i]; i++)
 		free(args[i]);
 	for(int i = 0; env[i]; i++)
@@ -139,9 +126,7 @@ void	Valid::handleCgi( void ) {
 void	Valid::generateBody( void ) {
 	if(_request.getMethod() == "GET")
 	{
-		if (_request.getMatch().getAutoindex() == true && *_request.getTranslate().rbegin() == '/')
-			handleAutoindex();
-		else
+		if (_request.getMatch().getAutoindex() == false && *_request.getTranslate().rbegin() != '/')
 		{
 			std::stringstream ss;
 			ss << _file.rdbuf();
@@ -149,6 +134,8 @@ void	Valid::generateBody( void ) {
 			if (!_request.getMatch().getCgiPass().empty())
 				handleCgi();
 		}
+		else
+			handleAutoindex();
 			
 	}
 	else if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")

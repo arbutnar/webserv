@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 21:13:44 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/14 15:18:46 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class Server : public Directives {
 		void			ListenerInit( void );
 		void			newConnection( void );
 		v_cli::iterator	eraseClient( v_cli::iterator &c_it );
-		void			clientInteraction( const fd_set &active );
+		void			menageConnection( const fd_set &active );
 		void			bufferChecker( const std::string &buffer ) const;
 		bool			writeResponse( v_cli::iterator &it );
 		void			displayServer( void ) const;

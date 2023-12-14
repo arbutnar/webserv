@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 22:05:19 by arbutnar         ###   ########.fr       */
+/*   Updated: 2023/12/14 18:50:34 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,12 +163,6 @@ void	Master::serverParser( std::string &block ) {
 	}
 }
 
-void	Master::displayMaster( void ) const {
-	std::cout << "[MASTER]" << std::endl;
-	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
-		it->displayServer();
-}
-
 void	Master::arrangeCluster( void ) {
 	std::sort(_cluster.begin(), _cluster.end());
 	v_ser::iterator it = _cluster.begin();
@@ -187,7 +181,8 @@ void	Master::arrangeCluster( void ) {
 }
 
 void	Master::start( void ) {
-	fd_set	active;
+	fd_set	read;
+	fd_set	write;
 	int		max;
 	struct timeval  tv;
 
@@ -195,20 +190,30 @@ void	Master::start( void ) {
 	tv.tv_usec = 0;
 	while (true)
 	{
+		FD_ZERO(&read);
+		FD_ZERO(&write);
 		for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
 		{
-			FD_ZERO(&active);
-			FD_SET(it->getListener(), &active);
+			FD_SET(it->getListener(), &read);
 			for (v_cli::const_iterator c_it = it->getClients().begin(); c_it != it->getClients().end(); c_it++)
-				FD_SET(c_it->getSocket(), &active);
+			{
+				FD_SET(c_it->getSocket(), &read);
+				FD_SET(c_it->getSocket(), &write);
+			}
 			max = it->nfds();
 			if (max == 0)
 				max = it->getListener();
-			if (select(max + 1, &active, NULL, NULL, &tv) < 1)
+			if (select(max + 1, &read, &write, NULL, &tv) < 1)
 				continue ;
-			if (FD_ISSET(it->getListener(), &active))
+			if (FD_ISSET(it->getListener(), &read))
 				it->newConnection();
-			it->clientInteraction(active);
+			it->menageConnection(read);
 		}
 	}
+}
+
+void	Master::displayMaster( void ) const {
+	std::cout << "[MASTER]" << std::endl;
+	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		it->displayServer();
 }
