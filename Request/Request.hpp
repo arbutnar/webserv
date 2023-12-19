@@ -5,36 +5,43 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/21 13:58:17 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/07 18:14:34 by arbutnar         ###   ########.fr       */
+/*   Created: 2023/11/18 16:38:05 by arbutnar          #+#    #+#             */
+/*   Updated: 2023/12/13 17:57:15 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
+# include <iostream>
+# include <sys/socket.h>
+# include <unistd.h>
 # include <sys/socket.h>
 # include <fstream>
 # include "../Location/Location.hpp"
 
 class Request {
 	private:
+		int			_socket;
+		std::string	_buffer;
 		std::string	_method;
+		std::string	_request;
 		std::string	_uri;
 		std::string	_protocol;
 		m_strStr	_headers;
 		std::string	_body;
 		std::string	_translate;
 		Location	_match;
-
-		void		readChunk( const int &socket, const size_t &chunkSize );
-		static unsigned	getChunkSize( const int &socket );
 	public:
 		Request( void );
-		Request( const Request &src );
-		Request& operator=( const Request &src );
-		~Request( );
+		Request( int const &socket );
+		Request( Request const &src );
+		Request	&operator=( Request const &src );
+		bool	operator==( Request const &src ) const ;
+		~Request();
 
+		const int			&getSocket( void ) const;
+		const std::string	&getBuffer( void ) const;
 		const std::string 	&getMethod( void ) const;
 		const std::string 	&getUri( void ) const;
 		const std::string 	&getProtocol( void ) const;
@@ -42,6 +49,8 @@ class Request {
 		const std::string 	&getBody( void ) const;
 		const std::string	&getTranslate( void ) const;
 		const Location		&getMatch( void ) const;
+		void				setSocket( int const &socket );
+		void				setBuffer( std::string const &buffer );
 		void				setMethod( const std::string &method );
 		void				setUri( const std::string &uri );
 		void				setProtocol( const std::string &protocol );
@@ -50,12 +59,14 @@ class Request {
 		void				setTranslate( const std::string &uri );
 		void				setMatch( const Location &match );
 
-		void	headersParser( const std::string &buffer );
-		void	headersChecker( void ) const;
+		bool 	buildBuffer( void );
+		void	clearBuffer( void );
+		void	firstLineParser( std::string &line );
+		void	headersParser( std::string &line );
+		void	bodyParser( std::string &line );
 		void	uriMatcher( const s_locs &locations );
 		void	matchChecker( void ) const;
 		void	translateUri( void );
-		void	bodyParser( const int &socket );
 		void	displayRequest( void ) const;
 };
 

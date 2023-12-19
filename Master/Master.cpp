@@ -144,7 +144,7 @@ void	Master::serverParser( std::string &block ) {
 			}
 			else if (inLocation)
 			{
-				if (line.find("client_header_buffer_size") != std::string::npos)
+				if (line.find("connection_header_buffer_size") != std::string::npos)
 					throw Directives::SyntaxError();
 				locationPtr->directiveParser(line);
 			}
@@ -181,33 +181,32 @@ void	Master::arrangeCluster( void ) {
 }
 
 void	Master::start( void ) {
-	fd_set	read;
-	fd_set	write;
-	int		max;
-	struct timeval  tv;
-
+	fd_set			read;
+	fd_set			write;
+	fd_set			active;
+	int				max;
+	struct timeval	tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
-	while (true)
+
+	while(1)
 	{
-		FD_ZERO(&read);
-		FD_ZERO(&write);
-		for (v_ser::iterator it = _cluster.begin(); it != _cluster.end(); it++)
+		for (v_ser::iterator s_it = _cluster.begin(); s_it != _cluster.end(); s_it++)
 		{
-			FD_SET(it->getListener(), &read);
-			for (v_cli::const_iterator c_it = it->getClients().begin(); c_it != it->getClients().end(); c_it++)
-			{
-				FD_SET(c_it->getSocket(), &read);
-				FD_SET(c_it->getSocket(), &write);
-			}
-			max = it->nfds();
-			if (max == 0)
-				max = it->getListener();
-			if (select(max + 1, &read, &write, NULL, &tv) < 1)
+			FD_ZERO(&active);
+			FD_SET(s_it->getListener(), &active);
+			for (v_req::const_iterator r_it = s_it->getRequests().begin(); r_it != s_it->getRequests().end(); r_it++)
+				FD_SET(r_it->getSocket(), &active);
+			if ((max = s_it->nfds()) == 0)
+				max = s_it->getListener();
+			read = active;
+			write = active;
+			if (select(max + 1, &read, &write, NULL, &tv) == 0)
 				continue ;
-			if (FD_ISSET(it->getListener(), &read))
-				it->newConnection();
-			it->menageConnection(read);
+			if (FD_ISSET(s_it->getListener(), &read))
+				s_it->newRequest();
+			else
+				s_it->menageRequest(read, write);
 		}
 	}
 }

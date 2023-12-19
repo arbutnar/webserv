@@ -1,19 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request.cpp                                        :+:      :+:    :+:   */
+/*   Request.cpp                                   	    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/21 14:51:25 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/12 19:02:43 by arbutnar         ###   ########.fr       */
+/*   Created: 2023/11/18 16:38:10 by arbutnar          #+#    #+#             */
+/*   Updated: 2023/12/13 21:11:31 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
 Request::Request( void )
-	: _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
+	: _socket (0), _buffer (""), _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
+}
+
+Request::Request( int const &socket )
+	: _socket (socket), _buffer (""), _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
 }
 
 Request::Request( const Request &src ) {
@@ -23,6 +27,8 @@ Request::Request( const Request &src ) {
 Request& Request::operator=( const Request &src ) {
 	if (this == &src)
 		return *this;
+	_socket = src._socket;
+	_buffer = src._buffer;
 	_method = src._method;
 	_uri = src._uri;
 	_protocol = src._protocol;
@@ -34,6 +40,14 @@ Request& Request::operator=( const Request &src ) {
 }
 
 Request::~Request( ) {
+}
+
+const int	&Request::getSocket( void ) const {
+	return _socket;
+}
+
+const std::string	&Request::getBuffer( void ) const {
+	return _buffer;
 }
 
 const std::string &Request::getMethod( void ) const {
@@ -64,6 +78,14 @@ const Location	&Request::getMatch( void ) const {
 	return _match;
 }
 
+void	Request::setSocket( int const &socket ) {
+	_socket = socket;
+}
+
+void	Request::setBuffer( std::string const &buffer ) {
+	_buffer = buffer;
+}
+
 void	Request::setMethod( const std::string &method ) {
 	_method = method;
 }
@@ -92,68 +114,99 @@ void	Request::setMatch( const Location &match ) {
 	_match = match;
 }
 
-void	Request::headersParser( const std::string &buffer ) {
-	std::stringstream	ss(buffer);
-	std::string			key;
-	std::string			value;
-	size_t				pos;
+bool	Request::buildBuffer( void ) {
 
-	pos = buffer.find_first_of(" ");
-	_method = buffer.substr(0, pos);
-	if (_method.empty())
-		throw std::runtime_error("400");
-	pos += 1;
-	_uri = buffer.substr(pos, buffer.find_first_of(" ", pos) - pos);
-	if (_uri.empty())
-		throw std::runtime_error("400");
-	pos += _uri.size() + 1;
-	_protocol = buffer.substr(pos, buffer.find("\r\n", pos) - pos);
-	if (_protocol.empty())
-		throw std::runtime_error("400");
-	std::getline(ss, key);
-	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
-	{
-		if (value.at(value.size() - 1) == '\r')
-			value.erase(value.size() - 1, 1);
-		if (_headers.find(key) != _headers.end())
-			throw std::runtime_error("400");
-		_headers.insert(std::make_pair(key, value));
-	}
-	if (_headers.find("Content-Length") != _headers.end() && _headers.find("Transfer-Encoding") != _headers.end())
-		_headers.erase("Content-Length");
-	else if (_headers.find("Content-Length") == _headers.end())
-		_headers.insert(std::make_pair("Transfer-Encoding", "chunked"));
-	if (_uri != "/" && _uri.at(0) == '/')
-		_uri.erase(0, 1);
+	char	tmp_buffer[200000];
+	int		n_bytes = 0;
+	n_bytes = recv(_socket, tmp_buffer, 200000, 0);
+	if (n_bytes <= 0)
+		return false;
+	tmp_buffer[n_bytes] = '\0';
+	_buffer += tmp_buffer;
+	return true;
 }
 
-void	Request::headersChecker( void ) const {
+void	Request::clearBuffer( void ) {
+	_buffer.clear();
+}
+
+void	Request::firstLineParser( std::string &line ) {
 	std::string	methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
+	size_t		pos;
 	int			i;
 
+	pos = line.find_first_of(" ");
+	_method = line.substr(0, pos);
 	for (i = 0; i < 5; i++)
 		if (methods[i] == _method)
 			break ;
 	if (i == 5)
 		throw std::runtime_error("501");
+	if (_method.empty())
+		throw std::runtime_error("400");
+	pos += 1;
+	_uri = line.substr(pos, line.find_first_of(" ", pos) - pos);
+	if (_uri.empty())
+		throw std::runtime_error("400");
+	pos += _uri.size() + 1;
+	_protocol = line.substr(pos, line.find_first_of("\r\n", pos) - pos);
 	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
 		throw std::runtime_error("505");
-	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
+	if (_protocol.empty())
+		throw std::runtime_error("400");
+	if (_uri != "/" && _uri.at(0) == '/')
+		_uri.erase(0, 1);
+}
+
+void	Request::headersParser( std::string &line ) {
+	std::stringstream	ss(line);
+	std::string			key;
+	std::string			value;
+
+	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 	{
-		if (it->first.find_first_of(" \t") != std::string::npos)
+		if (value.at(value.size() - 1) == '\r')
+			value.erase(value.size() - 1, 1);
+		if (_headers.find(key) != _headers.end() || (key.empty() || value.empty()))
 			throw std::runtime_error("400");
-		if (it->first.empty() || it->second.empty())
+		if (key.find_first_of(" \t") != std::string::npos)
 			throw std::runtime_error("400");
+		_headers.insert(std::make_pair(key, value));
 	}
+	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
+		throw std::runtime_error("400");
 	if (_headers.find("Content-Length") != _headers.end())
 	{
 		if (_headers.at("Content-Length").find_first_not_of("0123456789") != std::string::npos)
 			throw std::runtime_error("400");
 		if (_headers.find("Transfer-Encoding") != _headers.end())
-			throw std::runtime_error("400");
+			_headers.erase("Content-Length");
 	}
-	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
-		throw std::runtime_error("400");
+	else
+		_headers.insert(std::make_pair("Transfer-Encoding", "chunked"));
+}
+
+void	Request::bodyParser( std::string &line ) {
+	if (_method != "POST" && _method != "PUT")
+		return ;
+	if (_headers.find("Content-Length") != _headers.end())
+		_body = line.substr(0, atoi(_headers.at("Content-Length").c_str()));
+	else if (_headers.at("Transfer-Encoding") == "chunked")
+	{
+		while(1)
+		{
+			std::stringstream	ss;
+			unsigned			chunkSize = 0;
+			size_t				pos = line.find_first_of("\r\n");
+			ss << std::hex << line.substr(0, pos);
+			ss >> chunkSize;
+			if (chunkSize == 0)
+				break ;
+			line.erase(0, pos + 2);
+			_body += line.substr(0, chunkSize);
+			line.erase(0, chunkSize);
+		}
+	}
 }
 
 void	Request::uriMatcher( const s_locs &locations ) {
@@ -233,75 +286,10 @@ void	Request::translateUri( void ) {
 	}
 }
 
-void	Request::readChunk( const int &socket, const size_t &chunkSize ) {
-
-	unsigned	i;
-	int			nBytes = 0;
-	char		*buffer;
-
-	buffer = (char*) malloc (sizeof(char) * (chunkSize + 1));
-	if (buffer == NULL)
-		throw std::runtime_error("507");
-	i = 0;
-	while (i < chunkSize)
-	{
-		nBytes = recv(socket, &buffer[i], chunkSize, 0);
-		if (nBytes <= 0)
-			throw std::runtime_error("499");
-		i += nBytes;
-	}
-	buffer[i] = '\0';
-	_body += buffer;
-	free(buffer);
-}
-
-unsigned	Request::getChunkSize( const int &socket ) {
-	std::string			size;
-	char				c;
-	std::stringstream	ss;
-	int					nBytes;
-	unsigned			chunkSize = 0;
-
-	while (size.find("\r\n") == std::string::npos)
-	{
-		nBytes = recv(socket, &c, 1, 0);
-		if (nBytes == -1)
-			throw std::runtime_error("400");
-		else if (nBytes == 0)
-			throw std::runtime_error("499");
-		size += c;
-	}
-	ss << std::hex << size.substr(0, size.find("\r\n"));
-	chunkSize = 0;
-	ss >> chunkSize;
-	return chunkSize;
-}
-
-void	Request::bodyParser( const int &socket ) {
-	if (_method != "POST" && _method != "PUT")
-		return ;
-	if (_headers.find("Content-Length") != _headers.end())
-		readChunk(socket, strtoul(_headers.at("Content-Length").c_str(), NULL, 10));
-	else if (_headers.at("Transfer-Encoding") == "chunked")
-	{
-		unsigned	chunkSize;
-		while (true)
-		{
-			chunkSize = getChunkSize(socket);
-			if (chunkSize == 0)
-				break ;
-			readChunk(socket, chunkSize);
-			chunkSize = getChunkSize(socket);
-		}
-		chunkSize = getChunkSize(socket);
-	}
-	else
-		throw std::runtime_error("501");
-}
-
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;
 	std::cout << "uri: " << _uri << std::endl;
+	std::cout << "protocol: " << _protocol << std::endl;
 	std::cout << "match Location name: " << _match.getLocationName() << std::endl;
 	std::cout << "uri translated: " << _translate << std::endl;
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)

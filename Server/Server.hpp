@@ -21,18 +21,17 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include "../Location/Location.hpp"
-# include "../Client/Client.hpp"
 # include "../Request/Request.hpp"
 # include "../Response/Error.hpp"
 # include "../Response/Valid.hpp"
 
-typedef std::vector<Client> v_cli;
+typedef std::vector<Request> v_req;
 
 class Server : public Directives {
 	private:
 		s_locs	_locations;
 		int		_listener;
-		v_cli	_clients;
+		v_req	_requests;
 	public:
 		Server( void );
 		Server( const Server &src );
@@ -42,19 +41,20 @@ class Server : public Directives {
 
 		void			setLocations( const s_locs &locations );
 		void			setListener( const int &listener );
-		void			setClients( const v_cli &clients );
+		void			setRequests( const v_req &connections );
 		const s_locs	&getLocations( void ) const;
 		const int		&getListener( void ) const;
-		const v_cli		&getClients( void ) const;
+		const v_req		&getRequests( void ) const;
 
 		void			addLocation( const Location &location );
 		int				nfds( void ) const;
 		void			ListenerInit( void );
-		void			newConnection( void );
-		v_cli::iterator	eraseClient( v_cli::iterator &c_it );
-		void			menageConnection( const fd_set &active );
+		void			newRequest( void );
+		v_req::iterator	eraseRequest( v_req::iterator &r_it );
+		void			menageRequest( const fd_set &read, const fd_set &write );
 		void			bufferChecker( const std::string &buffer ) const;
-		bool			writeResponse( v_cli::iterator &it );
+		void			requestParser( v_req::iterator &r_it );
+		void			writeResponse( v_req::iterator &it );
 		void			displayServer( void ) const;
 };
 

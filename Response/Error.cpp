@@ -43,6 +43,8 @@ Error::Error( const std::string &code, const Request &request )
 				_status += " Method Not Allowed"; break ;
 			case CONFLICT:
 				_status += " Conflict"; break ;
+			case REQUEST_ENTITY_TOO_LARGE:
+				_status += " Request Entity Too Large"; break ;
 			case URI_TOO_LONG:
 				_status += " URI Too Long"; break ;
 			case UNSUPPORTED_MEDIA_TYPE:
@@ -50,7 +52,7 @@ Error::Error( const std::string &code, const Request &request )
 			case REQUEST_HEADER_TOO_LARGE:
 				_status += " Request header too large"; break ;
 			case CLIENT_CLOSED_REQUEST:
-				_status += " Client Closed Request"; break ;
+				_status += " Request Closed Request"; break ;
 			case INTERNAL_SERVER:
 				_status += " Internal Server Error"; break ;
 			case NOT_IMPLEMENTED:

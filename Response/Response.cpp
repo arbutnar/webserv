@@ -97,12 +97,12 @@ void	Response::generateHeaders( void ) {
 	tstruct = *localtime(&now);
 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
 	_headers.insert(std::make_pair("Date", buf));
-	if (_status == "499 Client Closed Request")
-		_headers.insert(std::make_pair("Connection", "close"));
-	else if (_request.getHeaders().find("Connection") != _request.getHeaders().end())
-		_headers.insert(*_request.getHeaders().find("Connection"));
+	if (_status == "499 Request Closed Request")
+		_headers.insert(std::make_pair("Request", "close"));
+	else if (_request.getHeaders().find("Request") != _request.getHeaders().end())
+		_headers.insert(*_request.getHeaders().find("Request"));
 	else
-		_headers.insert(std::make_pair("Connection", "keep-alive"));
+		_headers.insert(std::make_pair("Request", "keep-alive"));
 	int	code = atoi(_status.c_str());
 	if (code > 300 && code < 309)
 		_headers.insert(std::make_pair("Location", _request.getMatch().getReturn().second));
