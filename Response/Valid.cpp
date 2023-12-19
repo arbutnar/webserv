@@ -136,7 +136,6 @@ void	Valid::generateBody( void ) {
 		}
 		else
 			handleAutoindex();
-			
 	}
 	else if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
 	{

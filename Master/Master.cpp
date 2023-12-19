@@ -195,8 +195,8 @@ void	Master::start( void ) {
 		{
 			FD_ZERO(&active);
 			FD_SET(s_it->getListener(), &active);
-			for (v_req::const_iterator r_it = s_it->getRequests().begin(); r_it != s_it->getRequests().end(); r_it++)
-				FD_SET(r_it->getSocket(), &active);
+			for (m_intStr::const_iterator c_it = s_it->getConnections().begin(); c_it != s_it->getConnections().end(); c_it++)
+				FD_SET(c_it->first, &active);
 			if ((max = s_it->nfds()) == 0)
 				max = s_it->getListener();
 			read = active;
@@ -204,9 +204,9 @@ void	Master::start( void ) {
 			if (select(max + 1, &read, &write, NULL, &tv) == 0)
 				continue ;
 			if (FD_ISSET(s_it->getListener(), &read))
-				s_it->newRequest();
+				s_it->newConnection();
 			else
-				s_it->menageRequest(read, write);
+				s_it->menageConnection(read, write);
 		}
 	}
 }

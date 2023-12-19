@@ -19,16 +19,16 @@ Server::Server( void ) {
 Server::Server( const Server &src )
     : Directives(src) {
         _locations = src._locations;
-		_requests = src._requests;
 		_listener = src._listener;
+		_connections = src._connections;
 }
 
 Server& Server::operator=( const Server &src ) {
     if (this == &src)
         return *this;
     _locations = src._locations;
-	_requests = src._requests;
 	_listener = src._listener;
+	_connections = src._connections;
     Directives::operator=(src);
     return *this;
 }
@@ -42,9 +42,9 @@ bool	Server::operator<( const Server &src ) {
 Server::~Server() {
 	if (_listener != 0)
 		close(_listener);
-	v_req::iterator it = _requests.begin();
-	while ( it != _requests.end() )
-		it = eraseRequest(it);
+	m_intStr::iterator it = _connections.begin();
+	while ( it != _connections.end() )
+		eraseConnection(it);
 }
 
 void    Server::setLocations( const s_locs &locations ) {
@@ -55,8 +55,8 @@ void	Server::setListener( const int &listener ) {
 	_listener = listener;
 }
 
-void	Server::setRequests( const v_req &connections ) {
-	_requests = connections;
+void	Server::setConnections( const m_intStr &connections ) {
+	_connections = connections;
 }
 
 const s_locs	&Server::getLocations( void ) const {
@@ -67,8 +67,8 @@ const int &Server::getListener( void ) const {
 	return _listener;
 }
 
-const v_req	&Server::getRequests( void ) const {
-	return _requests;
+const m_intStr	&Server::getConnections( void ) const {
+	return _connections;
 }
 
 void    Server::addLocation( const Location &location ) {
@@ -79,24 +79,18 @@ void    Server::addLocation( const Location &location ) {
 int	Server::nfds( void ) const {
 	int temp = 0;
 
-	for (v_req::const_iterator it = _requests.begin(); it != _requests.end(); it++)
-		if (temp < it->getSocket())
-			temp = it->getSocket();
+	for (m_intStr::const_iterator it = _connections.begin(); it != _connections.end(); it++)
+		if (temp < it->first)
+			temp = it->first;
 	return temp;
 }
 
-v_req::iterator	Server::eraseRequest( v_req::iterator &r_it ) {
-	std::cout << r_it->getSocket() << " is disconnected" << std::endl;
-	close(r_it->getSocket());
-	return _requests.erase(r_it);
-}
-
-void	Server::displayServer( void ) const {
-	std::cout << "Server {" << std::endl;
-	displayDirectives();
-	for (s_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
-		it->displayLocation();
-	std::cout << "}" << std::endl;
+void	Server::eraseConnection( m_intStr::iterator &c_it ) {
+	int	socket = c_it->first;
+	std::cout << socket << " is disconnected" << std::endl;
+	close(socket);
+	c_it++;
+	_connections.erase(socket);
 }
 
 void	Server::ListenerInit( void ) {
@@ -118,64 +112,99 @@ void	Server::ListenerInit( void ) {
 		throw std::runtime_error("Socket cannot Listen");
 }
 
-void	Server::newRequest( void ) {
+void	Server::newConnection( void ) {
 	int socket = accept(_listener, NULL, NULL);
 	if (socket == -1)
 		return ;
 	if (fcntl(socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
 		return ;
-	_requests.push_back(socket);
-	std::cout << "Request " << socket << std::endl;
+	_connections.insert(std::make_pair(socket, ""));
+	std::cout << "Connection " << socket << std::endl;
 }
 
-void	Server::menageRequest( const fd_set &read, const fd_set &write ) {
-	v_req::iterator r_it = _requests.begin();
-	while ( r_it != _requests.end() )
+bool	Server::buildBuffer( m_intStr::iterator &c_it ) {
+	char	tmp_buffer[200000];
+	int		n_bytes = 0;
+	n_bytes = recv(c_it->first, tmp_buffer, 200000, 0);
+	if (n_bytes <= 0)
+		return false;
+	tmp_buffer[n_bytes] = '\0';
+	c_it->second += tmp_buffer;
+	return true;
+}
+
+void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
+	m_intStr::iterator c_it = _connections.begin();
+	while (c_it != _connections.end())
 	{
-		if (FD_ISSET(r_it->getSocket(), &write) && !r_it->getBuffer().empty())
+		if (FD_ISSET(c_it->first, &write) && !c_it->second.empty())
 		{
-			writeResponse(r_it);
-			r_it->displayRequest();
-			exit(0);
-			r_it++;
-		}
-		else if (FD_ISSET(r_it->getSocket(), &read))
-		{
-			if (r_it->buildBuffer() == false)
-				r_it = eraseRequest(r_it);
+			if (writeResponse(c_it) == false)
+				eraseConnection(c_it);
 			else
-				r_it++;
+				c_it++;
+		}
+		else if (FD_ISSET(c_it->first, &read))
+		{
+			if (buildBuffer(c_it) == false)
+				eraseConnection(c_it);
+			else
+				c_it++;
 		}
 		else
-			r_it++;
+			c_it++;
 	}
 }
 
-void	Server::requestParser( v_req::iterator &r_it ) {
-	size_t pos = r_it->getBuffer().find("\r\n");
-	std::string line = r_it->getBuffer().substr(0, pos);
+Request	Server::requestParser( m_intStr::iterator &c_it ) {
+	Request		request;
+	size_t		pos = c_it->second.find("\r\n");
+	std::string line = c_it->second.substr(0, pos);
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("414");
-	r_it->firstLineParser(line);
+	request.firstLineParser(line);
 	pos += 2;
-	line = r_it->getBuffer().substr(pos, r_it->getBuffer().find("\r\n\r\n") - pos);
+	line = c_it->second.substr(pos, c_it->second.find("\r\n\r\n") - pos);
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("400");
-	r_it->headersParser(line);
-	pos = r_it->getBuffer().find("\r\n\r\n") + 4;
-	line = r_it->getBuffer().substr(pos, std::string::npos);
-	r_it->bodyParser(line);
-	if (r_it->getBody().length() > _client_max_body_size)
+	request.headersParser(line);
+	pos = c_it->second.find("\r\n\r\n") + 4;
+	line = c_it->second.substr(pos, std::string::npos);
+	request.bodyParser(line);
+	if (_client_max_body_size != 0 && request.getBody().length() > _client_max_body_size)
 		throw std::runtime_error("413");
-	std::cout << r_it->getBody() << std::endl;
-	// if (_client_max_body_size == 0) _client_max_body_size viene disabilitato;
+	request.uriMatcher(_locations);
+	request.translateUri();
+	return request;
 }
 
-void	Server::writeResponse( v_req::iterator &r_it ) {
+bool	Server::writeResponse( m_intStr::iterator &c_it ) {
+	Request		request;
+	Response	*response = NULL;
 	try
 	{
-		requestParser(r_it);
+		std::cout << c_it->second << std::endl;
+		request = requestParser(c_it);
+		response = new Valid(request);
+		response->generateBody();
+		std::cout << response->getBody() << std::endl;
 	} catch(std::exception &e) {
-		std::cout << e.what() << std::endl;
+		response = new Error(e.what(), request);
+		response->generateBody();
 	}
+	response->generateHeaders();
+	response->send(c_it->first);
+	c_it->second.clear();
+	if (request.getHeaders().at("Connection") == "close")
+		return false;
+	delete response;
+	return true;
+}
+
+void	Server::displayServer( void ) const {
+	std::cout << "Server {" << std::endl;
+	displayDirectives();
+	for (s_locs::const_iterator it = _locations.begin(); it != _locations.end(); it++)
+		it->displayLocation();
+	std::cout << "}" << std::endl;
 }

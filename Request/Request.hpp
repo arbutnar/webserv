@@ -22,10 +22,7 @@
 
 class Request {
 	private:
-		int			_socket;
-		std::string	_buffer;
 		std::string	_method;
-		std::string	_request;
 		std::string	_uri;
 		std::string	_protocol;
 		m_strStr	_headers;
@@ -34,14 +31,11 @@ class Request {
 		Location	_match;
 	public:
 		Request( void );
-		Request( int const &socket );
 		Request( Request const &src );
 		Request	&operator=( Request const &src );
 		bool	operator==( Request const &src ) const ;
 		~Request();
 
-		const int			&getSocket( void ) const;
-		const std::string	&getBuffer( void ) const;
 		const std::string 	&getMethod( void ) const;
 		const std::string 	&getUri( void ) const;
 		const std::string 	&getProtocol( void ) const;
@@ -49,8 +43,6 @@ class Request {
 		const std::string 	&getBody( void ) const;
 		const std::string	&getTranslate( void ) const;
 		const Location		&getMatch( void ) const;
-		void				setSocket( int const &socket );
-		void				setBuffer( std::string const &buffer );
 		void				setMethod( const std::string &method );
 		void				setUri( const std::string &uri );
 		void				setProtocol( const std::string &protocol );
@@ -59,15 +51,13 @@ class Request {
 		void				setTranslate( const std::string &uri );
 		void				setMatch( const Location &match );
 
-		bool 	buildBuffer( void );
-		void	clearBuffer( void );
 		void	firstLineParser( std::string &line );
 		void	headersParser( std::string &line );
 		void	bodyParser( std::string &line );
 		void	uriMatcher( const s_locs &locations );
-		void	matchChecker( void ) const;
 		void	translateUri( void );
 		void	displayRequest( void ) const;
+		void	resetRequest( void );
 };
 
 #endif

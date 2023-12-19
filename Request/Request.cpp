@@ -13,11 +13,7 @@
 #include "Request.hpp"
 
 Request::Request( void )
-	: _socket (0), _buffer (""), _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
-}
-
-Request::Request( int const &socket )
-	: _socket (socket), _buffer (""), _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
+	: _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
 }
 
 Request::Request( const Request &src ) {
@@ -27,8 +23,6 @@ Request::Request( const Request &src ) {
 Request& Request::operator=( const Request &src ) {
 	if (this == &src)
 		return *this;
-	_socket = src._socket;
-	_buffer = src._buffer;
 	_method = src._method;
 	_uri = src._uri;
 	_protocol = src._protocol;
@@ -40,14 +34,6 @@ Request& Request::operator=( const Request &src ) {
 }
 
 Request::~Request( ) {
-}
-
-const int	&Request::getSocket( void ) const {
-	return _socket;
-}
-
-const std::string	&Request::getBuffer( void ) const {
-	return _buffer;
 }
 
 const std::string &Request::getMethod( void ) const {
@@ -78,14 +64,6 @@ const Location	&Request::getMatch( void ) const {
 	return _match;
 }
 
-void	Request::setSocket( int const &socket ) {
-	_socket = socket;
-}
-
-void	Request::setBuffer( std::string const &buffer ) {
-	_buffer = buffer;
-}
-
 void	Request::setMethod( const std::string &method ) {
 	_method = method;
 }
@@ -112,22 +90,6 @@ void	Request::setTranslate( const std::string &translate ) {
 
 void	Request::setMatch( const Location &match ) {
 	_match = match;
-}
-
-bool	Request::buildBuffer( void ) {
-
-	char	tmp_buffer[200000];
-	int		n_bytes = 0;
-	n_bytes = recv(_socket, tmp_buffer, 200000, 0);
-	if (n_bytes <= 0)
-		return false;
-	tmp_buffer[n_bytes] = '\0';
-	_buffer += tmp_buffer;
-	return true;
-}
-
-void	Request::clearBuffer( void ) {
-	_buffer.clear();
 }
 
 void	Request::firstLineParser( std::string &line ) {
@@ -165,6 +127,7 @@ void	Request::headersParser( std::string &line ) {
 
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 	{
+		std::cout << key << value << std::endl;
 		if (value.at(value.size() - 1) == '\r')
 			value.erase(value.size() - 1, 1);
 		if (_headers.find(key) != _headers.end() || (key.empty() || value.empty()))
@@ -193,20 +156,24 @@ void	Request::bodyParser( std::string &line ) {
 		_body = line.substr(0, atoi(_headers.at("Content-Length").c_str()));
 	else if (_headers.at("Transfer-Encoding") == "chunked")
 	{
+		std::stringstream	ss;
+		unsigned			chunkSize;
+		size_t				pos;
 		while(1)
 		{
-			std::stringstream	ss;
-			unsigned			chunkSize = 0;
-			size_t				pos = line.find_first_of("\r\n");
+			chunkSize = 0;
+			pos = line.find_first_of("\r\n");
 			ss << std::hex << line.substr(0, pos);
 			ss >> chunkSize;
 			if (chunkSize == 0)
 				break ;
 			line.erase(0, pos + 2);
 			_body += line.substr(0, chunkSize);
-			line.erase(0, chunkSize);
+			line.erase(0, chunkSize + 2);
 		}
 	}
+	else
+		throw std::runtime_error("501");
 }
 
 void	Request::uriMatcher( const s_locs &locations ) {
@@ -232,17 +199,8 @@ void	Request::uriMatcher( const s_locs &locations ) {
 		ss << _match.getReturn().first;
 		throw std::runtime_error(ss.str());
 	}
-}
-
-void	Request::matchChecker( void ) const {
-	unsigned int	cl = 0;
-
 	if (_match.getLimitExcept().at(_method) == false)
 		throw std::runtime_error("405");
-	if (_headers.find("Content-Length") != _headers.end())
-		cl = strtoul(_headers.at("Content-Length").c_str(), NULL, 10);
-	if (cl > _match.getClientMaxBodySize())
-		throw std::runtime_error("400");
 }
 
 void	Request::translateUri( void ) {
@@ -286,6 +244,17 @@ void	Request::translateUri( void ) {
 	}
 }
 
+// void	Request::resetRequest( void ) {
+// 	_buffer.clear();
+// 	_method.clear();
+// 	_uri.clear();
+// 	_protocol.clear();
+// 	_headers.clear();
+// 	_body.clear();
+// 	_translate.clear();
+// 	_match = ;
+// }
+
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;
 	std::cout << "uri: " << _uri << std::endl;
@@ -294,4 +263,5 @@ void	Request::displayRequest( void ) const {
 	std::cout << "uri translated: " << _translate << std::endl;
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
+	std::cout << "body: " << _body << std::endl;
 }

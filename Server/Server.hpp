@@ -29,9 +29,9 @@ typedef std::vector<Request> v_req;
 
 class Server : public Directives {
 	private:
-		s_locs	_locations;
-		int		_listener;
-		v_req	_requests;
+		s_locs		_locations;
+		int			_listener;
+		m_intStr	_connections;
 	public:
 		Server( void );
 		Server( const Server &src );
@@ -41,21 +41,21 @@ class Server : public Directives {
 
 		void			setLocations( const s_locs &locations );
 		void			setListener( const int &listener );
-		void			setRequests( const v_req &connections );
+		void			setConnections( const m_intStr &connections );
 		const s_locs	&getLocations( void ) const;
 		const int		&getListener( void ) const;
-		const v_req		&getRequests( void ) const;
+		const m_intStr	&getConnections( void ) const;
 
-		void			addLocation( const Location &location );
-		int				nfds( void ) const;
-		void			ListenerInit( void );
-		void			newRequest( void );
-		v_req::iterator	eraseRequest( v_req::iterator &r_it );
-		void			menageRequest( const fd_set &read, const fd_set &write );
-		void			bufferChecker( const std::string &buffer ) const;
-		void			requestParser( v_req::iterator &r_it );
-		void			writeResponse( v_req::iterator &it );
-		void			displayServer( void ) const;
+		void	addLocation( const Location &location );
+		int		nfds( void ) const;
+		void	ListenerInit( void );
+		void	newConnection( void );
+		bool 	buildBuffer( m_intStr::iterator &c_it );
+		void	eraseConnection( m_intStr::iterator &c_it );
+		void	menageConnection( const fd_set &read, const fd_set &write );
+		Request requestParser( m_intStr::iterator &c_it );
+		bool	writeResponse( m_intStr::iterator &c_it );
+		void	displayServer( void ) const;
 };
 
 #endif
