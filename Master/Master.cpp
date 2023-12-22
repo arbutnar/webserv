@@ -197,12 +197,11 @@ void	Master::start( void ) {
 			FD_SET(s_it->getListener(), &active);
 			for (m_intStr::const_iterator c_it = s_it->getConnections().begin(); c_it != s_it->getConnections().end(); c_it++)
 				FD_SET(c_it->first, &active);
-			if ((max = s_it->nfds()) == 0)
-				max = s_it->getListener();
+			if (s_it.getCgi().getOutput() != 0)
+				FD_SET(s_it.getCgi().getOutput(), &active);
 			read = active;
 			write = active;
-			if (select(max + 1, &read, &write, NULL, &tv) == 0)
-				continue ;
+			select(s_it->nfds() + 1, &read, &write, NULL, &tv);
 			if (FD_ISSET(s_it->getListener(), &read))
 				s_it->newConnection();
 			else

@@ -99,11 +99,6 @@ void	Request::firstLineParser( std::string &line ) {
 
 	pos = line.find_first_of(" ");
 	_method = line.substr(0, pos);
-	for (i = 0; i < 5; i++)
-		if (methods[i] == _method)
-			break ;
-	if (i == 5)
-		throw std::runtime_error("501");
 	if (_method.empty())
 		throw std::runtime_error("400");
 	pos += 1;
@@ -112,10 +107,15 @@ void	Request::firstLineParser( std::string &line ) {
 		throw std::runtime_error("400");
 	pos += _uri.size() + 1;
 	_protocol = line.substr(pos, line.find_first_of("\r\n", pos) - pos);
-	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
-		throw std::runtime_error("505");
 	if (_protocol.empty())
 		throw std::runtime_error("400");
+	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
+		throw std::runtime_error("505");
+	for (i = 0; i < 5; i++)
+		if (methods[i] == _method)
+			break ;
+	if (i == 5)
+		throw std::runtime_error("501");
 	if (_uri != "/" && _uri.at(0) == '/')
 		_uri.erase(0, 1);
 }
@@ -127,7 +127,6 @@ void	Request::headersParser( std::string &line ) {
 
 	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
 	{
-		std::cout << key << value << std::endl;
 		if (value.at(value.size() - 1) == '\r')
 			value.erase(value.size() - 1, 1);
 		if (_headers.find(key) != _headers.end() || (key.empty() || value.empty()))
@@ -193,14 +192,14 @@ void	Request::uriMatcher( const s_locs &locations ) {
 		for (s_locs::const_iterator it = locations.begin(); it != locations.end(); it++)
 			if (it->getLocationName() == "/")
 				_match = *it;
+	if (_match.getLimitExcept().at(_method) == false)
+		throw std::runtime_error("405");
 	if (_match.getReturn().first != -1)
 	{
 		std::stringstream	ss;
 		ss << _match.getReturn().first;
 		throw std::runtime_error(ss.str());
 	}
-	if (_match.getLimitExcept().at(_method) == false)
-		throw std::runtime_error("405");
 }
 
 void	Request::translateUri( void ) {
@@ -243,17 +242,6 @@ void	Request::translateUri( void ) {
 			throw std::runtime_error("403");
 	}
 }
-
-// void	Request::resetRequest( void ) {
-// 	_buffer.clear();
-// 	_method.clear();
-// 	_uri.clear();
-// 	_protocol.clear();
-// 	_headers.clear();
-// 	_body.clear();
-// 	_translate.clear();
-// 	_match = ;
-// }
 
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;

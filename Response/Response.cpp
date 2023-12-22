@@ -97,23 +97,21 @@ void	Response::generateHeaders( void ) {
 	tstruct = *localtime(&now);
 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
 	_headers.insert(std::make_pair("Date", buf));
-	if (_status == "499 Request Closed Request")
-		_headers.insert(std::make_pair("Request", "close"));
-	else if (_request.getHeaders().find("Request") != _request.getHeaders().end())
-		_headers.insert(*_request.getHeaders().find("Request"));
+	if (_request.getHeaders().find("Connection") != _request.getHeaders().end())
+		_headers.insert(*_request.getHeaders().find("Connection"));
 	else
 		_headers.insert(std::make_pair("Connection", "keep-alive"));
 	int	code = atoi(_status.c_str());
 	if (code > 300 && code < 309)
 		_headers.insert(std::make_pair("Location", _request.getMatch().getReturn().second));
-	// if (_request.getHeaders().find("Cookie") == _request.getHeaders().end())
-	// 	_headers.insert(std::make_pair("Set-Cookie", createCookie(5)));
-	// else
-	// {
-	// 	_headers.insert(std::make_pair("Cookie", _request.getHeaders().at("Cookie")));
-	// 	if (_body.find("<h2>No Cookie!</h2>") != std::string::npos)
-	// 		_body.replace(_body.find("<h2>No Cookie!</h2>"), 19, "<img src=\"https://www.freepnglogos.com/uploads/cookie-png/cookie-cliparts-transparent-download-clip-art-22.png\" alt=\"cookie\" width=\"200\" height=\"200\" />");
-	// }
+	if (_request.getHeaders().find("Cookie") == _request.getHeaders().end())
+		_headers.insert(std::make_pair("Set-Cookie", createCookie(5)));
+	else
+	{
+		_headers.insert(std::make_pair("Cookie", _request.getHeaders().at("Cookie")));
+		if (_body.find("<h2>No Cookie!</h2>") != std::string::npos)
+			_body.replace(_body.find("<h2>No Cookie!</h2>"), 19, "<img src=\"https://www.freepnglogos.com/uploads/cookie-png/cookie-cliparts-transparent-download-clip-art-22.png\" alt=\"cookie\" width=\"200\" height=\"200\" />");
+	}
 	if (!_body.empty())
 	{
 		_headers.insert(std::make_pair("Content-Type", "text/html"));

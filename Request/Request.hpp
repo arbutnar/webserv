@@ -57,7 +57,6 @@ class Request {
 		void	uriMatcher( const s_locs &locations );
 		void	translateUri( void );
 		void	displayRequest( void ) const;
-		void	resetRequest( void );
 };
 
 #endif

@@ -61,6 +61,8 @@ Error::Error( const std::string &code, const Request &request )
 				_status += " HTTP Not Supported"; break ;
 			case INSUFFICIENT_STORAGE:
 				_status += " Insufficient Storage"; break ;
+			default:
+				throw std::runtime_error(code);
 		}
 }
 

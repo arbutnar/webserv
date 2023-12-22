@@ -22,6 +22,7 @@
 # include <fcntl.h>
 # include "../Location/Location.hpp"
 # include "../Request/Request.hpp"
+# include "../Cgi/Cgi.hpp"
 # include "../Response/Error.hpp"
 # include "../Response/Valid.hpp"
 
@@ -32,6 +33,7 @@ class Server : public Directives {
 		s_locs		_locations;
 		int			_listener;
 		m_intStr	_connections;
+		Cgi			_cgi;
 	public:
 		Server( void );
 		Server( const Server &src );
@@ -39,12 +41,14 @@ class Server : public Directives {
 		bool	operator<( const Server &src );
 		~Server( );
 
-		void			setLocations( const s_locs &locations );
-		void			setListener( const int &listener );
-		void			setConnections( const m_intStr &connections );
 		const s_locs	&getLocations( void ) const;
 		const int		&getListener( void ) const;
 		const m_intStr	&getConnections( void ) const;
+		const Cgi		&getCgi( void ) const;
+		void			setLocations( const s_locs &locations );
+		void			setListener( const int &listener );
+		void			setConnections( const m_intStr &connections );
+		void			setCgi( const Cgi &cgi );
 
 		void	addLocation( const Location &location );
 		int		nfds( void ) const;
@@ -53,7 +57,7 @@ class Server : public Directives {
 		bool 	buildBuffer( m_intStr::iterator &c_it );
 		void	eraseConnection( m_intStr::iterator &c_it );
 		void	menageConnection( const fd_set &read, const fd_set &write );
-		Request requestParser( m_intStr::iterator &c_it );
+		bool	requestParser( Request &request, m_intStr::iterator &c_it );
 		bool	writeResponse( m_intStr::iterator &c_it );
 		void	displayServer( void ) const;
 };
