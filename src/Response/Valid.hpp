@@ -25,7 +25,6 @@
 class Valid : public Response {
 	private:
 		std::fstream	_file;
-		std::string		_cgiBuffer;
 	public:
 		Valid( void );
 		Valid( const Request &request );
@@ -33,9 +32,10 @@ class Valid : public Response {
 		Valid &operator=( const Valid &src );
 		~Valid( );
 
-		const std::string	&getCgiBuffer( void ) const;
-		void			handleAutoindex( void );
-		void			generateBody( void );
+		void	handleByMethod( void );
+		void	handleGET( void );
+		void	handlePOST( void );
+		void	handleAutoindex( void );
 };
 
 #endif

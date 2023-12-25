@@ -38,15 +38,14 @@ typedef std::pair<int, std::string> p_intStr;
 
 extern std::string	absolutePath;
 
-enum	commonDirectives {
+enum	listDirectives {
 	LISTEN,
 	SERVER_NAME,
 	ROOT,
 	ALIAS,
+	CGI_ALIAS,
 	INDEX,
 	AUTOINDEX,
-	CGI_PASS,
-	TRY_FILES,
 	LIMIT_EXCEPT,
 	ERROR_PAGE,
 	CLIENT_MAX_BODY_SIZE,
@@ -63,8 +62,7 @@ class Directives {
 		std::string		_alias;
 		v_str			_index;
 		bool			_autoindex;
-		std::string		_cgi_pass;
-		v_str			_try_files;
+		std::string		_cgi_alias;
 		m_strBool		_limit_except;
 		m_intStr		_error_page;
 		unsigned int	_client_max_body_size;
@@ -87,10 +85,9 @@ class Directives {
 		void	parseAlias( const std::string &attribute );
 		void	parseIndex( const std::string &attribute );
 		void	parseAutoindex( const std::string &attribute );
-		void	parseTryFiles( const std::string &attribute );
 		void	parseLimitExcept( const std::string &attribute );
 		void	parseErrorPage( const std::string &attribute );
-		void	parseCgiPass( const std::string &attribute );
+		void	parseCgiAlias( const std::string &attribute );
 		void	parseClientMaxBodySize( const std::string &attribute );
 		void	parseClientHeaderBufferSize( const std::string &attribute );
 		void	parseReturn( const std::string &attribute );
@@ -102,8 +99,7 @@ class Directives {
 		void	setAlias( const std::string &root );
 		void	setIndex( const v_str &index );
 		void	setAutoindex( const bool &autoindex );
-		void	setCgiPass( const std::string &cgi_pass );
-		void	setTryFiles( const v_str &try_files );
+		void	setCgiAlias( const std::string &cgi_alias );
 		void	setLimitExcept( const m_strBool &limit_except );
 		void	setErrorPage( const m_intStr &error_page );
 		void	setClientMaxBodySize( const unsigned int &client_max_body_size );
@@ -117,15 +113,15 @@ class Directives {
 		const std::string	&getAlias( void ) const;
 		const v_str			&getIndex( void ) const;
 		const bool			&getAutoindex( void ) const;
-		const std::string	&getCgiPass( void ) const;
-		const v_str			&getTryFiles( void ) const;
+		const std::string	&getCgiAlias( void ) const;
 		const m_strBool		&getLimitExcept( void ) const;
 		const m_intStr		&getErrorPage( void ) const;
 		const unsigned int	&getClientMaxBodySize( void ) const;
 		const unsigned int	&getClientHeaderBufferSize( void ) const;
 		const p_intStr		&getReturn( void ) const;
 
-		void			directiveParser( std::string line );
+		void			checkDirective( const std::string &key, const bool &inLocation ) const;
+		void			directiveParser( std::string line, const bool &inLocation );
 		void			displayDirectives( void ) const;
 		virtual void	addLocation( const Location &location );
 };

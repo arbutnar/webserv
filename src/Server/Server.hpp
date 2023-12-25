@@ -54,7 +54,7 @@ class Server : public Directives {
 		int		nfds( void ) const;
 		void	ListenerInit( void );
 		void	newConnection( void );
-		bool 	buildBuffer( m_intStr::iterator &c_it );
+		bool 	buildBuffer( const int &socket, std::string &buffer );
 		void	eraseConnection( m_intStr::iterator &c_it );
 		void	menageConnection( const fd_set &read, const fd_set &write );
 		bool	requestParser( Request &request, m_intStr::iterator &c_it );

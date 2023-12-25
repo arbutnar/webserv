@@ -67,7 +67,8 @@ class Response {
 
 		std::string		createCookie( const int len );
 		void			generateHeaders( void );
-		virtual void	generateBody( void ) = 0;
+		virtual void	handleByMethod( void );
+		virtual void	generateBody( void );
 		void			send( const int &socket ) const;
 };
 

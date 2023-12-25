@@ -16,7 +16,7 @@ Cgi	&Cgi::operator=( const Cgi &src ) {
 	return *this;
 }
 
-~Cgi::Cgi( void ) {
+Cgi::~Cgi( void ) {
 	if (_output != 0)
 		close(_output);
 }
@@ -38,17 +38,16 @@ void	Cgi::setCliSock( const int &cliSock ) {
 }
 
 void	Cgi::handleCgi( int cliSock, Request &request ) {
-	char*		args[3];
+	char*		args[2];
 	char*		env[4];
 	int			pipe_in[2];
 	int			pipe_out[2];
 	pid_t		pid;
 
-	pipe(pipe_in);
-	pipe(pipe_out);
-	args[0] = strdup(request.getMatch().getCgiPass().c_str());
-	args[1] = strdup(request.getTranslate().c_str());
-	args[2] = NULL;
+	if (pipe(pipe_in) == -1 || pipe(pipe_out) == -1)
+		throw std::runtime_error("500");
+	args[0] = strdup(request.getTranslate().c_str());
+	args[1] = NULL;
 	env[0] = strdup("SERVER_PROTOCOL=HTTP/1.1");
 	env[1] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
 	env[2] = strdup(("PATH_INFO=" + request.getUri()).c_str());
@@ -79,4 +78,5 @@ void	Cgi::handleCgi( int cliSock, Request &request ) {
 		free(args[i]);
 	for(int i = 0; env[i]; i++)
 		free(env[i]);
+	waitpid(-1, NULL, 0);
 }

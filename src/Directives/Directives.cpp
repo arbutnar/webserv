@@ -23,8 +23,7 @@ Directives::Directives( void ) {
 	_alias = "";
 	_index.clear();
 	_autoindex = false;
-	_cgi_pass = "";
-	_try_files.clear();
+	_cgi_alias = "";
 	_error_page.clear();
 	_client_max_body_size = 1000000;
 	_client_header_buffer_size = 4000;
@@ -54,8 +53,7 @@ Directives& Directives::operator=( const Directives &src ) {
 	_alias = src._alias;
 	_index = src._index;
 	_autoindex = src._autoindex;
-	_cgi_pass = src._cgi_pass;
-	_try_files = src._try_files;
+	_cgi_alias = src._cgi_alias;
 	_limit_except = src._limit_except;
 	_error_page = src._error_page;
 	_client_max_body_size = src._client_max_body_size;
@@ -64,9 +62,16 @@ Directives& Directives::operator=( const Directives &src ) {
 	return *this;
 }
 
-void	Directives::directiveParser( std::string line ) {
-	std::string	arr[] = { "listen", "server_name", "root", "alias", "index", "autoindex", "cgi_pass", "try_files", 
-							"limit_except", "error_page", "client_max_body_size", "client_header_buffer_size", "return" };
+void	Directives::checkDirective( const std::string &key, const bool &inLocation ) const {
+	if (!inLocation && (key == "limit_except" || key == "alias" || key == "cgi_alias"))
+		throw Directives::SyntaxError();
+	else if (inLocation && (key == "server_name" || key == "listen" || key == "client_header_buffer_size"))
+		throw Directives::SyntaxError();
+}
+
+void	Directives::directiveParser( std::string line, const bool &inLocation ) {
+	std::string	arr[] = { "listen", "server_name", "root", "alias", "cgi_alias", "index", "autoindex", "limit_except",
+							"error_page", "client_max_body_size", "client_header_buffer_size", "return" };
 	std::string	key;
 	std::string	value;
 	size_t		pos;
@@ -74,7 +79,7 @@ void	Directives::directiveParser( std::string line ) {
 
 	pos = line.find_first_not_of(" \t");
 	key = line.substr(pos, line.find_first_of(" \t", pos) - pos);
-	for (i = 0; i < 13; i++) {
+	for (i = 0; i < 12; i++) {
 		if (arr[i] == key)
 			break;
 	}
@@ -82,6 +87,7 @@ void	Directives::directiveParser( std::string line ) {
 	value = line.substr(0, line.find(';'));
 	if (value.empty())
 		throw Directives::SyntaxError();
+	checkDirective(key, inLocation);
 	switch (i) {
 		case LISTEN:
 			parseListen(value); break;
@@ -91,18 +97,16 @@ void	Directives::directiveParser( std::string line ) {
 			parseRoot(value); break;
 		case ALIAS:
 			parseAlias(value); break;
+		case CGI_ALIAS:
+			parseCgiAlias(value); break;
 		case INDEX:
 			parseIndex(value); break;
 		case AUTOINDEX:
 			parseAutoindex(value); break;
-		case ERROR_PAGE:
-			parseErrorPage(value); break;
 		case LIMIT_EXCEPT:
 			parseLimitExcept(value); break;
-		case TRY_FILES:
-			parseTryFiles(value); break;
-		case CGI_PASS:
-			parseCgiPass(value); break;
+		case ERROR_PAGE:
+			parseErrorPage(value); break;
 		case CLIENT_MAX_BODY_SIZE:
 			parseClientMaxBodySize(value); break;
 		case CLIENT_HEADER_BUFFER_SIZE:
@@ -125,11 +129,7 @@ void	Directives::displayDirectives( void ) const {
 		std::cout << *it << ' ';
 	std::cout << std::endl;
 	std::cout << "Autoindex: " << _autoindex << std::endl;
-	std::cout << "Cgi Pass: " << _cgi_pass << std::endl;
-	std::cout << "Try Files: ";
-	for (v_str::const_iterator it = _try_files.begin(); it != _try_files.end(); it++)
-		std::cout << *it << ' ';
-	std::cout << std::endl;
+	std::cout << "Cgi Pass: " << _cgi_alias << std::endl;
 	std::cout << "Allowed Methods: ";
 	for (m_strBool::const_iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 		if (it->second == true)

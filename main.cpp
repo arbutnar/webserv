@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./Master/Master.hpp"
+#include "src/Master/Master.hpp"
 
 Master	*master = NULL;
 

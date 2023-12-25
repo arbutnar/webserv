@@ -203,44 +203,48 @@ void	Request::uriMatcher( const s_locs &locations ) {
 }
 
 void	Request::translateUri( void ) {
+	std::string	alias;
+
 	if (_uri == "/")
 		_uri.clear();
-	if (_match.getAlias().empty())
+	if (!_match.getRoot().empty())
 		_translate = _match.getRoot() + _uri;
-	else if (_match.getRoot().empty())
+	alias = _match.getAlias();
+	alias += _match.getCgiAlias();
+	if (!alias.empty())
 	{
 		if (_uri.find(_match.getLocationName()) != std::string::npos)
-			_translate = _match.getAlias() + _uri.substr(_match.getLocationName().size(), std::string::npos);
+			_translate = alias + _uri.substr(_match.getLocationName().size(), std::string::npos);
 		else
-			_translate = _match.getAlias();
+			_translate = alias;
 	}
 	if (_uri.empty())
 		_uri = "/";
-	_translate = absolutePath + _translate;
-	struct stat st;
-	if (_method != "PUT" && _method != "POST")
-		if (stat(_translate.c_str(), &st) == -1)
-			throw std::runtime_error("404");
-	if (_method == "GET" || _method == "HEAD")
+	if (_translate.find(absolutePath) == std::string::npos)
+		_translate = absolutePath + _translate;		
+}
+
+void	Request::finishTranslation( void ) {
+	struct stat	st;
+	if (stat(_translate.c_str(), &st) == -1)
+		throw std::runtime_error("404");
+	if (st.st_mode & S_IFDIR)
 	{
-		if (st.st_mode & S_IFDIR)
-		{
-			if (*_translate.rbegin() != '/')
-				_translate += "/";
-			v_str::const_iterator	it;
-			for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
-				if (access((_translate + *it).c_str(), R_OK) == 0)
-					break ;
-			if (it != _match.getIndex().end())
-				_translate += *it;
-			else if (access((_translate + "index.html").c_str(), R_OK) == 0)
-				_translate += "index.html";
-			else if (_match.getAutoindex() == false)
-				throw std::runtime_error("403");
-		}
-		else if (access((_translate).c_str(), R_OK) == -1)
+		if (*_translate.rbegin() != '/')
+			_translate += "/";
+		v_str::const_iterator	it;
+		for (it = _match.getIndex().begin(); it != _match.getIndex().end(); it++)
+			if (access((_translate + *it).c_str(), R_OK) == 0)
+				break ;
+		if (it != _match.getIndex().end())
+			_translate += *it;
+		else if (access((_translate + "index.html").c_str(), R_OK) == 0)
+			_translate += "index.html";
+		else if (_match.getAutoindex() == false)
 			throw std::runtime_error("403");
 	}
+	else if (access((_translate).c_str(), R_OK) == -1)
+		throw std::runtime_error("403");
 }
 
 void	Request::displayRequest( void ) const {

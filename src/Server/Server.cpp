@@ -134,32 +134,43 @@ void	Server::newConnection( void ) {
 	std::cout << "Connection " << socket << std::endl;
 }
 
-bool	Server::buildBuffer( m_intStr::iterator &c_it ) {
-	char	tmp_buffer[200000];
+bool	Server::buildBuffer( const int &socket, std::string &buffer ) {
+	char	tmp_buffer[200001];
 	int		n_bytes = 0;
-	n_bytes = recv(c_it->first, tmp_buffer, 200000, 0);
+	n_bytes = read(socket, tmp_buffer, 200000);
 	if (n_bytes <= 0)
 		return false;
 	tmp_buffer[n_bytes] = '\0';
-	c_it->second += tmp_buffer;
+	buffer += tmp_buffer;
 	return true;
 }
 
 void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
-
-
-	m_intStr::iterator c_it = _connections.begin();
+	m_intStr::iterator c_it;
+	if (FD_ISSET(_cgi.getOutput(), &read))
+	{
+		c_it = _connections.find(_cgi.getCliSock());
+		if (c_it == _connections.end())
+			close(_cgi.getOutput());
+		else if (buildBuffer(_cgi.getOutput(), c_it->second) == false)
+		{
+			close(_cgi.getOutput());
+			_cgi.setOutput(0);
+		}
+		return ;
+	}
+	c_it = _connections.begin();
 	while (c_it != _connections.end())
 	{
 		if (FD_ISSET(c_it->first, &read))
 		{
-			if (buildBuffer(c_it) == false)
+			if (buildBuffer(c_it->first, c_it->second) == false)
 				eraseConnection(c_it);
 			break ;
 		}
 		else if (FD_ISSET(c_it->first, &write) && !c_it->second.empty())
 		{
-			if ( writeResponse(c_it) == false )
+			if (writeResponse(c_it) == false)
 				eraseConnection(c_it);
 			break ;
 		}
@@ -188,7 +199,7 @@ bool	Server::requestParser( Request &request, m_intStr::iterator &c_it ) {
 		throw std::runtime_error("413");
 	request.uriMatcher(_locations);
 	request.translateUri();
-	if (!request.getMatch().getCgiPass().empty())
+	if (!request.getMatch().getCgiAlias().empty())
 		return true;
 	return false;
 }
@@ -199,14 +210,14 @@ bool	Server::writeResponse( m_intStr::iterator &c_it ) {
 	try
 	{
 		std::cout << c_it->second << std::endl;
-		bool cgi = requestParser(request, c_it);
-		if (cgi == true)
+		if (requestParser(request, c_it))
 		{
 			_cgi.handleCgi(c_it->first, request);
+			c_it->second.clear();
 			return true;
 		}
 		response = new Valid(request);
-		response->generateBody();
+		response->handleByMethod();
 	} catch(std::exception &e) {
 		response = new Error(e.what(), request);
 		response->generateBody();
@@ -215,12 +226,12 @@ bool	Server::writeResponse( m_intStr::iterator &c_it ) {
 	response->send(c_it->first);
 	c_it->second.clear();
 	if (response->getHeaders().at("Connection") == "close")
+	{
+		delete response;
 		return false;
+	}
 	delete response;
 	return true;
-	// std::string response = "HTTP/1.1 200 OK\r\nStatus: 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\nCIAOAOAO";
-	// ::send(c_it->first, response.c_str(), response.length(), 0);
-	// return true;
 }
 
 void	Server::displayServer( void ) const {

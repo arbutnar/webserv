@@ -18,20 +18,6 @@ Valid::Valid( void )
 
 Valid::Valid( const Request &request )
 	:  Response ("200 Ok", request) {
-		if (_request.getMethod() == "GET" || _request.getMethod() == "HEAD")
-			_file.open(request.getTranslate().c_str(), std::fstream::in);
-		if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
-		{
-			struct stat st;
-			if (stat(request.getTranslate().c_str(), &st) == 0 && st.st_mode & S_IFDIR)
-				throw std::runtime_error("409");
-			_status = "201 Created";
-			if (stat(request.getTranslate().c_str(), &st) == 0)
-				_status = "204 No Content";
-			_file.open(request.getTranslate().c_str(), std::fstream::out);
-		}
-		if (!_file.is_open() && _request.getMethod() != "DELETE")
-			throw std::runtime_error("500");
 }
 
 Valid::Valid( const Valid &src )
@@ -46,6 +32,59 @@ Valid	&Valid::operator=( const Valid &src ) {
 }
 
 Valid::~Valid( ) {
+}
+
+void	Valid::handleByMethod( void ) {
+	std::string	methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
+	int	i;
+	for (i = 0; i < 5; i++)
+		if (methods[i] == _request.getMethod())
+			break;
+	switch(i) {
+		case GET:
+		case HEAD:
+			handleGET(); break ;
+		case POST:
+		case PUT:
+			handlePOST(); break ;
+		case DELETE: {
+			remove(_request.getTranslate().c_str());
+			_status = "204 No Content";
+			break ;
+		}
+	}
+}
+
+void	Valid::handleGET( void ) {
+	_request.finishTranslation();
+	if (_request.getMatch().getAutoindex() == true && *_request.getTranslate().rbegin() == '/')
+		handleAutoindex();
+	else
+	{
+		_file.open(_request.getTranslate().c_str(), std::fstream::in);
+		if (!_file.is_open())
+			throw std::runtime_error("500");
+		else if (_request.getMethod() == "GET")
+		{
+			std::stringstream ss;
+			ss << _file.rdbuf();
+			_body = ss.str();
+		}
+	}
+}
+
+void	Valid::handlePOST( void ) {
+	struct stat st;
+	if (stat(_request.getTranslate().c_str(), &st) == 0 && st.st_mode & S_IFDIR)
+		throw std::runtime_error("409");
+	_status = "201 Created";
+	if (stat(_request.getTranslate().c_str(), &st) == 0)
+		_status = "204 No Content";
+	_file.open(_request.getTranslate().c_str(), std::fstream::out);
+	_body = _request.getBody();
+	_file << _body;
+	if (_request.getMethod() == "PUT")
+		_body.clear();
 }
 
 void	Valid::handleAutoindex( void ) {
@@ -70,32 +109,4 @@ void	Valid::handleAutoindex( void ) {
 	}
 	_body += "\t<hr>\n</body>\n</html>\n";
 	closedir(dir);
-}
-
-void	Valid::generateBody( void ) {
-	if(_request.getMethod() == "GET")
-	{
-		if (_request.getMatch().getAutoindex() == true && *_request.getTranslate().rbegin() == '/')
-			handleAutoindex();
-		else
-		{
-			std::stringstream ss;
-			ss << _file.rdbuf();
-			_body = ss.str();
-		}
-	}
-	else if (_request.getMethod() == "PUT" || _request.getMethod() == "POST")
-	{
-		_body = _request.getBody();
-		if (!_request.getMatch().getCgiPass().empty())
-			handleCgi();
-		_file << _body;
-		if (_request.getMethod() == "PUT")
-			_body.clear();
-	}
-	else if (_request.getMethod() == "DELETE")
-	{
-		remove(_request.getTranslate().c_str());
-		_status = "204 No Content";
-	}
 }

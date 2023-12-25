@@ -40,12 +40,8 @@ const bool	&Directives::getAutoindex( void ) const {
 	return _autoindex;
 }
 
-const std::string	&Directives::getCgiPass( void ) const {
-	return _cgi_pass;
-}
-
-const v_str	&Directives::getTryFiles( void ) const {
-	return _try_files;
+const std::string	&Directives::getCgiAlias( void ) const {
+	return _cgi_alias;
 }
 
 const m_strBool	&Directives::getLimitExcept( void ) const {

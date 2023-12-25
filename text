@@ -1,0 +1,8 @@
+SERVER
+listen
+server_name
+
+LOCATION
+limit_except
+alias
+cgi_alias

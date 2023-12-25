@@ -20,6 +20,14 @@
 # include <fstream>
 # include "../Location/Location.hpp"
 
+enum methods {
+	GET,
+	HEAD,
+	POST,
+	PUT,
+	DELETE
+};
+
 class Request {
 	private:
 		std::string	_method;
@@ -56,6 +64,7 @@ class Request {
 		void	bodyParser( std::string &line );
 		void	uriMatcher( const s_locs &locations );
 		void	translateUri( void );
+		void	finishTranslation( void );
 		void	displayRequest( void ) const;
 };
 

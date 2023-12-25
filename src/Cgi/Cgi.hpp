@@ -1,3 +1,5 @@
+#include <string.h>
+#include <sys/wait.h>
 #include "../Request/Request.hpp"
 
 class Cgi {

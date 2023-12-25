@@ -24,7 +24,7 @@ void	Directives::parseListen( const std::string &attribute ) {
 }
 
 void	Directives::parseRoot( const std::string &attribute ) {
-	if (!_alias.empty())
+	if (!_alias.empty() || !_cgi_alias.empty())
 		throw std::runtime_error("Syntax Error: root Directive");
 	_root = attribute;
 	if (_root != "/") {
@@ -42,16 +42,11 @@ void	Directives::parseRoot( const std::string &attribute ) {
 }
 
 void	Directives::parseAlias( const std::string &attribute ) {
-	if (!_root.empty())
+	if (!_root.empty() || !_cgi_alias.empty())
 		throw std::runtime_error("Syntax Error: alias Directive");
 	_alias = attribute;
 	if (_alias != "/" && _alias.at(0) == '/')
 		_alias.erase(0, 1);
-	if (_alias.empty())
-		throw std::runtime_error("Syntax Error: alias Directive");
-	struct stat	st;
-	if (stat(_alias.c_str(), &st) == -1 || !(st.st_mode & S_IFDIR))
-		throw std::runtime_error("Syntax Error: alias Directive");
 }
 
 void 	Directives::parseListenHost( const std::string &attribute ) {
@@ -82,16 +77,6 @@ void	Directives::parseAutoindex( const std::string &attribute ) {
 		throw std::runtime_error("Syntax Error: autoindex Directive");
 }
 
-void	Directives::parseTryFiles( const std::string &attribute ) {
-	size_t	pos = 0;
-	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
-	{
-		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		_try_files.push_back(tmp);
-		pos += tmp.length();
-	}
-}
-
 void	Directives::parseLimitExcept( const std::string &attribute ) {
 	for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
 		it->second = false;
@@ -99,7 +84,7 @@ void	Directives::parseLimitExcept( const std::string &attribute ) {
 	while ((pos = attribute.find_first_not_of(' ', pos)) != std::string::npos)
 	{
 		std::string tmp = attribute.substr(pos, attribute.find_first_of(' ', pos) - pos);
-		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);			// is case sensitive?
+		std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
 		if (tmp != "GET" && tmp != "HEAD" && tmp != "POST" && tmp != "PUT" && tmp != "DELETE")
 			throw std::runtime_error("Syntax Error: limit_except Directive");
 		for (m_strBool::iterator it = _limit_except.begin(); it != _limit_except.end(); it++)
@@ -129,13 +114,12 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	_error_page.insert(std::make_pair(code, value));
 }
 
-void	Directives::parseCgiPass( const std::string &attribute ) {
-	_cgi_pass = attribute;
-	if (*_cgi_pass.begin() == '/')
-		_cgi_pass.erase(0, 1);
-	_cgi_pass = absolutePath + _cgi_pass;
-	if (access(_cgi_pass.c_str(), X_OK) == -1)
-		throw std::runtime_error("Syntax Error: cgi_pass Directive");
+void	Directives::parseCgiAlias( const std::string &attribute ) {
+	if (!_root.empty() || !_alias.empty())
+		throw std::runtime_error("Syntax Error: cgi alias Directive");
+	_cgi_alias = attribute;
+	if (_cgi_alias != "/" && _cgi_alias.at(0) == '/')
+		_cgi_alias.erase(0, 1);
 }
 
 void	Directives::parseClientMaxBodySize( const std::string &attribute ) {

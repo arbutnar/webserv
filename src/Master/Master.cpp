@@ -111,7 +111,7 @@ void	Master::serverParser( std::string &block ) {
 	std::stringstream	ss(block);
 	std::string			line;
 	Directives*			serverPtr = new Server();
-	Directives*			locationPtr;
+	Directives*			locationPtr = NULL;
 	bool				inLocation = false;
 
 	try {
@@ -127,29 +127,21 @@ void	Master::serverParser( std::string &block ) {
 				locationPtr = new Location(line);
 				*locationPtr = *serverPtr;
 				locationPtr->setRoot("");
-				locationPtr->setAlias("");
 			}
 			else if (line.find("}") != std::string::npos)
 			{
 				if (!inLocation)
 					throw Directives::SyntaxError();
 				inLocation = false;
-				if (locationPtr->getRoot().empty() && locationPtr->getAlias().empty())
-				{
+				if (locationPtr->getRoot().empty() && (locationPtr->getAlias().empty() && locationPtr->getCgiAlias().empty()))
 					locationPtr->setRoot(serverPtr->getRoot());
-					locationPtr->setAlias(serverPtr->getAlias());
-				}
 				serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
 				delete locationPtr;
 			}
 			else if (inLocation)
-			{
-				if (line.find("connection_header_buffer_size") != std::string::npos)
-					throw Directives::SyntaxError();
-				locationPtr->directiveParser(line);
-			}
+				locationPtr->directiveParser(line, inLocation);
 			else
-				serverPtr->directiveParser(line);
+				serverPtr->directiveParser(line, inLocation);
 		}
 		_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
 		delete serverPtr;
@@ -184,7 +176,6 @@ void	Master::start( void ) {
 	fd_set			read;
 	fd_set			write;
 	fd_set			active;
-	int				max;
 	struct timeval	tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
@@ -197,10 +188,9 @@ void	Master::start( void ) {
 			FD_SET(s_it->getListener(), &active);
 			for (m_intStr::const_iterator c_it = s_it->getConnections().begin(); c_it != s_it->getConnections().end(); c_it++)
 				FD_SET(c_it->first, &active);
-			if (s_it.getCgi().getOutput() != 0)
-				FD_SET(s_it.getCgi().getOutput(), &active);
-			read = active;
-			write = active;
+			if (s_it->getCgi().getOutput() != 0)
+				FD_SET(s_it->getCgi().getOutput(), &active);
+			read = write = active;
 			select(s_it->nfds() + 1, &read, &write, NULL, &tv);
 			if (FD_ISSET(s_it->getListener(), &read))
 				s_it->newConnection();
