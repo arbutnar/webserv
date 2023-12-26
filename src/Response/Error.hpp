@@ -23,7 +23,7 @@ class Error : public Response {
 		Error &operator=( const Error &src );
 		~Error( );
 
-		void	generateBody( void );
+		void	defaultErrorPage( void );
 };
 
 #endif

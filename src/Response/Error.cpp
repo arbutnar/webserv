@@ -80,7 +80,7 @@ Error	&Error::operator=( const Error &src ) {
 Error::~Error( ) {
 }
 
-void	Error::generateBody( void ) {
+void	Error::defaultErrorPage( void ) {
 	int status = atoi(_status.c_str());
 
 	m_intStr::const_iterator it = _request.getMatch().getErrorPage().find(status);

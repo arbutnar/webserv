@@ -221,7 +221,7 @@ void	Request::translateUri( void ) {
 	if (_uri.empty())
 		_uri = "/";
 	if (_translate.find(absolutePath) == std::string::npos)
-		_translate = absolutePath + _translate;		
+		_translate = absolutePath + _translate;
 }
 
 void	Request::finishTranslation( void ) {

@@ -22,9 +22,9 @@
 # include <fcntl.h>
 # include "../Location/Location.hpp"
 # include "../Request/Request.hpp"
-# include "../Cgi/Cgi.hpp"
 # include "../Response/Error.hpp"
 # include "../Response/Valid.hpp"
+# include "../Cgi/Cgi.hpp"
 
 typedef std::vector<Request> v_req;
 
@@ -33,7 +33,7 @@ class Server : public Directives {
 		s_locs		_locations;
 		int			_listener;
 		m_intStr	_connections;
-		Cgi			_cgi;
+		Cgi	_cgi;
 	public:
 		Server( void );
 		Server( const Server &src );
@@ -57,7 +57,7 @@ class Server : public Directives {
 		bool 	buildBuffer( const int &socket, std::string &buffer );
 		void	eraseConnection( m_intStr::iterator &c_it );
 		void	menageConnection( const fd_set &read, const fd_set &write );
-		bool	requestParser( Request &request, m_intStr::iterator &c_it );
+		bool	requestParser( Request &request, const std::string &clientBuffer );
 		bool	writeResponse( m_intStr::iterator &c_it );
 		void	displayServer( void ) const;
 };

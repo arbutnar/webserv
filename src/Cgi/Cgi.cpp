@@ -1,7 +1,7 @@
 #include "Cgi.hpp"
 
 Cgi::Cgi( void )
-	: _output (0), _cliSock (0) {
+	: _readFd (0), _cliSock (0) {
 }
 
 Cgi::Cgi( const Cgi &src ) {
@@ -11,33 +11,35 @@ Cgi::Cgi( const Cgi &src ) {
 Cgi	&Cgi::operator=( const Cgi &src ) {
 	if (this == &src)
 		return *this;
-	_output = src._output;
+	_readFd = src._readFd;
 	_cliSock = src._cliSock;
 	return *this;
 }
 
 Cgi::~Cgi( void ) {
-	if (_output != 0)
-		close(_output);
+	if (_readFd != 0)
+		close(_readFd);
+	if (_cliSock != 0)
+		close(_cliSock);
 }
 
-const int	&Cgi::getOutput( void ) const {
-	return _output;
+const int	&Cgi::getReadFd( void ) const {
+	return _readFd;
 }
 
 const int	&Cgi::getCliSock( void ) const {
 	return _cliSock;
 }
 
-void	Cgi::setOutput( const int &output ) {
-	_output = output;
+void	Cgi::setReadFd( const int &readFd ) {
+	_readFd = readFd;
 }
 
 void	Cgi::setCliSock( const int &cliSock ) {
 	_cliSock = cliSock;
 }
 
-void	Cgi::handleCgi( int cliSock, Request &request ) {
+void	Cgi::handleCgi( Request &request ) {
 	char*		args[2];
 	char*		env[4];
 	int			pipe_in[2];
@@ -52,8 +54,6 @@ void	Cgi::handleCgi( int cliSock, Request &request ) {
 	env[1] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
 	env[2] = strdup(("PATH_INFO=" + request.getUri()).c_str());
 	env[3] = NULL;
-	pipe(pipe_in);
-	pipe(pipe_out);
 	pid = fork();
 	if (pid < 0)
 		throw std::runtime_error("500");
@@ -72,11 +72,19 @@ void	Cgi::handleCgi( int cliSock, Request &request ) {
 	close(pipe_out[1]);
 	write(pipe_in[1], request.getBody().c_str(), request.getBody().size());
 	close(pipe_in[1]);
-	_output = pipe_out[0];
-	_cliSock = cliSock;
+	_readFd = pipe_out[0];
 	for(int i = 0; args[i]; i++)
 		free(args[i]);
 	for(int i = 0; env[i]; i++)
 		free(env[i]);
 	waitpid(-1, NULL, 0);
+}
+
+void	Cgi::clear( void ) {
+	if (_readFd != 0)
+		close(_readFd);
+	if (_cliSock != 0)
+		close(_cliSock);
+	_readFd = 0;
+	_cliSock = 0;
 }

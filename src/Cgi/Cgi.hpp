@@ -4,7 +4,7 @@
 
 class Cgi {
 	private:
-		int	_output;
+		int	_readFd;
 		int	_cliSock;
 	public:
 		Cgi( void );
@@ -12,9 +12,10 @@ class Cgi {
 		Cgi &operator=( const Cgi &src );
 		~Cgi();
 		
-		const int	&getOutput( void ) const;
+		const int	&getReadFd( void ) const;
 		const int	&getCliSock( void ) const;
-		void		setOutput( const int &output );
+		void		setReadFd( const int &readFd );
 		void		setCliSock( const int &cliSock );
-		void		handleCgi( int cliSock, Request &request );
+		void		handleCgi( Request &request );
+		void		clear( void );
 };

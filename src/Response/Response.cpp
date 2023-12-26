@@ -112,13 +112,10 @@ void	Response::generateHeaders( void ) {
 		if (_body.find("<h2>No Cookie!</h2>") != std::string::npos)
 			_body.replace(_body.find("<h2>No Cookie!</h2>"), 19, "<img src=\"https://www.freepnglogos.com/uploads/cookie-png/cookie-cliparts-transparent-download-clip-art-22.png\" alt=\"cookie\" width=\"200\" height=\"200\" />");
 	}
-	if (!_body.empty())
-	{
-		_headers.insert(std::make_pair("Content-Type", "text/html"));
-		std::stringstream ss;
-		ss << _body.length();
-		_headers.insert(std::make_pair("Content-Length", ss.str()));
-	}
+	_headers.insert(std::make_pair("Content-Type", "text/html"));
+	std::stringstream ss;
+	ss << _body.length();
+	_headers.insert(std::make_pair("Content-Length", ss.str()));
 }
 
 void	Response::send( const int &socket ) const {
@@ -135,5 +132,5 @@ void	Response::send( const int &socket ) const {
 void	Response::handleByMethod( void ) {
 }
 
-void	Response::generateBody( void ) {
+void	Response::defaultErrorPage( void ) {
 }
