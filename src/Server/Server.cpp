@@ -153,6 +153,8 @@ void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
 			_cgi.clear();
 		else if (buildBuffer(_cgi.getReadFd(), c_it->second))
 		{
+			if (c_it->second.empty())
+				c_it->second = "empty buffer";
 			close(_cgi.getReadFd());
 			_cgi.setReadFd(0);
 		}
@@ -169,9 +171,9 @@ void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
 		}
 		else if (FD_ISSET(c_it->first, &write) && !c_it->second.empty())
 		{
-			if (_cgi.getCliSock() == c_it->first && _cgi.writeResponse(c_it->second))
-				eraseConnection(c_it);
-			else if (writeResponse(c_it))
+			// if (_cgi.getCliSock() == c_it->first && _cgi.writeResponse(c_it->second))
+			// 	eraseConnection(c_it);
+			if (writeResponse(c_it))
 				eraseConnection(c_it);
 			break ;
 		}
@@ -195,7 +197,8 @@ bool	Server::requestParser( Request &request, const std::string &clientBuffer ) 
 	request.headersParser(line);
 	pos = clientBuffer.find("\r\n\r\n") + 4;
 	line = clientBuffer.substr(pos, std::string::npos);
-	request.bodyParser(line);
+	if (!line.empty())
+		request.bodyParser(line);
 	if (_client_max_body_size != 0 && request.getBody().length() > _client_max_body_size)
 		throw std::runtime_error("413");
 	request.uriMatcher(_locations);
@@ -219,10 +222,10 @@ bool	Server::writeResponse( m_intStr::iterator &c_it ) {
 			return true;
 		}
 		response = new Valid(request);
-		response->handleByMethod();
+		(dynamic_cast<Valid *>(response))->handleByMethod();
 	} catch(std::exception &e) {
 		response = new Error(e.what(), request);
-		response->defaultErrorPage();
+		(dynamic_cast<Error *>(response))->defaultErrorPage();
 	}
 	response->generateHeaders();
 	response->send(c_it->first);

@@ -128,9 +128,3 @@ void	Response::send( const int &socket ) const {
 	::send(socket, response.c_str(), response.length(), 0);
 	std::cout << response << std::endl;
 }
-
-void	Response::handleByMethod( void ) {
-}
-
-void	Response::defaultErrorPage( void ) {
-}

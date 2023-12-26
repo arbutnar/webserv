@@ -34,7 +34,7 @@ class Valid : public Response {
 
 		void	handleByMethod( void );
 		void	handleGET( void );
-		void	handlePOST( void );
+		void	handlePUT( void );
 		void	handleAutoindex( void );
 };
 

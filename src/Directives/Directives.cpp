@@ -142,7 +142,3 @@ void	Directives::displayDirectives( void ) const {
 	std::cout << "Client Max Body Size: " << _client_max_body_size << std::endl;
 	std::cout << "Return: " << _return.first << " " << _return.second << std::endl;
 }
-
-void	Directives::addLocation( const Location &location ) {		//implemented only to avoid hpp files recurion.
-	(void) location;
-}

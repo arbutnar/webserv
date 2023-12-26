@@ -20,6 +20,8 @@
 # include <fstream>
 # include "../Location/Location.hpp"
 
+typedef std::set<Location> s_locs;
+
 enum methods {
 	GET,
 	HEAD,

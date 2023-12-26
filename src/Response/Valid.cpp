@@ -43,10 +43,10 @@ void	Valid::handleByMethod( void ) {
 	switch(i) {
 		case GET:
 		case HEAD:
-			handleGET(); break ;
 		case POST:
+			handleGET(); break ;
 		case PUT:
-			handlePOST(); break ;
+			handlePUT(); break ;
 		case DELETE: {
 			remove(_request.getTranslate().c_str());
 			_status = "204 No Content";
@@ -64,7 +64,7 @@ void	Valid::handleGET( void ) {
 		_file.open(_request.getTranslate().c_str(), std::fstream::in);
 		if (!_file.is_open())
 			throw std::runtime_error("500");
-		else if (_request.getMethod() == "GET")
+		else if (_request.getMethod() == "GET" || _request.getMethod() == "POST")
 		{
 			std::stringstream ss;
 			ss << _file.rdbuf();
@@ -73,7 +73,7 @@ void	Valid::handleGET( void ) {
 	}
 }
 
-void	Valid::handlePOST( void ) {
+void	Valid::handlePUT( void ) {
 	struct stat st;
 	if (stat(_request.getTranslate().c_str(), &st) == 0 && st.st_mode & S_IFDIR)
 		throw std::runtime_error("409");
@@ -83,8 +83,7 @@ void	Valid::handlePOST( void ) {
 	_file.open(_request.getTranslate().c_str(), std::fstream::out);
 	_body = _request.getBody();
 	_file << _body;
-	if (_request.getMethod() == "PUT")
-		_body.clear();
+	_body.clear();
 }
 
 void	Valid::handleAutoindex( void ) {

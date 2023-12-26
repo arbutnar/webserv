@@ -16,6 +16,7 @@ class Cgi {
 		const int	&getCliSock( void ) const;
 		void		setReadFd( const int &readFd );
 		void		setCliSock( const int &cliSock );
+		bool		writeResponse( const std::string &clientBuffer );
 		void		handleCgi( Request &request );
 		void		clear( void );
 };

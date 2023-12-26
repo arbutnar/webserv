@@ -26,14 +26,11 @@
 # include <sys/stat.h>
 # include <unistd.h>
 
-class	Location;
-
 typedef std::vector<std::string> v_str;
 typedef std::map<int,std::string> m_intStr;
 typedef std::map<std::string, bool> m_strBool;
 typedef std::map<std::string, std::string> m_strStr;
 typedef	std::pair<std::string, std::string> p_strStr;
-typedef std::set<Location> s_locs;
 typedef std::pair<int, std::string> p_intStr;
 
 extern std::string	absolutePath;
@@ -123,7 +120,6 @@ class Directives {
 		void			checkDirective( const std::string &key, const bool &inLocation ) const;
 		void			directiveParser( std::string line, const bool &inLocation );
 		void			displayDirectives( void ) const;
-		virtual void	addLocation( const Location &location );
 };
 
 #endif

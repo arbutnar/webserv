@@ -39,6 +39,50 @@ void	Cgi::setCliSock( const int &cliSock ) {
 	_cliSock = cliSock;
 }
 
+// bool	Cgi::writeResponse( const std::string &clientBuffer ) {
+// 	Response	*response = NULL;
+// 	std::string	key;
+// 	std::string	value;
+// 	m_strStr	headers;
+
+// 	try
+// 	{
+// 		if (clientBuffer == "empty buffer")
+// 			throw std::runtime_error("500");
+// 		while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
+// 		{
+// 			if (value.at(value.size() - 1) == '\r')
+// 				value.erase(value.size() - 1, 1);
+// 			if (headers.find(key) != headers.end() || (key.empty() || value.empty()))
+// 				throw std::runtime_error("500");
+// 			if (key.find_first_of(" \t") != std::string::npos)
+// 				throw std::runtime_error("500");
+// 			headers.insert(std::make_pair(key, value));
+// 		}
+// 		if ("")
+// 		response = new Valid(request);
+// 		response->handleByMethod();
+// 	} catch(std::exception &e) {
+// 		response = new Error(e.what(), request);
+// 		response->defaultErrorPage();
+// 	}
+// 	std::time_t	now = time(0);
+// 	struct tm	tstruct;
+// 	headers.insert(std::make_pair("Server", "42webserv"));
+// 	tstruct = *localtime(&now);
+// 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
+// 	headers.insert(std::make_pair("Date", buf));
+// 	headers.insert(std::make_pair("Content-Type", "text/html"));
+// 	std::stringstream ss;
+// 	ss << _body.length();
+// 	headers.insert(std::make_pair("Content-Length", ss.str()));
+// 	response->setHeaders(headers);
+// 	response->send(c_it->first);
+// 	c_it->second.clear();
+// 	delete response;
+// 	return false;
+// }
+
 void	Cgi::handleCgi( Request &request ) {
 	char*		args[2];
 	char*		env[4];

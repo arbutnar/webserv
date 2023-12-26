@@ -149,8 +149,8 @@ void	Request::headersParser( std::string &line ) {
 }
 
 void	Request::bodyParser( std::string &line ) {
-	if (_method != "POST" && _method != "PUT")
-		return ;
+	if (_method == "GET" || _method == "HEAD" || _method == "DELETE")
+		throw std::runtime_error("400");
 	if (_headers.find("Content-Length") != _headers.end())
 		_body = line.substr(0, atoi(_headers.at("Content-Length").c_str()));
 	else if (_headers.at("Transfer-Encoding") == "chunked")

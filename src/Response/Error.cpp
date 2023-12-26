@@ -95,9 +95,7 @@ void	Error::defaultErrorPage( void ) {
 	_body = "<!DOCTYPE HTML>\n";
 	_body += "<html>\n<head>\n\t<title>" + _status + "</title>\n</head>\n<body>\n\t";
 	if ((status < 301 || status > 308) && _request.getMatch().getReturn().first != -1)
-	{
 		_body += _request.getMatch().getReturn().second;
-	}
 	else
 		_body += "<h1>" + _status + "</h1>";
 	_body += "\n</body>\n</html>\n";

@@ -135,7 +135,7 @@ void	Master::serverParser( std::string &block ) {
 				inLocation = false;
 				if (locationPtr->getRoot().empty() && (locationPtr->getAlias().empty() && locationPtr->getCgiAlias().empty()))
 					locationPtr->setRoot(serverPtr->getRoot());
-				serverPtr->addLocation(*(dynamic_cast<Location *>(locationPtr)));
+				(dynamic_cast<Server *>(serverPtr))->addLocation(*(dynamic_cast<Location *>(locationPtr)));
 				delete locationPtr;
 			}
 			else if (inLocation)
