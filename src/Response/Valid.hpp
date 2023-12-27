@@ -32,9 +32,13 @@ class Valid : public Response {
 		Valid &operator=( const Valid &src );
 		~Valid( );
 
-		void	handleByMethod( void );
-		void	handleGET( void );
-		void	handlePUT( void );
+		const std::fstream	&getFile( void ) const;
+
+		void	cgiOutputParser( std::string &cliBuffer );
+		void	methodHandler( void );
+		void	getHandler( void );
+		void	putHandler( void );
+		void	deleteHandler( void );
 		void	handleAutoindex( void );
 };
 

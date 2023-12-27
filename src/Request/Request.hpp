@@ -19,6 +19,7 @@
 # include <sys/socket.h>
 # include <fstream>
 # include "../Location/Location.hpp"
+# include "../Utils.tpp"
 
 typedef std::set<Location> s_locs;
 

@@ -93,10 +93,6 @@ void	Response::generateHeaders( void ) {
 	struct tm	tstruct;
 	char		buf[30];
 
-	_headers.insert(std::make_pair("Server", "42webserv"));
-	tstruct = *localtime(&now);
-	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
-	_headers.insert(std::make_pair("Date", buf));
 	if (_request.getHeaders().find("Connection") != _request.getHeaders().end())
 		_headers.insert(*_request.getHeaders().find("Connection"));
 	else
@@ -112,19 +108,35 @@ void	Response::generateHeaders( void ) {
 		if (_body.find("<h2>No Cookie!</h2>") != std::string::npos)
 			_body.replace(_body.find("<h2>No Cookie!</h2>"), 19, "<img src=\"https://www.freepnglogos.com/uploads/cookie-png/cookie-cliparts-transparent-download-clip-art-22.png\" alt=\"cookie\" width=\"200\" height=\"200\" />");
 	}
+	_headers.insert(std::make_pair("Server", "42webserv"));
+	tstruct = *localtime(&now);
+	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S", &tstruct);
+	_headers.insert(std::make_pair("Date", buf));
 	_headers.insert(std::make_pair("Content-Type", "text/html"));
-	std::stringstream ss;
-	ss << _body.length();
-	_headers.insert(std::make_pair("Content-Length", ss.str()));
+	_headers.insert(std::make_pair("Content-Length", toString(_body.length())));
 }
 
-void	Response::send( const int &socket ) const {
+bool	Response::send( const int &socket ) const {
 	std::string	response("HTTP/1.1 ");
 
 	response += _status + "\r\n";
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		response += it->first + ": " + it->second + "\r\n";
 	response += "\r\n" + _body;
-	::send(socket, response.c_str(), response.length(), 0);
 	std::cout << response << std::endl;
+	if (write(socket, response.c_str(), response.length()) <= 0)
+		return false;
+	return true;
+}
+
+void	Response::displayResponse( void ) const {
+	std::cout << "REQUEST" << std::endl;
+	_request.displayRequest();
+	std::cout << "RESPONSE" << std::endl;
+	std::cout << "status: " << _status << std::endl;
+	std::cout << "headers:" << std::endl;
+	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
+		std::cout << it->first << ": " << it->second << std::endl;
+	std::cout << "body:" << std::endl;
+	std::cout << _body << std::endl;
 }

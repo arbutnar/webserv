@@ -195,11 +195,7 @@ void	Request::uriMatcher( const s_locs &locations ) {
 	if (_match.getLimitExcept().at(_method) == false)
 		throw std::runtime_error("405");
 	if (_match.getReturn().first != -1)
-	{
-		std::stringstream	ss;
-		ss << _match.getReturn().first;
-		throw std::runtime_error(ss.str());
-	}
+		throw std::runtime_error(toString(_match.getReturn().first));
 }
 
 void	Request::translateUri( void ) {
@@ -253,6 +249,7 @@ void	Request::displayRequest( void ) const {
 	std::cout << "protocol: " << _protocol << std::endl;
 	std::cout << "match Location name: " << _match.getLocationName() << std::endl;
 	std::cout << "uri translated: " << _translate << std::endl;
+	std::cout << "headers:" << std::endl;
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		std::cout << it->first << ": " << it->second << std::endl;
 	std::cout << "body: " << _body << std::endl;

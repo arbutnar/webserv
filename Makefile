@@ -1,5 +1,5 @@
 NAME = webserv
-SRC = src/*/*.cpp main.cpp
+SRC = src/*/*.cpp  main.cpp
 OBJ = obj/*.o
 FLG = -Wextra -Wall -Werror -std=c++98
 

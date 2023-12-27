@@ -58,7 +58,7 @@ const m_intStr	&Server::getConnections( void ) const {
 	return _connections;
 }
 
-const Cgi	&Server::getCgi( void ) const {
+const p_intInt	&Server::getCgi( void ) const {
 	return _cgi;
 }
 
@@ -74,7 +74,7 @@ void	Server::setConnections( const m_intStr &connections ) {
 	_connections = connections;
 }
 
-void	Server::setCgi( const Cgi &cgi ) {
+void	Server::setCgi( const p_intInt &cgi ) {
 	_cgi = cgi;
 }
 
@@ -89,8 +89,8 @@ int	Server::nfds( void ) const {
 	for (m_intStr::const_iterator it = _connections.begin(); it != _connections.end(); it++)
 		if (temp < it->first)
 			temp = it->first;
-	if (temp < _cgi.getReadFd())
-		temp = _cgi.getReadFd();
+	if (temp < _cgi.first)
+		temp = _cgi.first;
 	if (temp < _listener)
 		temp = _listener;
 	return temp;
@@ -101,6 +101,12 @@ void	Server::eraseConnection( m_intStr::iterator &c_it ) {
 	std::cout << socket << " is disconnected" << std::endl;
 	c_it++;
 	_connections.erase(socket);
+	if (_cgi.second == socket)
+	{
+		_cgi.second = 0;
+		close(_cgi.first);
+		_cgi.first = 0;
+	}
 	close(socket);
 }
 
@@ -134,29 +140,35 @@ void	Server::newConnection( void ) {
 }
 
 bool	Server::buildBuffer( const int &socket, std::string &buffer ) {
-	char	tmp_buffer[200001];
-	int		n_bytes = 0;
-	n_bytes = read(socket, tmp_buffer, 200000);
-	if (n_bytes <= 0)
+	char	tmpBuffer[200001];
+	int		nBytes = 0;
+
+	nBytes = read(socket, tmpBuffer, 200000);
+	if (nBytes <= 0)
 		return true;
-	tmp_buffer[n_bytes] = '\0';
-	buffer += tmp_buffer;
+	tmpBuffer[nBytes] = '\0';
+	buffer += tmpBuffer;
 	return false;
 }
 
 void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
 	m_intStr::iterator c_it;
-	if (FD_ISSET(_cgi.getReadFd(), &read))
+
+	if (FD_ISSET(_cgi.first, &read))
 	{
-		c_it = _connections.find(_cgi.getCliSock());
+		c_it = _connections.find(_cgi.second);
 		if (c_it == _connections.end())
-			_cgi.clear();
-		else if (buildBuffer(_cgi.getReadFd(), c_it->second))
+		{
+			close(_cgi.first);
+			_cgi.first = 0;
+			_cgi.second = 0;
+		}
+		else if (buildBuffer(_cgi.first, c_it->second))
 		{
 			if (c_it->second.empty())
 				c_it->second = "empty buffer";
-			close(_cgi.getReadFd());
-			_cgi.setReadFd(0);
+			close(_cgi.first);
+			_cgi.first = 0;
 		}
 		return ;
 	}
@@ -171,8 +183,6 @@ void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
 		}
 		else if (FD_ISSET(c_it->first, &write) && !c_it->second.empty())
 		{
-			// if (_cgi.getCliSock() == c_it->first && _cgi.writeResponse(c_it->second))
-			// 	eraseConnection(c_it);
 			if (writeResponse(c_it))
 				eraseConnection(c_it);
 			break ;
@@ -182,61 +192,133 @@ void	Server::menageConnection( const fd_set &read, const fd_set &write ) {
 	}
 }
 
-bool	Server::requestParser( Request &request, const std::string &clientBuffer ) {
-	size_t		pos = clientBuffer.find("\r\n");
-	std::string line = clientBuffer.substr(0, pos);
+void	Server::handleCgi( Request &request ) {
+	char*		args[2];
+	char*		env[4];
+	int			pipeIn[2];
+	int			pipeOut[2];
+	int			nBytes;
+	int			status;
+	pid_t		pid;
+
+	struct stat	st;
+	if (stat(request.getTranslate().c_str(), &st) == -1)
+		throw std::runtime_error("404");
+	if (!(st.st_mode & S_IFREG))
+		throw std::runtime_error("403");
+	if (pipe(pipeIn) == -1 || pipe(pipeOut) == -1)
+		throw std::runtime_error("500");
+	args[0] = strdup(request.getTranslate().c_str());
+	args[1] = NULL;
+	env[0] = strdup("SERVER_PROTOCOL=HTTP/1.1");
+	env[1] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
+	env[2] = strdup(("PATH_INFO=" + request.getUri()).c_str());
+	env[3] = NULL;
+	pid = fork();
+	if (pid < 0)
+	{
+		freeMatrix(args);
+		freeMatrix(env);
+		closePipe(pipeIn);
+		closePipe(pipeOut);
+		throw std::runtime_error("500");
+	}
+	else if (pid == 0)
+	{
+		dup2(pipeIn[0], 0);
+		dup2(pipeOut[1], 1);
+		closePipe(pipeIn);
+		closePipe(pipeOut);
+		execve(args[0], args, env);
+		exit(-1);
+	}
+	close(pipeIn[0]);
+	close(pipeOut[1]);
+	nBytes = write(pipeIn[1], request.getBody().c_str(), request.getBody().size());
+	close(pipeIn[1]);
+	if (nBytes >= 0)
+	{
+		waitpid(pid, &status, 0);
+		if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
+		{
+			freeMatrix(args);
+			freeMatrix(env);
+			_cgi.first = pipeOut[0];
+			return ;
+		}
+	}
+	close(pipeOut[0]);
+	kill(pid, SIGKILL);
+	freeMatrix(args);
+	freeMatrix(env);
+	throw std::runtime_error("500");
+}
+
+bool	Server::requestParser( Request &request, m_intStr::iterator &c_it ) {
+	size_t		pos = c_it->second.find("\r\n");
+	std::string line = c_it->second.substr(0, pos);
 	if (std::count(line.begin(), line.end(), ' ') != 2)
 		throw std::runtime_error("400");
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("414");
 	request.firstLineParser(line);
 	pos += 2;
-	line = clientBuffer.substr(pos, clientBuffer.find("\r\n\r\n") - pos);
+	line = c_it->second.substr(pos, c_it->second.find("\r\n\r\n") - pos);
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("400");
 	request.headersParser(line);
-	pos = clientBuffer.find("\r\n\r\n") + 4;
-	line = clientBuffer.substr(pos, std::string::npos);
+	pos = c_it->second.find("\r\n\r\n") + 4;
+	line = c_it->second.substr(pos, std::string::npos);
 	if (!line.empty())
 		request.bodyParser(line);
 	if (_client_max_body_size != 0 && request.getBody().length() > _client_max_body_size)
 		throw std::runtime_error("413");
 	request.uriMatcher(_locations);
 	request.translateUri();
-	if (!request.getMatch().getCgiAlias().empty())
-		return true;
-	return false;
+	if (request.getMatch().getCgiAlias().empty())
+		return false;
+	handleCgi(request);
+	_cgi.second = c_it->first;
+	c_it->second.clear();
+	return true;
 }
 
 bool	Server::writeResponse( m_intStr::iterator &c_it ) {
+	bool		isClose = false;
 	Request		request;
 	Response	*response = NULL;
-	try
-	{
-		std::cout << c_it->second << std::endl;
-		if (requestParser(request, c_it->second))
+
+	try {
+		if (c_it->second == "empty buffer")
+			throw std::runtime_error("500");
+		if (_cgi.second != c_it->first)
 		{
-			_cgi.setCliSock(c_it->first);
-			_cgi.handleCgi(request);
-			c_it->second.clear();
-			return true;
+			if (requestParser(request, c_it))
+				return false;
+			response = new Valid(request);
+			(dynamic_cast<Valid *>(response))->methodHandler();
 		}
-		response = new Valid(request);
-		(dynamic_cast<Valid *>(response))->handleByMethod();
-	} catch(std::exception &e) {
+		else
+		{
+			response = new Valid();
+			(dynamic_cast<Valid *>(response))->cgiOutputParser(c_it->second);
+		}
+	} catch( std::exception &e ) {
+		if (response != NULL)
+			delete response;
 		response = new Error(e.what(), request);
 		(dynamic_cast<Error *>(response))->defaultErrorPage();
 	}
 	response->generateHeaders();
-	response->send(c_it->first);
+	if (response->send(c_it->first))
+		isClose = true;
 	c_it->second.clear();
+	if (_cgi.second != 0)
+		_cgi.second = 0;
 	if (response->getHeaders().at("Connection") == "close")
-	{
-		delete response;
-		return true;
-	}
+		isClose = true;
 	delete response;
-	return false;
+	return isClose;
 }
 
 void	Server::displayServer( void ) const {

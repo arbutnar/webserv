@@ -145,8 +145,7 @@ void	Master::serverParser( std::string &block ) {
 		}
 		_cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
 		delete serverPtr;
-	}
-	catch (std::exception &e) {
+	} catch (std::exception &e) {
 		if (locationPtr != NULL)
 			delete locationPtr;
 		if (serverPtr != NULL)
@@ -188,8 +187,8 @@ void	Master::start( void ) {
 			FD_SET(s_it->getListener(), &active);
 			for (m_intStr::const_iterator c_it = s_it->getConnections().begin(); c_it != s_it->getConnections().end(); c_it++)
 				FD_SET(c_it->first, &active);
-			if (s_it->getCgi().getReadFd() != 0)
-				FD_SET(s_it->getCgi().getReadFd(), &active);
+			if (s_it->getCgi().first != 0)
+				FD_SET(s_it->getCgi().first, &active);
 			read = write = active;
 			select(s_it->nfds() + 1, &read, &write, NULL, &tv);
 			if (FD_ISSET(s_it->getListener(), &read))

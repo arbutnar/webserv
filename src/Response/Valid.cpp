@@ -34,7 +34,41 @@ Valid	&Valid::operator=( const Valid &src ) {
 Valid::~Valid( ) {
 }
 
-void	Valid::handleByMethod( void ) {
+const std::fstream	&Valid::getFile( void ) const {
+	return _file;
+}
+
+void	Valid::cgiOutputParser( std::string &cliBuffer ) {
+	size_t		pos;
+
+	for (pos = cliBuffer.find("\r"); pos != std::string::npos; pos = cliBuffer.find("\r"))
+		cliBuffer.erase(pos, 1);
+	if ((pos = cliBuffer.find("\n\n")) != std::string::npos)
+	{
+		std::stringstream	ss(cliBuffer.substr(0, pos));
+		std::string			key;
+		std::string			value;
+		while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
+		{
+			if (value.at(value.size() - 1) == '\r')
+				value.erase(value.size() - 1, 1);
+			if (_headers.find(key) != _headers.end() || (key.empty() || value.empty()))
+				throw std::runtime_error("500");
+			if (key.find_first_of(" \t") != std::string::npos)
+				throw std::runtime_error("500");
+			if (key == "Status")
+			{
+				_status = value;
+				continue ;
+			}
+			_headers.insert(std::make_pair(key, value));
+		}
+		cliBuffer.erase(0, pos + 2);
+	}
+	_body = cliBuffer;
+}
+
+void	Valid::methodHandler( void ) {
 	std::string	methods[5] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
 	int	i;
 	for (i = 0; i < 5; i++)
@@ -44,18 +78,16 @@ void	Valid::handleByMethod( void ) {
 		case GET:
 		case HEAD:
 		case POST:
-			handleGET(); break ;
+			getHandler(); break ;
 		case PUT:
-			handlePUT(); break ;
+			putHandler(); break ;
 		case DELETE: {
-			remove(_request.getTranslate().c_str());
-			_status = "204 No Content";
-			break ;
+			deleteHandler(); break ;
 		}
 	}
 }
 
-void	Valid::handleGET( void ) {
+void	Valid::getHandler( void ) {
 	_request.finishTranslation();
 	if (_request.getMatch().getAutoindex() == true && *_request.getTranslate().rbegin() == '/')
 		handleAutoindex();
@@ -73,7 +105,7 @@ void	Valid::handleGET( void ) {
 	}
 }
 
-void	Valid::handlePUT( void ) {
+void	Valid::putHandler( void ) {
 	struct stat st;
 	if (stat(_request.getTranslate().c_str(), &st) == 0 && st.st_mode & S_IFDIR)
 		throw std::runtime_error("409");
@@ -81,9 +113,15 @@ void	Valid::handlePUT( void ) {
 	if (stat(_request.getTranslate().c_str(), &st) == 0)
 		_status = "204 No Content";
 	_file.open(_request.getTranslate().c_str(), std::fstream::out);
-	_body = _request.getBody();
-	_file << _body;
-	_body.clear();
+	_file << _request.getBody();
+}
+
+void	Valid::deleteHandler( void ) {
+	struct stat st;
+	if (stat(_request.getTranslate().c_str(), &st) == -1)
+		throw std::runtime_error("404");
+	remove(_request.getTranslate().c_str());
+	_status = "204 No Content";
 }
 
 void	Valid::handleAutoindex( void ) {
