@@ -25,6 +25,10 @@
 # include <set>
 # include <sys/stat.h>
 # include <unistd.h>
+# include <arpa/inet.h>
+# include "../Utils.tpp"
+
+# define HOSTS "/etc/hosts"
 
 typedef std::vector<std::string> v_str;
 typedef std::map<int,std::string> m_intStr;

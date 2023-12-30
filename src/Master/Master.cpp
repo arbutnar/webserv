@@ -38,18 +38,12 @@ const v_ser&	Master::getCluster( void ) const {
 }
 
 void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
-	std::stringstream	buffer;
+	std::stringstream	ss;
 	std::string			tmp;
 	size_t				pos = 0;
 
-	buffer << configFile.rdbuf();
-	content = buffer.str();
-	while ((pos = content.find('#')) != std::string::npos)
-	{
-		tmp = content.substr(pos, content.find_first_of("\n", pos) - pos);
-		content.erase(pos, content.find_first_not_of(" \t\n", pos + tmp.size()) - pos);
-	}
-	pos = 0;
+	ss << configFile.rdbuf();
+	content = removeComments(ss.str());
 	while ((pos = content.find("\n", pos)) != std::string::npos)
 	{
 		tmp = content.substr(pos, content.find_first_of("\n", pos + 1) - pos);
@@ -155,7 +149,7 @@ void	Master::serverParser( std::string &block ) {
 }
 
 void	Master::arrangeCluster( void ) {
-	std::sort(_cluster.begin(), _cluster.end());
+	std::sort(_cluster.begin(), _cluster.end());	// compare uses Server::operator<;
 	v_ser::iterator it = _cluster.begin();
 	while (it != _cluster.end())
 	{

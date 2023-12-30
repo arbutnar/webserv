@@ -17,3 +17,15 @@ void	freeMatrix( T **matrix ) {
 	for(int i = 0; matrix[i]; i++)
 		free(matrix[i]);
 }
+
+template <typename T>
+T	removeComments(T str) {
+	size_t		pos;
+	std::string	tmp;
+	while ((pos = str.find('#')) != std::string::npos)
+	{
+		tmp = str.substr(pos, str.find_first_of("\n", pos) - pos);
+		str.erase(pos, str.find_first_not_of(" \t\n", pos + tmp.size()) - pos);
+	}
+	return str;
+}

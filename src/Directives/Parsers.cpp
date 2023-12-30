@@ -23,6 +23,37 @@ void	Directives::parseListen( const std::string &attribute ) {
 		parseListenPort(attribute);
 }
 
+void 	Directives::parseListenHost( const std::string &attribute ) {
+	std::string	tmp = attribute;
+	if (tmp.find_first_not_of(".0123456789") != std::string::npos)
+	{
+		std::stringstream	ss;
+		std::ifstream		hosts(HOSTS);
+		if (!hosts.is_open())
+			throw std::runtime_error("Syntax Error: host Directive");
+		ss << hosts.rdbuf();
+		std::string content = removeComments(ss.str());
+		size_t	pos = content.find(tmp);
+		if (pos == std::string::npos)
+			throw std::runtime_error("Syntax Error: host Directive");
+		if ((pos = content.find_last_of("\n", pos)) == std::string::npos)
+			pos = content.find_first_not_of(" \t", 0);
+		else
+			pos = content.find_first_not_of(" \t", pos + 1);
+		tmp = content.substr(pos, content.find_first_of(" \t", pos) - pos);
+	}
+	int	inet = inet_addr(tmp.c_str());
+	if (inet == -1)
+		throw std::runtime_error("Syntax Error: host Directive");
+	_listen_host = static_cast<u_int32_t>(inet);
+}
+
+void	Directives::parseListenPort( const std::string &attribute ) {
+	if (attribute.find_first_not_of("0123456789") != std::string::npos)
+		throw std::runtime_error("Syntax Error: port Directive");
+	_listen_port = std::atoi(attribute.c_str());
+}
+
 void	Directives::parseRoot( const std::string &attribute ) {
 	if (!_alias.empty() || !_cgi_alias.empty())
 		throw std::runtime_error("Syntax Error: root Directive");
@@ -47,17 +78,6 @@ void	Directives::parseAlias( const std::string &attribute ) {
 	_alias = attribute;
 	if (_alias != "/" && _alias.at(0) == '/')
 		_alias.erase(0, 1);
-}
-
-void 	Directives::parseListenHost( const std::string &attribute ) {
-	if (attribute != "127.0.0.1" && attribute != "localhost")
-		throw std::runtime_error("Syntax Error: host Directive");
-}
-
-void	Directives::parseListenPort( const std::string &attribute ) {
-	if (attribute.find_first_not_of("0123456789") != std::string::npos)
-		throw std::runtime_error("Syntax Error: port Directive");
-	_listen_port = std::atoi(attribute.c_str());
 }
 
 void	Directives::parseIndex( const std::string &attribute ) {

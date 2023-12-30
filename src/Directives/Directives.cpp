@@ -16,7 +16,7 @@ static char buffer[PATH_MAX + 1];
 std::string	absolutePath = static_cast<std::string>(realpath(".", buffer)) + "/";
 
 Directives::Directives( void ) {
-	_listen_host = 2130706433;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
+	_listen_host = 0;	// 127*2^24 + 0*2^16 + 0*2^8 + 1
 	_listen_port = 8080;
 	_server_name = "";
 	_root = "";

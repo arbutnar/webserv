@@ -122,7 +122,7 @@ void	Server::ListenerInit( void ) {
 	struct sockaddr_in	sockaddr;
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_port = htons(_listen_port);
-	sockaddr.sin_addr.s_addr = htonl(_listen_host);
+	sockaddr.sin_addr.s_addr = _listen_host;	// htonl();
 	if (bind(_listener, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) == -1)
 		throw std::runtime_error("Cannot bind socket");
 	if (listen(_listener, 10) == -1)
@@ -136,7 +136,7 @@ void	Server::newConnection( void ) {
 	if (fcntl(socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1)
 		return ;
 	_connections.insert(std::make_pair(socket, ""));
-	std::cout << "Connection " << socket << std::endl;
+	std::cout << "Connection " << socket << " on port " << _listen_port << std::endl;
 }
 
 bool	Server::buildBuffer( const int &socket, std::string &buffer ) {
@@ -289,6 +289,7 @@ bool	Server::writeResponse( m_intStr::iterator &c_it ) {
 	Response	*response = NULL;
 
 	try {
+		std::cout << c_it->second << std::endl;
 		if (c_it->second == "empty buffer")
 			throw std::runtime_error("500");
 		if (_cgi.second != c_it->first)
