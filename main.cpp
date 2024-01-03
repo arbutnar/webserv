@@ -21,6 +21,7 @@ void	sigintHandler( int signum ) {
 }
 
 int main(int argc, char *argv[]) {
+
 	signal(SIGINT, sigintHandler);
 	master = new Master();
 	try {
@@ -30,7 +31,6 @@ int main(int argc, char *argv[]) {
 			throw std::invalid_argument("Invalid Argument");
 		else if (argc < 2)
 			master->configDivider("conf/webserv.conf");
-		master->arrangeCluster();
 		master->start();
 	} catch (std::exception &e) {
 		if (master != NULL)

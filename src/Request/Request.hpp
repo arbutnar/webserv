@@ -31,31 +31,27 @@ enum methods {
 };
 
 class Request {
-	private:
+	protected:
 		std::string	_method;
-		std::string	_uri;
-		std::string	_protocol;
 		m_strStr	_headers;
 		std::string	_body;
+		std::string	_uri;
 		std::string	_translate;
 		Location	_match;
 	public:
 		Request( void );
 		Request( Request const &src );
 		Request	&operator=( Request const &src );
-		bool	operator==( Request const &src ) const ;
-		~Request();
+		virtual ~Request();
 
 		const std::string 	&getMethod( void ) const;
 		const std::string 	&getUri( void ) const;
-		const std::string 	&getProtocol( void ) const;
 		const m_strStr		&getHeaders( void ) const;
 		const std::string 	&getBody( void ) const;
 		const std::string	&getTranslate( void ) const;
 		const Location		&getMatch( void ) const;
 		void				setMethod( const std::string &method );
 		void				setUri( const std::string &uri );
-		void				setProtocol( const std::string &protocol );
 		void				setHeaders( const m_strStr &headers );
 		void				setBody( const std::string &body );
 		void				setTranslate( const std::string &uri );

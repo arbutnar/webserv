@@ -12,8 +12,8 @@
 
 #include "Request.hpp"
 
-Request::Request( void )
-	: _method (""), _uri (""), _protocol (""), _body (""), _translate ("") {
+Request::Request( void ) {
+
 }
 
 Request::Request( const Request &src ) {
@@ -25,7 +25,6 @@ Request& Request::operator=( const Request &src ) {
 		return *this;
 	_method = src._method;
 	_uri = src._uri;
-	_protocol = src._protocol;
 	_headers = src._headers;
 	_body = src._body;
 	_translate = src._translate;
@@ -42,10 +41,6 @@ const std::string &Request::getMethod( void ) const {
 
 const std::string &Request::getUri( void ) const {
 	return _uri;
-}
-
-const std::string &Request::getProtocol( void ) const {
-	return _protocol;
 }
 
 const m_strStr	&Request::getHeaders( void ) const {
@@ -70,10 +65,6 @@ void	Request::setMethod( const std::string &method ) {
 
 void	Request::setUri( const std::string &uri ) {
 	_uri = uri;
-}
-
-void	Request::setProtocol( const std::string &protocol ) {
-	_protocol = protocol;
 }
 
 void	Request::setHeaders( const m_strStr &headers ) {
@@ -106,10 +97,10 @@ void	Request::firstLineParser( std::string &line ) {
 	if (_uri.empty())
 		throw std::runtime_error("400");
 	pos += _uri.size() + 1;
-	_protocol = line.substr(pos, line.find_first_of("\r\n", pos) - pos);
-	if (_protocol.empty())
+	std::string protocol = line.substr(pos, line.find_first_of("\r\n", pos) - pos);
+	if (protocol.empty())
 		throw std::runtime_error("400");
-	if (_protocol != "HTTP/1.1" && _protocol != "http/1.1")
+	if (protocol != "HTTP/1.1" && protocol != "http/1.1")
 		throw std::runtime_error("505");
 	for (i = 0; i < 5; i++)
 		if (methods[i] == _method)
@@ -152,7 +143,7 @@ void	Request::bodyParser( std::string &line ) {
 	if (_method == "GET" || _method == "HEAD" || _method == "DELETE")
 		throw std::runtime_error("400");
 	if (_headers.find("Content-Length") != _headers.end())
-		_body = line.substr(0, atoi(_headers.at("Content-Length").c_str()));
+		_body = line.substr(0, std::atoi(_headers.at("Content-Length").c_str()));
 	else if (_headers.at("Transfer-Encoding") == "chunked")
 	{
 		std::stringstream	ss;
@@ -246,7 +237,6 @@ void	Request::finishTranslation( void ) {
 void	Request::displayRequest( void ) const {
 	std::cout << "method: " << _method << std::endl;
 	std::cout << "uri: " << _uri << std::endl;
-	std::cout << "protocol: " << _protocol << std::endl;
 	std::cout << "match Location name: " << _match.getLocationName() << std::endl;
 	std::cout << "uri translated: " << _translate << std::endl;
 	std::cout << "headers:" << std::endl;

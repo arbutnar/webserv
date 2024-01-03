@@ -17,9 +17,14 @@
 # include <sys/socket.h>
 # include <fstream>
 # include <ctime>
+# include <signal.h>
+# include <dirent.h>
 # include "../Request/Request.hpp"
 
 enum Codes {
+	OK = 200,
+	CREATED = 201,
+	NO_CONTENT = 204,
 	MOVED_PERMANENTLY = 301,
 	MOVED_TEMPORARLY = 302,
 	SEE_OTHER = 303,
@@ -42,33 +47,31 @@ enum Codes {
 	INSUFFICIENT_STORAGE = 507
 };
 
-class Response {
-	protected:
-		std::string	_status;
-		m_strStr	_headers;
-		std::string	_body;
-		Request		_request;
+class Response : public Request {
+	private:
+		int				_statusCode;
+		std::fstream	_file;
 	public:
 		Response( void );
-		Response( const std::string &status );
-		Response( const std::string &status, const Request &request );
 		Response( const Response &src );
 		Response &operator=( const Response &src );
 		virtual ~Response( );
 
-		const std::string	&getStatus( void ) const;
-		const m_strStr		&getHeaders( void ) const;
-		const std::string	&getBody( void ) const;
-		const Request		&getRequest( void ) const;
-		void				setStatus( const std::string &status );
-		void				setHeaders( const m_strStr &headers );
-		void				setBody( const std::string &body);
-		void				setRequest( const Request &request );
+		const int			&getStatusCode( void ) const;
+		const std::fstream	&getFile( void ) const;
+		void				setStatusCode( const int &statusCode );
 
-		std::string		createCookie( const int len );
-		void			generateHeaders( void );
-		bool			send( const int &socket ) const;
-		void			displayResponse( void ) const;
+		void		methodHandler( void );
+		void		handleAutoindex( void );
+		void		getHandler( void );
+		void		putHandler( void );
+		void		deleteHandler( void );
+		void		cgiOutputParser( std::string &cliBuffer );
+		std::string	createCookie( const int len );
+		void		generateHeaders( void );
+		void		generateErrorPage( void );
+		std::string	convertStatus( void ) const;
+		bool		send( const int &socket ) const;
 };
 
 #endif

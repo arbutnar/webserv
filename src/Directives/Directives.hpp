@@ -21,6 +21,8 @@
 # include <map>
 # include <stdlib.h>
 # include <linux/limits.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 # include <algorithm>
 # include <set>
 # include <sys/stat.h>

@@ -66,10 +66,6 @@ void	Directives::parseRoot( const std::string &attribute ) {
 	}
 	if (_root.empty())
 		throw std::runtime_error("Syntax Error: root Directive");
-
-	struct stat	st;
-	if (stat(_root.c_str(), &st) == -1 || !(st.st_mode & S_IFDIR))
-		throw std::runtime_error("Syntax Error: root Directive");
 }
 
 void	Directives::parseAlias( const std::string &attribute ) {
@@ -123,14 +119,12 @@ void	Directives::parseErrorPage( const std::string &attribute ) {
 	
 	if (key.empty() || value.empty())
 		throw std::runtime_error("Syntax Error: error_page Directive");
-	int	code = atoi(key.c_str());
+	int	code = std::atoi(key.c_str());
 	if (key.find_first_not_of("0123456789") != std::string::npos || code < 300 || code > 600)
 		throw std::runtime_error("Syntax Error: error_page Directive");
 	if (*value.begin() == '/')
 		value.erase(0, 1);
 	value = absolutePath + value;
-	if (access(value.c_str(), R_OK) == -1)
-		throw std::runtime_error("Syntax Error: error_page Directive");
 	_error_page.insert(std::make_pair(code, value));
 }
 
@@ -188,7 +182,7 @@ void	Directives::parseReturn( const std::string &attribute ) {
 	str = attribute.substr(0, pos);
 	if (str.find_first_not_of("0123456789") != std::string::npos)
 		throw std::runtime_error("Syntax Error: return Directive");
-	code = atoi(str.c_str());
+	code = std::atoi(str.c_str());
 	if (code < 0 || code > 999)
 		throw std::runtime_error("Syntax Error: return Directive");
 	_return.first = code;

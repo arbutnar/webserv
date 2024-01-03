@@ -13,14 +13,13 @@
 #ifndef MASTER_HPP
 # define MASTER_HPP
 
-# include "../Server/Server.hpp"
+# include "../Cluster/Cluster.hpp"
 
-typedef std::vector<Server> v_ser;
+typedef std::vector<Cluster> v_cluster;
 
 class Master {
 	private:
-		v_ser	_cluster;
-		void	configCleaner( std::ifstream &configFile, std::string &content );
+		v_cluster	_clusters;
 	public:
 		Master( void );
 		Master( const char* path );
@@ -28,13 +27,14 @@ class Master {
 		Master& operator=( const Master &src );
 		~Master( );
 
-		void			setCluster( const v_ser &cluster);
-		const v_ser&	getCluster( void ) const;
+		const v_cluster&	getClusters( void ) const;
+		void				setClusters( const v_cluster &clusters);
 		
+		void	configCleaner( std::ifstream &configFile, std::string &content );
 		void	configDivider( const char* path );
-		void	serverParser( std::string &block );
+		Server	*serverParser( std::string &block );
 		void	displayMaster( void ) const;
-		void	arrangeCluster( void );
+		void	arrangeClusters( v_ser &serverVec );
 		void	start( void );
 };
 
