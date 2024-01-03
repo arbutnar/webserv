@@ -23,18 +23,13 @@ Client &Client::operator=( const Client &src ) {
 }
 
 Client::~Client() {
-	std::cout << _socket << " is disconnected" << std::endl;
-	close(_socket);
-	close(_cgiFd);
-	if (!_cgiPid)
-		kill(_cgiPid, SIGKILL);
 }
 
 const int	&Client::getSocket( void ) const {
 	return _socket;
 }
 
-std::string	&Client::getBuffer( void ) {
+const std::string	&Client::getBuffer( void ) const {
 	return _buffer;
 }
 

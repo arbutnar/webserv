@@ -1,9 +1,9 @@
 template <typename T>
 std::string toString(const T val)
 {
-    std::stringstream stream;
-    stream << val;
-    return stream.str();
+    std::stringstream ss;
+    ss << val;
+    return ss.str();
 }
 
 template <typename T>
@@ -19,13 +19,26 @@ void	freeMatrix( T **matrix ) {
 }
 
 template <typename T>
-T	removeComments(T str) {
+std::string	removeComments(T str) {
 	size_t		pos;
-	std::string	tmp;
+
 	while ((pos = str.find('#')) != std::string::npos)
-	{
-		tmp = str.substr(pos, str.find_first_of("\n", pos) - pos);
-		str.erase(pos, str.find_first_not_of(" \t\n", pos + tmp.size()) - pos);
-	}
+		str.erase(pos, str.find_first_of("\n", pos) - pos);
 	return str;
+}
+
+template <typename T>
+std::string	removeEmptyLine(T str) {
+	std::string	tmp;
+	size_t		pos = 0;
+
+	while ((pos = str.find_first_of("\n")) != std::string::npos)
+	{
+		pos += 1;
+		if (str.substr(0, pos).find_first_not_of(" \t\n") != std::string::npos)
+			tmp += str.substr(0, pos);
+		str.erase(0, pos);
+	}
+	tmp += str;
+	return tmp;
 }

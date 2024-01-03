@@ -26,9 +26,11 @@ class Cluster {
 
 		int				nfds( void ) const;
 		v_cli::iterator	removeClient( v_cli::iterator &it );
+		void			removeAllClients( void );
 		void			acceptNewClient( void );
 		void			serverIdentifier( const std::string &buffer );
 		void			menageClient( const fd_set &read, const fd_set &write );
+		void			displayCluster( void ) const;
 };
 
 #endif

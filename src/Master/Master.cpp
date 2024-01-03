@@ -27,6 +27,11 @@ Master& Master::operator=( const Master &src ) {
 }
 
 Master::~Master() {
+	for (v_cluster::iterator it = _clusters.begin(); it != _clusters.end(); it++)
+	{
+		close(it->getListener());
+		it->removeAllClients();
+	}
 }
 
 const v_cluster&	Master::getClusters( void ) const {
@@ -35,18 +40,6 @@ const v_cluster&	Master::getClusters( void ) const {
 
 void	Master::setClusters( const v_cluster &clusters) {
 	_clusters = clusters;
-}
-
-void	Master::configCleaner( std::ifstream &configFile, std::string &content) {
-	std::stringstream	ss;
-	std::string			tmp;
-	size_t				pos = 0;
-
-	ss << configFile.rdbuf();
-	content = removeComments(ss.str());
-	//togliere \n
-	std::cout << content << std::endl;
-	exit(0);
 }
 
 Server	*Master::serverParser( std::string &block ) {
@@ -103,7 +96,8 @@ void	Master::configDivider( const char* path ) {
 
 	if (!configFile.is_open())
 		throw std::runtime_error("Cannot open File");
-	configCleaner(configFile, content);
+	content = removeComments(toString(configFile.rdbuf()));
+	content = removeEmptyLine(content);
 	std::stringstream		ss(content);
 	std::string				line;
 	std::string				tmp;
@@ -170,8 +164,7 @@ void	Master::arrangeClusters( v_ser &serverVec ) {
 			subVector.push_back(*it);
 			serverVec.erase(it);
 		}
-		_clusters.push_back(Cluster());
-		_clusters.back().setListener(listener);
+		_clusters.push_back(Cluster(listener, subVector));
 		subVector.clear();
 		it = serverVec.begin();
 	}
@@ -207,8 +200,8 @@ void	Master::start( void ) {
 	}
 }
 
-// void	Master::displayMaster( void ) const {
-// 	std::cout << "[MASTER]" << std::endl;
-// 	for (v_ser::const_iterator it = _cluster.begin(); it != _cluster.end(); it++)
-// 		it->displayServer();
-// }
+void	Master::displayMaster( void ) const {
+	std::cout << "[MASTER]" << std::endl;
+	for (v_cluster::const_iterator it = _clusters.begin(); it != _clusters.end(); it++)
+		it->displayCluster();
+}

@@ -30,12 +30,11 @@ class Master {
 		const v_cluster&	getClusters( void ) const;
 		void				setClusters( const v_cluster &clusters);
 		
-		void	configCleaner( std::ifstream &configFile, std::string &content );
 		void	configDivider( const char* path );
 		Server	*serverParser( std::string &block );
-		void	displayMaster( void ) const;
 		void	arrangeClusters( v_ser &serverVec );
 		void	start( void );
+		void	displayMaster( void ) const;
 };
 
 #endif

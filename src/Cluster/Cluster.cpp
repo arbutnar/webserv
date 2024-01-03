@@ -22,7 +22,6 @@ Cluster	&Cluster::operator=( const Cluster &src ) {
 }
 
 Cluster::~Cluster( void ) {
-	close(_listener);
 }
 
 const int &Cluster::getListener( void ) const {
@@ -66,9 +65,15 @@ v_cli::iterator	Cluster::removeClient( v_cli::iterator &it ) {
 	std::cout << it->getSocket() << " is disconnected" << std::endl;
 	close(it->getSocket());
 	close(it->getCgiFd());
-	if (!it->getCgiPid())
+	if (it->getCgiPid() != 0)
 		kill(it->getCgiPid(), SIGKILL);
 	return _clients.erase(it);
+}
+
+void	Cluster::removeAllClients( void ) {
+	v_cli::iterator it = _clients.begin();
+	while (it != _clients.end())
+		it = removeClient(it);
 }
 
 void	Cluster::acceptNewClient( void ) {
@@ -128,7 +133,11 @@ void	Cluster::menageClient( const fd_set &read, const fd_set &write ) {
 				it = removeClient(it);
 			return ;
 		}
-		else
-			it++;
 	}
+}
+
+void	Cluster::displayCluster( void ) const {
+	std::cout << "[CLUSTER]" << std::endl;
+	for (v_ser::const_iterator it = _servers.begin(); it != _servers.end(); it++)
+		it->displayServer();
 }

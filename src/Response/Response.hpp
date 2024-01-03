@@ -66,7 +66,7 @@ class Response : public Request {
 		void		getHandler( void );
 		void		putHandler( void );
 		void		deleteHandler( void );
-		void		cgiOutputParser( std::string &cliBuffer );
+		void		cgiOutputParser( std::string cliBuffer );
 		std::string	createCookie( const int len );
 		void		generateHeaders( void );
 		void		generateErrorPage( void );

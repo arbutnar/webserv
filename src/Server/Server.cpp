@@ -103,7 +103,7 @@ bool	Server::requestParser( Request &request, v_cli::iterator &it ) {
 	if (request.getMatch().getCgiAlias().empty())
 		return false;
 	it->handleCgi(request);
-	it->getBuffer().clear();
+	it->setBuffer("");
 	return true;
 }
 
@@ -127,7 +127,7 @@ bool	Server::writeResponse( v_cli::iterator &it ) {
 		response.generateErrorPage();
 	}
 	response.generateHeaders();
-	it->getBuffer().clear();
+	it->setBuffer("");
 	if (it->getCgiPid() != 0)
 		it->setCgiPid(0);
 	if (response.send(it->getSocket()))

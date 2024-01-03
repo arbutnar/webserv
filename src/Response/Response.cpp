@@ -125,7 +125,7 @@ void	Response::deleteHandler( void ) {
 	_statusCode = 204;
 }
 
-void	Response::cgiOutputParser( std::string &cliBuffer ) {
+void	Response::cgiOutputParser( std::string cliBuffer ) {
 	size_t		pos;
 
 	for (pos = cliBuffer.find("\r"); pos != std::string::npos; pos = cliBuffer.find("\r"))
