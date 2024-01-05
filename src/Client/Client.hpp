@@ -2,6 +2,7 @@
 # define CLIENT_HPP
 
 # include "../Request/Request.hpp"
+#include <fcntl.h>
 # include <string.h>
 
 class Client {

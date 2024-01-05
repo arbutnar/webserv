@@ -64,7 +64,8 @@ int	Cluster::nfds( void ) const {
 v_cli::iterator	Cluster::removeClient( v_cli::iterator &it ) {
 	std::cout << it->getSocket() << " is disconnected" << std::endl;
 	close(it->getSocket());
-	close(it->getCgiFd());
+	if (it->getCgiFd() != -1)
+		close(it->getCgiFd());
 	if (it->getCgiPid() != 0)
 		kill(it->getCgiPid(), SIGKILL);
 	return _clients.erase(it);
@@ -89,15 +90,21 @@ void	Cluster::acceptNewClient( void ) {
 	std::cout << "Client " << socket << " on listener " << _listener << std::endl;
 }
 
-// void	Cluster::serverIdentifier( const std::string &buffer ) {
-// 	size_t	pos;
+v_ser::const_iterator	Cluster::serverLinker( const std::string &buffer ) const {
 
-// 	if ((pos = buffer.find("Host: ")) == buffer.end())
-// 	{
-// 		Error	error("400");
-// 	}
-// 	for (v_ser::iterator it = _servers.begin(); it != _servers)
-// }
+	std::string	host;
+	v_ser::const_iterator it;
+	size_t pos = buffer.substr(0, buffer.find("\r\n\r\n")).find("Host:");
+	if (pos == std::string::npos)
+		return _servers.begin();
+	pos += 5;
+	pos = buffer.find_first_not_of(" \t", pos);
+	host = buffer.substr(pos, buffer.find_first_of(" \t\r\n", pos) - pos);
+	it = std::find(_servers.begin(), _servers.end(), host);
+	if (it != _servers.end())
+		return it;
+	return _servers.begin();
+}
 
 void	Cluster::menageClient( const fd_set &read, const fd_set &write ) {
 	v_cli::iterator it;
@@ -128,9 +135,8 @@ void	Cluster::menageClient( const fd_set &read, const fd_set &write ) {
 		}
 		else if (FD_ISSET(it->getSocket(), &write) && !it->getBuffer().empty())
 		{
-			//serverIdentifier(it->getBuffer());
-			if (_servers.begin()->writeResponse(it))
-				it = removeClient(it);
+			if (serverLinker(it->getBuffer())->writeResponse(it))
+				removeClient(it);
 			return ;
 		}
 	}

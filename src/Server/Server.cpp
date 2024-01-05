@@ -29,14 +29,14 @@ Server& Server::operator=( const Server &src ) {
 	return *this;
 }
 
-bool	Server::operator==( const Server &src ) {
+bool	Server::operator==( const Server &src ) const {
 	if (src._listen_host != _listen_host || src._listen_port != _listen_port)
 		return false;
 	return true;
 }
 
-bool	Server::operator<( const Server &src ) {
-	if (_server_name.compare(src._server_name) >= 0)
+bool	Server::operator==( const std::string &serverName ) const {
+	if (serverName != _server_name)
 		return false;
 	return true;
 }
@@ -79,7 +79,7 @@ int	Server::listenerInit( void ) const {
 	return listener;
 }
 
-bool	Server::requestParser( Request &request, v_cli::iterator &it ) {
+bool	Server::requestParser( Request &request, v_cli::iterator &it ) const {
 	size_t		pos = it->getBuffer().find("\r\n");
 	std::string line = it->getBuffer().substr(0, pos);
 	if (std::count(line.begin(), line.end(), ' ') != 2)
@@ -88,7 +88,7 @@ bool	Server::requestParser( Request &request, v_cli::iterator &it ) {
 		throw std::runtime_error("414");
 	request.firstLineParser(line);
 	pos += 2;
-	line = it->getBuffer().substr(pos, it->getBuffer().find("\r\n\r\n") - pos);
+	line = it->getBuffer().substr(pos, it->getBuffer().find("\r\n\r\n") - pos + 2);
 	if (line.length() > _client_header_buffer_size)
 		throw std::runtime_error("400");
 	request.headersParser(line);
@@ -107,15 +107,16 @@ bool	Server::requestParser( Request &request, v_cli::iterator &it ) {
 	return true;
 }
 
-bool	Server::writeResponse( v_cli::iterator &it ) {
+bool	Server::writeResponse( v_cli::iterator &it ) const {
 	Response	response;
 
 	try {
-		std::cout << it->getBuffer() << std::endl;
 		if (it->getBuffer() == "empty buffer")
 			throw std::runtime_error("500");
 		if (it->getCgiPid() != 0)
+		{
 			response.cgiOutputParser(it->getBuffer());
+		}
 		else
 		{
 			if (requestParser(response, it))

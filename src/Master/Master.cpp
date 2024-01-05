@@ -161,6 +161,12 @@ void	Master::arrangeClusters( v_ser &serverVec ) {
 		serverVec.erase(it);
 		while ((it = std::find(serverVec.begin(), serverVec.end(), subVector.back())) != serverVec.end())
 		{
+			if (std::find(subVector.begin(), subVector.end(), it->getServerName()) != subVector.end())
+			{
+				std::cout << "conflicting server name " << it->getServerName() << " on " << listener << ", ignored" << std::endl;
+				serverVec.erase(it);
+				continue ;
+			}
 			subVector.push_back(*it);
 			serverVec.erase(it);
 		}

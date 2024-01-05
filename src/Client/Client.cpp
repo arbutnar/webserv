@@ -75,7 +75,6 @@ void	Client::handleCgi( Request &request ) {
 	int			pipeIn[2];
 	int			pipeOut[2];
 	int			nBytes;
-	int			status;
 	pid_t		pid;
 
 	struct stat	st;
@@ -85,23 +84,21 @@ void	Client::handleCgi( Request &request ) {
 		throw std::runtime_error("403");
 	if (pipe(pipeIn) == -1 || pipe(pipeOut) == -1)
 		throw std::runtime_error("500");
-	args[0] = strdup(request.getTranslate().c_str());
-	args[1] = NULL;
-	env[0] = strdup("SERVER_PROTOCOL=HTTP/1.1");
-	env[1] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
-	env[2] = strdup(("PATH_INFO=" + request.getUri()).c_str());
-	env[3] = NULL;
 	pid = fork();
 	if (pid < 0)
 	{
-		freeMatrix(args);
-		freeMatrix(env);
 		closePipe(pipeIn);
 		closePipe(pipeOut);
 		throw std::runtime_error("500");
 	}
 	else if (pid == 0)
 	{
+		args[0] = strdup(request.getTranslate().c_str());
+		args[1] = NULL;
+		env[0] = strdup("SERVER_PROTOCOL=HTTP/1.1");
+		env[1] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
+		env[2] = strdup(("PATH_INFO=" + request.getUri()).c_str());
+		env[3] = NULL;
 		dup2(pipeIn[0], 0);
 		dup2(pipeOut[1], 1);
 		closePipe(pipeIn);
@@ -115,18 +112,11 @@ void	Client::handleCgi( Request &request ) {
 	close(pipeIn[1]);
 	if (nBytes >= 0)
 	{
-		waitpid(pid, &status, 0);
-		if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
-		{
-			freeMatrix(args);
-			freeMatrix(env);
-			_cgiFd = pipeOut[0];
-			return ;
-		}
+		_cgiPid = pid;
+		_cgiFd = pipeOut[0];
+		return ;
 	}
 	close(pipeOut[0]);
 	kill(pid, SIGKILL);
-	freeMatrix(args);
-	freeMatrix(env);
 	throw std::runtime_error("500");
 }

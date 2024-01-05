@@ -32,8 +32,8 @@ class Server : public Directives {
 		Server( void );
 		Server( const Server &src );
 		Server& operator=( const Server &src );
-		bool	operator==( const Server &src );
-		bool	operator<( const Server &src );
+		bool	operator==( const Server &src ) const;
+		bool	operator==( const std::string &serverName ) const;
 		~Server( );
 
 		const s_locs	&getLocations( void ) const;
@@ -41,8 +41,8 @@ class Server : public Directives {
 
 		int		listenerInit( void ) const;
 		void	addLocation( const Location &location );
-		bool	requestParser( Request &request, v_cli::iterator &it );
-		bool	writeResponse( v_cli::iterator &it );
+		bool	requestParser( Request &request, v_cli::iterator &it ) const;
+		bool	writeResponse( v_cli::iterator &it ) const;
 		void	displayServer( void ) const;
 };
 

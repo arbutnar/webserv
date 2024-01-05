@@ -20,9 +20,15 @@ void	sigintHandler( int signum ) {
 	exit(0);
 }
 
+void	sigchldHandler( int signum ) {
+	if (signum == SIGCHLD)
+		waitpid(-1, NULL, 0);
+}
+
 int main(int argc, char *argv[]) {
 
 	signal(SIGINT, sigintHandler);
+	signal(SIGCHLD, sigchldHandler);
 	master = new Master();
 	try {
 		if (argc == 2)

@@ -112,19 +112,22 @@ void	Request::firstLineParser( std::string &line ) {
 }
 
 void	Request::headersParser( std::string &line ) {
-	std::stringstream	ss(line);
 	std::string			key;
 	std::string			value;
 
-	while (std::getline(std::getline(ss, key, ':') >> std::ws, value))
+	for (size_t pos = line.find(":"); pos != std::string::npos; pos = line.find(":"))
 	{
-		if (value.at(value.size() - 1) == '\r')
-			value.erase(value.size() - 1, 1);
-		if (_headers.find(key) != _headers.end() || (key.empty() || value.empty()))
+		key = line.substr(0, pos);
+		pos = line.find_first_not_of(" \t", pos + 1);
+		value = line.substr(pos, line.find_last_not_of(" \t\r\n", line.find("\n")) - pos + 1);
+		if (key.empty() || value.empty())
+			throw std::runtime_error("400");
+		if (_headers.find(key) != _headers.end())
 			throw std::runtime_error("400");
 		if (key.find_first_of(" \t") != std::string::npos)
 			throw std::runtime_error("400");
 		_headers.insert(std::make_pair(key, value));
+		line.erase(0, line.find("\n") + 1);
 	}
 	if (_headers.find("Host") == _headers.end() || _headers.at("Host").empty())
 		throw std::runtime_error("400");
