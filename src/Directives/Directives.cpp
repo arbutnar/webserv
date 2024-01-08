@@ -84,7 +84,10 @@ void	Directives::directiveParser( std::string line, const bool &inLocation ) {
 			break;
 	}
 	line.erase(0, line.find_first_not_of(" \t", key.length() + pos));
-	value = line.substr(0, line.find(';'));
+	pos = line.find(';');
+	if (pos != line.size() - 1)
+		throw Directives::SyntaxError();
+	value = line.substr(0, pos);
 	if (value.empty())
 		throw Directives::SyntaxError();
 	checkDirective(key, inLocation);

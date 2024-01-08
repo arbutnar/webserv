@@ -1,18 +1,30 @@
-#include "Cluster.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Worker.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/07 18:45:31 by marvin            #+#    #+#             */
+/*   Updated: 2024/01/07 18:45:31 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-Cluster::Cluster( void )
+#include "Worker.hpp"
+
+Worker::Worker( void )
 	: _listener (-1) {
 }
 
-Cluster::Cluster( const int &listener, const v_ser &servers )
+Worker::Worker( const int &listener, const v_ser &servers )
 	: _listener (listener), _servers (servers) {
 }
 
-Cluster::Cluster( const Cluster &src ) {
+Worker::Worker( const Worker &src ) {
 	*this = src;
 }
 
-Cluster	&Cluster::operator=( const Cluster &src ) {
+Worker	&Worker::operator=( const Worker &src ) {
 	if (this == &src)
 		return *this;
 	_listener = src._listener;
@@ -21,34 +33,34 @@ Cluster	&Cluster::operator=( const Cluster &src ) {
 	return *this;
 }
 
-Cluster::~Cluster( void ) {
+Worker::~Worker( void ) {
 }
 
-const int &Cluster::getListener( void ) const {
+const int &Worker::getListener( void ) const {
 	return _listener;
 }
 
-const v_ser	&Cluster::getServers( void ) const {
+const v_ser	&Worker::getServers( void ) const {
 	return _servers;
 }
 
-const v_cli	&Cluster::getClients( void ) const {
+const v_cli	&Worker::getClients( void ) const {
 	return _clients;
 }
 
-void	Cluster::setListener( const int &listener ) {
+void	Worker::setListener( const int &listener ) {
 	_listener = listener;
 }
 
-void	Cluster::setServers( const v_ser &servers ) {
+void	Worker::setServers( const v_ser &servers ) {
 	_servers = servers;
 }
 
-void	Cluster::setClients( const v_cli &clients ) {
+void	Worker::setClients( const v_cli &clients ) {
 	_clients = clients;
 }
 
-int	Cluster::nfds( void ) const {
+int	Worker::nfds( void ) const {
 	int temp = _listener;
 
 	for (v_cli::const_iterator it = _clients.begin(); it != _clients.end(); it++)
@@ -61,7 +73,7 @@ int	Cluster::nfds( void ) const {
 	return temp;
 }
 
-v_cli::iterator	Cluster::removeClient( v_cli::iterator &it ) {
+v_cli::iterator	Worker::removeClient( v_cli::iterator &it ) {
 	std::cout << it->getSocket() << " is disconnected" << std::endl;
 	close(it->getSocket());
 	if (it->getCgiFd() != -1)
@@ -71,13 +83,13 @@ v_cli::iterator	Cluster::removeClient( v_cli::iterator &it ) {
 	return _clients.erase(it);
 }
 
-void	Cluster::removeAllClients( void ) {
+void	Worker::removeAllClients( void ) {
 	v_cli::iterator it = _clients.begin();
 	while (it != _clients.end())
 		it = removeClient(it);
 }
 
-void	Cluster::acceptNewClient( void ) {
+void	Worker::acceptNewClient( void ) {
 	int socket = accept(_listener, NULL, NULL);
 	if (socket == -1)
 		return ;
@@ -90,7 +102,7 @@ void	Cluster::acceptNewClient( void ) {
 	std::cout << "Client " << socket << " on listener " << _listener << std::endl;
 }
 
-v_ser::const_iterator	Cluster::serverLinker( const std::string &buffer ) const {
+v_ser::const_iterator	Worker::serverLinker( const std::string &buffer ) const {
 
 	std::string	host;
 	v_ser::const_iterator it;
@@ -106,7 +118,7 @@ v_ser::const_iterator	Cluster::serverLinker( const std::string &buffer ) const {
 	return _servers.begin();
 }
 
-void	Cluster::menageClient( const fd_set &read, const fd_set &write ) {
+void	Worker::menageClient( const fd_set &read, const fd_set &write ) {
 	v_cli::iterator it;
 
 	for (it = _clients.begin(); it != _clients.end(); it++)
@@ -142,7 +154,7 @@ void	Cluster::menageClient( const fd_set &read, const fd_set &write ) {
 	}
 }
 
-void	Cluster::displayCluster( void ) const {
+void	Worker::displayWorker( void ) const {
 	std::cout << "[CLUSTER]" << std::endl;
 	for (v_ser::const_iterator it = _servers.begin(); it != _servers.end(); it++)
 		it->displayServer();

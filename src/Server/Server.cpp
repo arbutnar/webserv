@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:24:46 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/14 15:18:46 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/01/08 19:09:20 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,8 @@ void    Server::addLocation( const Location &location ) {
 		throw Directives::SyntaxError();
 }
 
-int	Server::listenerInit( void ) const {
-	int listener;
-
+void	Server::listenerInit( int &listener ) const {
+	listener = -1;
 	listener = socket(AF_INET, SOCK_STREAM, 0);
 	if (listener == -1)
 		throw std::runtime_error("Cannot create socket");
@@ -76,7 +75,9 @@ int	Server::listenerInit( void ) const {
 		throw std::runtime_error("Cannot bind socket");
 	if (listen(listener, 10) == -1)
 		throw std::runtime_error("Socket cannot Listen");
-	return listener;
+	struct in_addr	addr;
+	addr.s_addr = _listen_host;
+	std::cout << "Socket " << listener << " binded to " << inet_ntoa(addr) << ":" << _listen_port << std::endl;
 }
 
 bool	Server::requestParser( Request &request, v_cli::iterator &it ) const {

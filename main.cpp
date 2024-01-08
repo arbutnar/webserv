@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 13:05:32 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 21:59:43 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/01/07 22:27:48 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 		else if (argc > 2)
 			throw std::invalid_argument("Invalid Argument");
 		else if (argc < 2)
-			master->configDivider("conf/webserv.conf");
+			master->configDivider("conf/default.conf");
 		master->start();
 	} catch (std::exception &e) {
 		if (master != NULL)

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Utils.tpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/07 18:45:48 by marvin            #+#    #+#             */
+/*   Updated: 2024/01/07 18:45:48 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 template <typename T>
 std::string toString(const T val)
 {
@@ -35,7 +47,7 @@ std::string	removeEmptyLine(T str) {
 	while ((pos = str.find_first_of("\n")) != std::string::npos)
 	{
 		pos += 1;
-		if (str.substr(0, pos).find_first_not_of(" \t\n") != std::string::npos)
+		if (str.substr(0, pos).find_first_not_of(" \t\n\r") != std::string::npos)
 			tmp += str.substr(0, pos);
 		str.erase(0, pos);
 	}

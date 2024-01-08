@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Master.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/14 18:50:34 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/01/08 18:54:30 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,63 +22,61 @@ Master::Master( const Master &src ) {
 Master& Master::operator=( const Master &src ) {
 	if (this == &src)
 		return *this;
-	_clusters = src._clusters;
+	_workers = src._workers;
 	return *this;
 }
 
 Master::~Master() {
-	for (v_cluster::iterator it = _clusters.begin(); it != _clusters.end(); it++)
+	for (v_wrk::iterator it = _workers.begin(); it != _workers.end(); it++)
 	{
 		close(it->getListener());
 		it->removeAllClients();
 	}
 }
 
-const v_cluster&	Master::getClusters( void ) const {
-	return _clusters;
+const v_wrk&	Master::getWorkers( void ) const {
+	return _workers;
 }
 
-void	Master::setClusters( const v_cluster &clusters) {
-	_clusters = clusters;
+void	Master::setWorkers( const v_wrk &workers) {
+	_workers = workers;
 }
 
 Server	*Master::serverParser( std::string &block ) {
-	block.erase(0, block.find_first_of('\n') + 1);
 	block.erase(block.find_last_of('\n', block.find_last_of('\n') - 1) + 1, std::string::npos);
-	std::stringstream	ss(block);
-	std::string			line;
 	Directives*			serverPtr = new Server();
 	Directives*			locationPtr = NULL;
-	bool				inLocation = false;
+	std::string			line;
+	std::stringstream	ss;
 
 	try {
+		ss << block;
 		while (std::getline(ss, line))
 		{
 			if (line.find("location ") != std::string::npos)
 			{
-				if (inLocation)
+				if (locationPtr != NULL)
 					throw Directives::SyntaxError();
 				if (line.find("{") != line.length() - 1)
 					throw Directives::SyntaxError();
-				inLocation = true;
 				locationPtr = new Location(line);
 				*locationPtr = *serverPtr;
 				locationPtr->setRoot("");
 			}
 			else if (line.find("}") != std::string::npos)
 			{
-				if (!inLocation)
+				if (locationPtr == NULL)
 					throw Directives::SyntaxError();
-				inLocation = false;
 				if (locationPtr->getRoot().empty() && (locationPtr->getAlias().empty() && locationPtr->getCgiAlias().empty()))
 					locationPtr->setRoot(serverPtr->getRoot());
 				(dynamic_cast<Server *>(serverPtr))->addLocation(*(dynamic_cast<Location *>(locationPtr)));
 				delete locationPtr;
+				locationPtr = NULL;
 			}
-			else if (inLocation)
-				locationPtr->directiveParser(line, inLocation);
+			else if (locationPtr != NULL)
+				locationPtr->directiveParser(line, true);
 			else
-				serverPtr->directiveParser(line, inLocation);
+				serverPtr->directiveParser(line, false);
 		}
 	} catch (std::exception &e) {
 		if (locationPtr != NULL)
@@ -103,27 +101,36 @@ void	Master::configDivider( const char* path ) {
 	std::string				tmp;
 	unsigned int 			brackets = 0;
 	Directives*				serverPtr = NULL;
-	v_ser					serverVec;
+	v_ser					cluster;
 
 	while (std::getline(ss, line))
 	{
-		if (line.find('{') != std::string::npos)
+		size_t pos = line.find_first_not_of(" \t");
+		line = line.substr(pos, line.find_last_not_of(" \t\r\n") - pos + 1);
+		if (brackets == 0)
 		{
-			if (brackets == 0 && line.find("server") == std::string::npos)
+			pos = line.find("server");
+			if (pos == std::string::npos)
+				throw Directives::SyntaxError();
+			pos = line.find_first_not_of(" \t", pos + 6);
+			if (pos != line.size() - 1 || line.at(pos) != '{')
 				throw Directives::SyntaxError();
 			brackets++;
+			continue ;
 		}
-		else if (line.find('}') != std::string::npos)
+		else if (*line.rbegin() == '{')
+			brackets++;
+		else if (*line.rbegin() == '}')
+		{
+			if (brackets == 0)
+				throw Directives::SyntaxError();
 			brackets--;
-		else if (line[line.length() - 1] != ';')
-			throw Directives::SyntaxError();
-		tmp += line + '\n';
-		if (tmp.find("server {") == std::string::npos)
-			throw Directives::SyntaxError();
+		}
+		tmp += line + "\n";
 		if (brackets == 0)
 		{
 			serverPtr = serverParser(tmp);
-			serverVec.push_back(*(dynamic_cast<Server *>(serverPtr)));
+			cluster.push_back(*(dynamic_cast<Server *>(serverPtr)));
 			delete serverPtr;
 			tmp.clear();
 		}
@@ -131,7 +138,7 @@ void	Master::configDivider( const char* path ) {
 	configFile.close();
 	if (brackets != 0)
 		throw Directives::SyntaxError();
-	for (v_ser::iterator it = serverVec.begin(); it != serverVec.end(); it++)
+	for (v_ser::iterator it = cluster.begin(); it != cluster.end(); it++)
 	{
 		if (std::find(it->getLocations().begin(), it->getLocations().end(), "/") != it->getLocations().end())
 			continue ;
@@ -140,39 +147,41 @@ void	Master::configDivider( const char* path ) {
 		*root = *server;
 		it->addLocation(*(dynamic_cast<Location *>(root)));
 	}
-	arrangeClusters(serverVec);
+	arrangeWorkers(cluster);
 }
 
-void	Master::arrangeClusters( v_ser &serverVec ) {
+void	Master::arrangeWorkers( v_ser &cluster ) {
 	v_ser	subVector;
 	int		listener;
 
-	v_ser::iterator it = serverVec.begin();
-	while (it != serverVec.end())
+	v_ser::iterator it = cluster.begin();
+	while (it != cluster.end())
 	{
-		listener = it->listenerInit();
-		std::cout << listener << std::endl;
-		if (listener == -1)
-		{
-			serverVec.erase(it);
+		try {
+			it->listenerInit(listener);
+		} catch( std::exception &e ) {
+			std::cout << e.what() << std::endl;
+			if (listener != -1)
+				close(listener);
+			cluster.erase(it);
 			continue ;
 		}
 		subVector.push_back(*it);
-		serverVec.erase(it);
-		while ((it = std::find(serverVec.begin(), serverVec.end(), subVector.back())) != serverVec.end())
+		cluster.erase(it);
+		while ((it = std::find(cluster.begin(), cluster.end(), subVector.back())) != cluster.end())
 		{
 			if (std::find(subVector.begin(), subVector.end(), it->getServerName()) != subVector.end())
 			{
 				std::cout << "conflicting server name " << it->getServerName() << " on " << listener << ", ignored" << std::endl;
-				serverVec.erase(it);
+				cluster.erase(it);
 				continue ;
 			}
 			subVector.push_back(*it);
-			serverVec.erase(it);
+			cluster.erase(it);
 		}
-		_clusters.push_back(Cluster(listener, subVector));
+		_workers.push_back(Worker(listener, subVector));
 		subVector.clear();
-		it = serverVec.begin();
+		it = cluster.begin();
 	}
 }
 
@@ -186,7 +195,7 @@ void	Master::start( void ) {
 
 	while(1)
 	{
-		for (v_cluster::iterator it = _clusters.begin(); it != _clusters.end(); it++)
+		for (v_wrk::iterator it = _workers.begin(); it != _workers.end(); it++)
 		{
 			FD_ZERO(&active);
 			FD_SET(it->getListener(), &active);
@@ -208,6 +217,6 @@ void	Master::start( void ) {
 
 void	Master::displayMaster( void ) const {
 	std::cout << "[MASTER]" << std::endl;
-	for (v_cluster::const_iterator it = _clusters.begin(); it != _clusters.end(); it++)
-		it->displayCluster();
+	for (v_wrk::const_iterator it = _workers.begin(); it != _workers.end(); it++)
+		it->displayWorker();
 }

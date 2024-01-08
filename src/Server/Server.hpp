@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 18:23:11 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/14 15:18:46 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/01/08 18:52:31 by marvin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class Server : public Directives {
 		const s_locs	&getLocations( void ) const;
 		void			setLocations( const s_locs &locations );
 
-		int		listenerInit( void ) const;
+		void	listenerInit( int &listener ) const;
 		void	addLocation( const Location &location );
 		bool	requestParser( Request &request, v_cli::iterator &it ) const;
 		bool	writeResponse( v_cli::iterator &it ) const;
