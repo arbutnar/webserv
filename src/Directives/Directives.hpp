@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/06 13:44:09 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/09 17:27:35 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/03/01 16:58:04 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 # include <vector>
 # include <map>
 # include <stdlib.h>
-# include <linux/limits.h>
+# include <limits.h>
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <algorithm>

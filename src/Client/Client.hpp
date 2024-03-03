@@ -14,7 +14,9 @@
 # define CLIENT_HPP
 
 # include "../Request/Request.hpp"
-#include <fcntl.h>
+# include <fcntl.h>
+# include <sys/signal.h>
+# include <signal.h>
 # include <string.h>
 
 class Client {

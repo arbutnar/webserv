@@ -6,7 +6,7 @@
 /*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/30 13:25:35 by arbutnar          #+#    #+#             */
-/*   Updated: 2023/12/13 21:54:09 by arbutnar         ###   ########.fr       */
+/*   Updated: 2024/03/03 18:43:36 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -283,7 +283,6 @@ bool	Response::send( const int &socket ) const {
 	for (m_strStr::const_iterator it = _headers.begin(); it != _headers.end(); it++)
 		response += it->first + ": " + it->second + "\r\n";
 	response += "\r\n" + _body;
-	std::cout << response << std::endl;
 	if (write(socket, response.c_str(), response.length()) <= 0)
 		return true;
 	return false;

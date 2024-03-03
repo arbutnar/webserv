@@ -122,6 +122,10 @@ void	Client::handleCgi( Request &request ) {
 	close(pipeOut[1]);
 	nBytes = write(pipeIn[1], request.getBody().c_str(), request.getBody().size());
 	close(pipeIn[1]);
+	// waitpid(-1, NULL, 0);
+	// char	tmpBuffer[200001];
+	// read(pipeOut[0], tmpBuffer, 200000);
+	// std::cout << tmpBuffer << std::endl;
 	if (nBytes >= 0)
 	{
 		_cgiPid = pid;

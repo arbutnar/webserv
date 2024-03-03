@@ -123,7 +123,7 @@ void	Worker::menageClient( const fd_set &read, const fd_set &write ) {
 
 	for (it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (FD_ISSET(it->getCgiFd(), &read))
+		if (it->getCgiFd() != -1 && FD_ISSET(it->getCgiFd(), &read))
 		{
 			if (kill(it->getCgiPid(), 0) != -1)
 				continue ;
@@ -137,6 +137,7 @@ void	Worker::menageClient( const fd_set &read, const fd_set &write ) {
 			return ;
 		}
 	}
+	
 	for (it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (FD_ISSET(it->getSocket(), &read))

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Master.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: arbutnar <arbutnar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/03 12:59:53 by arbutnar          #+#    #+#             */
-/*   Updated: 2024/01/08 18:54:30 by marvin           ###   ########.fr       */
+/*   Updated: 2024/03/03 15:47:10 by arbutnar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,8 @@ void	Master::start( void ) {
 					FD_SET(c_it->getCgiFd(), &active);
 			}
 			read = write = active;
-			select(it->nfds() + 1, &read, &write, NULL, &tv);
+			if (!select(it->nfds() + 1, &read, &write, NULL, &tv))
+				continue ;
 			if (FD_ISSET(it->getListener(), &read))
 				it->acceptNewClient();
 			else
